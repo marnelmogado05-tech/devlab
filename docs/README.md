@@ -1,16 +1,16 @@
 # DevLab Documentation
 
-| Directory | Contains |
-|---|---|
+| Directory                                          | Contains                                                                                      |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | [`DevLab_Project_Plan.md`](DevLab_Project_Plan.md) | **The specification.** Vision, product, architecture, phases. The source of truth for intent. |
-| [`architecture/`](architecture/) | How the system is actually built — overview, domain model, data flow, subsystems. |
-| [`adr/`](adr/) | Architecture Decision Records. Why things are the way they are. |
-| [`development/`](development/) | Local setup, workflow, conventions, testing, troubleshooting. |
-| [`experiences/`](experiences/) | One document per experience: metadata, configuration schema, evaluation, scoring. |
-| [`ai/`](ai/) | AI architecture, provider abstraction, prompt and safety rules, cost control, RAG. |
-| [`security/`](security/) | Threat model, trust boundaries, sandbox design, security review checklists. |
-| [`deployment/`](deployment/) | Docker, environments, CI/CD, operations, observability. |
-| [`contributing/`](contributing/) | Deeper contributor guides. Entry point is [`../CONTRIBUTING.md`](../CONTRIBUTING.md). |
+| [`architecture/`](architecture/)                   | How the system is actually built — overview, domain model, data flow, subsystems.             |
+| [`adr/`](adr/)                                     | Architecture Decision Records. Why things are the way they are.                               |
+| [`development/`](development/)                     | Local setup, workflow, conventions, testing, troubleshooting.                                 |
+| [`experiences/`](experiences/)                     | One document per experience: metadata, configuration schema, evaluation, scoring.             |
+| [`ai/`](ai/)                                       | AI architecture, provider abstraction, prompt and safety rules, cost control, RAG.            |
+| [`security/`](security/)                           | Threat model, trust boundaries, sandbox design, security review checklists.                   |
+| [`deployment/`](deployment/)                       | Docker, environments, CI/CD, operations, observability.                                       |
+| [`contributing/`](contributing/)                   | Deeper contributor guides. Entry point is [`../CONTRIBUTING.md`](../CONTRIBUTING.md).         |
 
 ## Reading order for a new contributor
 

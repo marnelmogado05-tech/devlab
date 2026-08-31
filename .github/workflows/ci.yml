@@ -1,135 +1,100 @@
 name: CI
 
-# Scaffold. Every job no-ops until the application actually exists, so the first
-# commits are not red. Remove the guard steps once composer.json / package.json land.
-
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: PHP — lint, analyse, test
+  ci:
+    name: Lint, analyse, test
     runs-on: ubuntu-latest
 
     services:
+      # Tests run against PostgreSQL, not SQLite — DevLab's schema depends on
+      # jsonb, GIN indexes and partial unique indexes. See phpunit.xml.
       postgres:
-        image: postgres:16
+        image: postgres:17-alpine
         env:
-          POSTGRES_DB: devlab_test
+          POSTGRES_DB: devlab_testing
           POSTGRES_USER: devlab
-          POSTGRES_PASSWORD: devlab
+          POSTGRES_PASSWORD: change_me
         ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
+          --health-interval 5s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
+
       redis:
-        image: redis:7
+        image: redis:8-alpine
         ports: ["6379:6379"]
         options: >-
           --health-cmd "redis-cli ping"
-          --health-interval 10s
+          --health-interval 5s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
-      - id: guard
-        name: Is there an application yet?
-        run: |
-          if [ -f composer.json ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "No composer.json — skipping backend checks (Phase 0)."
-          fi
-
-      - name: Set up PHP
-        if: steps.guard.outputs.exists == 'true'
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: pdo_pgsql, redis, mbstring, bcmath
+          extensions: pdo_pgsql, pgsql, redis, intl, zip, bcmath
+          tools: composer:v2
           coverage: none
 
-      - name: Install dependencies
-        if: steps.guard.outputs.exists == 'true'
-        run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: Prepare environment
-        if: steps.guard.outputs.exists == 'true'
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      - name: Format check (Pint)
-        if: steps.guard.outputs.exists == 'true'
-        run: ./vendor/bin/pint --test
-
-      - name: Static analysis (PHPStan)
-        if: steps.guard.outputs.exists == 'true'
-        run: ./vendor/bin/phpstan analyse --no-progress
-
-      - name: Migrate
-        if: steps.guard.outputs.exists == 'true'
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_DATABASE: devlab_test
-          DB_USERNAME: devlab
-          DB_PASSWORD: devlab
-        run: php artisan migrate --force
-
-      - name: Tests
-        if: steps.guard.outputs.exists == 'true'
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_DATABASE: devlab_test
-          DB_USERNAME: devlab
-          DB_PASSWORD: devlab
-          REDIS_HOST: 127.0.0.1
-        run: php artisan test
-
-  frontend:
-    name: TypeScript — typecheck, lint, build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - id: guard
-        name: Is there a frontend yet?
-        run: |
-          if [ -f package.json ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "No package.json — skipping frontend checks (Phase 0)."
-          fi
-
-      - uses: actions/setup-node@v4
-        if: steps.guard.outputs.exists == 'true'
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
 
-      - name: Install
-        if: steps.guard.outputs.exists == 'true'
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install Node dependencies
         run: npm ci
 
-      - name: Typecheck
-        if: steps.guard.outputs.exists == 'true'
-        run: npx tsc --noEmit
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
 
-      - name: Build
-        if: steps.guard.outputs.exists == 'true'
+      - name: Check formatting
+        run: ./vendor/bin/pint --parallel --test
+
+      - name: Static analysis
+        run: ./vendor/bin/phpstan analyse --no-progress
+
+      - name: Frontend lint
+        run: npm run check
+
+      - name: Typecheck
+        run: npm run types:check
+
+      - name: Tests
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: devlab_testing
+          DB_USERNAME: devlab
+          DB_PASSWORD: change_me
+          REDIS_HOST: 127.0.0.1
+        run: php artisan test
+
+      - name: Build assets
         run: npm run build

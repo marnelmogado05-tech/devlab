@@ -1,0 +1,108 @@
+# DevLab local development environment.
+#
+# Deliberately four services. Anything else gets added when a feature needs it,
+# not in advance (plan §24, §77). The Phase 3 sandbox is NOT here — it runs on
+# isolated infrastructure with no route back into this network.
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/app/Dockerfile
+        container_name: devlab-app
+        restart: unless-stopped
+        working_dir: /var/www/html
+        volumes:
+            - .:/var/www/html
+            # Keep container-installed dependencies out of the bind mount so a host
+            # checkout on a different platform does not shadow them.
+            - /var/www/html/vendor
+            - /var/www/html/node_modules
+        ports:
+            - '${APP_PORT:-8000}:8000'
+            - '${VITE_PORT:-5173}:5173'
+        environment:
+            DB_HOST: postgres
+            REDIS_HOST: redis
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks: [devlab]
+
+    queue:
+        build:
+            context: .
+            dockerfile: docker/app/Dockerfile
+        container_name: devlab-queue
+        restart: unless-stopped
+        working_dir: /var/www/html
+        command: php artisan queue:work --tries=3 --max-time=3600 --backoff=5
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/vendor
+            - /var/www/html/node_modules
+        environment:
+            DB_HOST: postgres
+            REDIS_HOST: redis
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks: [devlab]
+
+    postgres:
+        image: postgres:17-alpine
+        container_name: devlab-postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:-devlab}'
+            POSTGRES_USER: '${DB_USERNAME:-devlab}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-change_me}'
+            # Deterministic collation, so ORDER BY does not differ between machines.
+            POSTGRES_INITDB_ARGS: '--locale=C --encoding=UTF8'
+        ports:
+            - '${DB_PORT_HOST:-5432}:5432'
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+            # Creates devlab_testing on first boot — the test suite runs on Postgres,
+            # not SQLite, and must not share a database with development data.
+            - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'pg_isready -U ${DB_USERNAME:-devlab} -d ${DB_DATABASE:-devlab}',
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+        networks: [devlab]
+
+    redis:
+        image: redis:8-alpine
+        container_name: devlab-redis
+        restart: unless-stopped
+        # Persist, so a restart does not silently empty the leaderboards before the
+        # rebuild job runs. Redis is still never the source of truth (plan §23).
+        command: redis-server --appendonly yes
+        ports:
+            - '${REDIS_PORT_HOST:-6379}:6379'
+        volumes:
+            - redis-data:/data
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 5s
+            timeout: 5s
+            retries: 10
+        networks: [devlab]
+
+volumes:
+    postgres-data:
+    redis-data:
+
+networks:
+    devlab:
+        driver: bridge

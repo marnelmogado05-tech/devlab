@@ -45,7 +45,7 @@ Phase 7 gives them a home.
 
 ### Wait for Phase 7, as the plan says
 
-Rejected. It is correct about the *moderation system* and wrong about the *signal*. Deferring
+Rejected. It is correct about the _moderation system_ and wrong about the _signal_. Deferring
 costs us the ability to detect corrupt scores during exactly the period when content is newest,
 least reviewed, and most likely to be wrong.
 
@@ -58,7 +58,7 @@ contributor path; it is not a substitute.
 
 ### Infer bad content from attempt statistics alone
 
-Rejected as insufficient on its own. Statistics show *that* something is off; they cannot
+Rejected as insufficient on its own. Statistics show _that_ something is off; they cannot
 distinguish "the key is wrong" from "this is genuinely hard" or "the wording misleads". A human
 saying which of those it is turns an anomaly into an actionable fix. We will do both — statistics
 via `content-curator`, reports via this table — because together they are much stronger than

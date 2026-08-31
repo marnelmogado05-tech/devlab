@@ -16,7 +16,7 @@ Draft an ADR for: **$ARGUMENTS**
 The record must include:
 
 - **Status** — `Proposed` unless told otherwise
-- **Context** — the forces and constraints as they stand *before* the decision, in present tense
+- **Context** — the forces and constraints as they stand _before_ the decision, in present tense
 - **Decision** — active voice, one decision
 - **Alternatives considered** — each with the specific reason it lost
 - **Consequences** — what this buys, what it costs, what it forecloses, what gets harder

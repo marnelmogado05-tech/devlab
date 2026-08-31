@@ -26,7 +26,7 @@ Two forces pull in opposite directions:
    license, anyone may run a hosted DevLab, close their changes, and keep the community's
    contributed content behind their product — contributing nothing back.
 
-A third consideration: contributed challenge *content* and platform *code* are different kinds of
+A third consideration: contributed challenge _content_ and platform _code_ are different kinds of
 work. Code licensing conventions do not fit prose and puzzles perfectly.
 
 ## Decision
@@ -43,7 +43,7 @@ All contributions are accepted under the same license, inbound = outbound, as st
 The strongest answer to the hosted-clone concern: a network-deployed derivative must publish its
 source. Rejected because the cost lands precisely on the group DevLab needs most. AGPL is banned
 outright by the open-source policies of several large employers, which would exclude a meaningful
-share of potential contributors — and would exclude them from contributing *challenges*, where
+share of potential contributors — and would exclude them from contributing _challenges_, where
 the legal weight is wildly disproportionate to the contribution. The threat it defends against is
 also speculative: a hosted clone is only a real risk once DevLab has a community worth cloning,
 and by then the community, not the code, is the moat.

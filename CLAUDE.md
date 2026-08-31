@@ -3,7 +3,11 @@
 DevLab is an open-source developer playground: **open DevLab → press "I'm Bored" → get an
 interesting developer experience.** Full specification: [docs/DevLab_Project_Plan.md](docs/DevLab_Project_Plan.md).
 
-**Stack:** Laravel (PHP 8.4) · React + TypeScript + Inertia.js · Tailwind · PostgreSQL · Redis · Docker
+**Stack:** Laravel 13 (PHP 8.4) · React 19 + TypeScript + Inertia 3 · Tailwind 4 · PostgreSQL 17 ·
+Redis 8 · Docker · Pest 5. Auth is Laravel Fortify, from the React starter kit.
+
+**Tests run against PostgreSQL, not SQLite** — the schema depends on `jsonb`, GIN and partial
+unique indexes, and those partial indexes are what make double-awards impossible. See `phpunit.xml`.
 
 ---
 
@@ -29,16 +33,16 @@ These are non-negotiable. They come from §32, §39–41, §25, §27, §66–67 
 
 ## Where things live
 
-| Concern | Location |
-|---|---|
-| Orchestration of one use case | `app/Actions/<Domain>/` |
-| Cross-cutting domain logic | `app/Services/{Challenge,Scoring,Leaderboard,Achievement,Recommendation,AI}/` |
-| HTTP entry (thin) | `app/Http/Controllers/` |
-| Validation | `app/Http/Requests/` |
-| Authorization | `app/Policies/` |
-| Experience UI modules | `resources/js/experiences/<ExperienceName>/` |
-| Shared UI | `resources/js/components/{ui,challenge,game,leaderboard,profile}/` |
-| Inertia pages | `resources/js/pages/` |
+| Concern                       | Location                                                                      |
+| ----------------------------- | ----------------------------------------------------------------------------- |
+| Orchestration of one use case | `app/Actions/<Domain>/`                                                       |
+| Cross-cutting domain logic    | `app/Services/{Challenge,Scoring,Leaderboard,Achievement,Recommendation,AI}/` |
+| HTTP entry (thin)             | `app/Http/Controllers/`                                                       |
+| Validation                    | `app/Http/Requests/`                                                          |
+| Authorization                 | `app/Policies/`                                                               |
+| Experience UI modules         | `resources/js/experiences/<ExperienceName>/`                                  |
+| Shared UI                     | `resources/js/components/{ui,challenge,game,leaderboard,profile}/`            |
+| Inertia pages                 | `resources/js/pages/`                                                         |
 
 Controllers stay thin. Repositories only when they earn their keep — plain Eloquent does not
 require one. Do not add a layer to have a layer.
@@ -81,7 +85,9 @@ health, needs attempt data) · `docs-keeper` (docs drift).
 
 ## Current phase
 
-**Phase 0 — foundation.** No application code exists yet. MVP scope (§48): auth, profiles,
+**Phase 0 — foundation.** The Laravel app, MVP schema, Docker environment and `config/devlab.php`
+exist; auth works via Fortify. No DevLab feature is built yet — no experiences, challenges,
+scoring, XP or "I'm Bored". MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward
 from Phase 7 by [ADR 0003](docs/adr/0003-challenge-reports-in-mvp.md). Sandboxing, AI, multiplayer

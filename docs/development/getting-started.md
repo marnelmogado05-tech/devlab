@@ -1,66 +1,114 @@
 # Getting Started
 
-> **Status:** scaffold. The application has not been generated yet — this file describes the
-> intended setup and will be filled in with real, verified commands as Phase 0 completes.
-> **Do not treat these commands as tested.**
+> **Status:** the Docker path has **not been verified end to end** — Docker was unavailable on
+> the machine where this scaffold was built, so the image has never been built and the containers
+> have never run. Treat the Docker section as intended, not proven. If you hit a problem, fixing
+> this file is a genuinely useful first contribution.
+>
+> The local (non-Docker) path is verified as far as dependency install, Pint and PHPStan.
 
 ## Requirements
 
-- Docker and Docker Compose
+- Docker and Docker Compose — **or** PHP 8.4+, Composer, Node 22+ and a local PostgreSQL 17 and
+  Redis
 - Git
-- (Optional, for running outside containers) PHP 8.4, Composer, Node 22+
 
-## First run
+## Option A — Docker (intended path)
 
 ```bash
 git clone <repository-url> devlab
 cd devlab
 cp .env.example .env
 docker compose up -d
-docker compose exec app composer install
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate --seed
-docker compose exec app npm install
-docker compose exec app npm run dev
 ```
 
-DevLab should then be available at `http://localhost:8000`.
+The entrypoint installs dependencies, generates `APP_KEY`, waits for Postgres and runs
+migrations on first boot. DevLab is then at `http://localhost:8000`, with Vite on `5173`.
 
-Seeding creates demo users, the seeded experiences and their starter challenges, so the platform
-is playable immediately after a clone. If it is not, that is a bug worth reporting.
+```bash
+docker compose logs -f app     # watch it come up
+docker compose exec app bash   # a shell inside the container
+```
+
+## Option B — Local PHP, containers for the datastores
+
+Useful if you want your editor's PHP tooling to work directly against `vendor/`.
+
+```bash
+cp .env.example .env
+# .env ships with Docker service names — point them at localhost:
+#   DB_HOST=127.0.0.1
+#   REDIS_HOST=127.0.0.1
+
+docker compose up -d postgres redis
+composer install
+php artisan key:generate
+php artisan migrate
+npm install
+npm run dev        # in one terminal
+php artisan serve  # in another
+```
 
 ## Services
 
-| Service | Purpose | Port |
-|---|---|---|
-| `app` | Laravel + Vite | 8000 / 5173 |
-| `postgres` | Source of truth | 5432 |
-| `redis` | Cache, queue, leaderboards | 6379 |
-| `queue` | Worker for jobs | — |
+| Service    | Purpose                                 | Port        |
+| ---------- | --------------------------------------- | ----------- |
+| `app`      | Laravel + Vite                          | 8000 / 5173 |
+| `queue`    | Queue worker                            | —           |
+| `postgres` | Source of truth                         | 5432        |
+| `redis`    | Cache, queue, leaderboards, rate limits | 6379        |
+
+Postgres creates two databases on first boot: `devlab` and `devlab_testing`.
 
 ## Everyday commands
 
 ```bash
-docker compose exec app php artisan test          # full suite
-docker compose exec app ./vendor/bin/pint         # format PHP
-docker compose exec app ./vendor/bin/phpstan analyse
-docker compose exec app npx tsc --noEmit          # typecheck
-docker compose exec app php artisan queue:work    # process jobs
-docker compose logs -f app
+composer test          # pint --test, phpstan, then artisan test
+composer ci:check      # the above plus frontend lint and typecheck
+composer lint          # fix formatting
+php artisan test       # tests only
+npm run dev            # Vite dev server
+npm run types:check    # tsc --noEmit
 ```
+
+Prefix with `docker compose exec app` if you are on the Docker path.
+
+## Tests run against PostgreSQL, not SQLite
+
+This is deliberate and worth knowing before your first test run. DevLab's schema depends on
+Postgres features SQLite does not have — `jsonb`, GIN indexes, partial unique indexes and CHECK
+constraints. The partial unique indexes are what make double-awarded XP impossible, so an
+idempotency test passing on SQLite would prove nothing.
+
+`php artisan test` therefore needs Postgres running and a `devlab_testing` database. The Compose
+setup creates it for you; see `phpunit.xml` for the connection settings.
 
 ## Before you open a pull request
 
 ```bash
-./vendor/bin/pint
-./vendor/bin/phpstan analyse
-npx tsc --noEmit
-php artisan test
+composer ci:check
 ```
 
-All four must pass. See [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md).
+Everything must pass. See [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md).
+
+## What exists right now
+
+Authentication, registration, password reset, two-factor, passkeys and profile settings come from
+the Laravel React starter kit and work today. The MVP schema is migrated. **Nothing DevLab-specific
+is built yet** — no experiences, no challenges, no scoring, no XP, no "I'm Bored". That is the
+next slice of work.
 
 ## Troubleshooting
 
-_(To be filled in with the problems people actually hit. If you hit one and solve it, add it
-here — that is a genuinely useful first contribution.)_
+**`docker compose up` fails to connect to the Docker daemon.** Docker Desktop is not running, or
+its engine has not finished starting. On Windows, check that the `docker-desktop` WSL distro is
+running: `wsl -l -v`.
+
+**Migrations fail with a syntax error near `jsonb`.** You are connected to SQLite or MySQL, not
+PostgreSQL. Check `DB_CONNECTION` in `.env`.
+
+**Tests fail with "database devlab_testing does not exist".** The database is created by
+`docker/postgres/init/01-create-test-database.sql`, which only runs when the Postgres volume is
+first created. If your volume predates it: `docker compose exec postgres createdb -U devlab devlab_testing`.
+
+_(Add what you hit. This section is only as good as its contributors.)_

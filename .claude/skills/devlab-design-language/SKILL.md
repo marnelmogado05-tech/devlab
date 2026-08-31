@@ -12,7 +12,7 @@ The interface has one job: make a bored developer curious enough to click.
 Technical · playful · modern · slightly experimental · fast · visually interesting.
 
 It must **not** look like a corporate LMS, a generic admin dashboard, or a school platform. The
-whole surface should say: *you can mess around here, and nothing you break matters.*
+whole surface should say: _you can mess around here, and nothing you break matters._
 
 ## Visual language
 

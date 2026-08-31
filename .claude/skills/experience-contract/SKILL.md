@@ -52,16 +52,16 @@ Attempt statuses: `started` · `completed` · `failed` · `abandoned` · `expire
 
 ## Evaluation styles, by experience
 
-| Experience | Evaluation |
-|---|---|
-| Cursed Code | Deterministic match against expected output or selected explanation |
-| Bug Hunter | Identified defect location and/or corrected behaviour against fixtures |
-| Debugging Detective | Root cause selection plus reasoning, scored against a rubric |
-| Docker Escape | Config diff against a known-good state, or scenario predicate checks |
-| Production Nightmare | Simulation state after a decision sequence; branching outcomes |
-| Git Simulator | Resulting repository graph compared to the target graph |
-| System Design Lab | Chosen components evaluated against stated requirements and constraints |
-| Code Arena | Test cases in the sandbox (Phase 3), plus correctness/time/memory metrics |
+| Experience           | Evaluation                                                                |
+| -------------------- | ------------------------------------------------------------------------- |
+| Cursed Code          | Deterministic match against expected output or selected explanation       |
+| Bug Hunter           | Identified defect location and/or corrected behaviour against fixtures    |
+| Debugging Detective  | Root cause selection plus reasoning, scored against a rubric              |
+| Docker Escape        | Config diff against a known-good state, or scenario predicate checks      |
+| Production Nightmare | Simulation state after a decision sequence; branching outcomes            |
+| Git Simulator        | Resulting repository graph compared to the target graph                   |
+| System Design Lab    | Chosen components evaluated against stated requirements and constraints   |
+| Code Arena           | Test cases in the sandbox (Phase 3), plus correctness/time/memory metrics |
 
 Prefer deterministic evaluation. Use an LLM judge only where free-form reasoning genuinely cannot
 be checked otherwise (§27) — and then still gate on deterministic pre-checks first.

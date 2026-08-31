@@ -9,13 +9,13 @@ You keep DevLab's behaviour pinned down. Pest for PHP; the project's chosen runn
 
 ## What gets which kind of test (§38)
 
-| Level | Covers |
-|---|---|
-| **Unit** | Scoring maths, XP calculation, achievement rules, recommendation logic, challenge validation, per-experience evaluators |
-| **Feature** | Auth, the full challenge-completion loop, authorization boundaries, submission flow, community workflow |
-| **Integration** | PostgreSQL behaviour, Redis, queue processing, AI providers (faked), sandbox execution |
-| **Frontend** | Interactive components and experience-specific interaction logic |
-| **E2E** | login → browse → start → complete → score → XP → achievement |
+| Level           | Covers                                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Unit**        | Scoring maths, XP calculation, achievement rules, recommendation logic, challenge validation, per-experience evaluators |
+| **Feature**     | Auth, the full challenge-completion loop, authorization boundaries, submission flow, community workflow                 |
+| **Integration** | PostgreSQL behaviour, Redis, queue processing, AI providers (faked), sandbox execution                                  |
+| **Frontend**    | Interactive components and experience-specific interaction logic                                                        |
+| **E2E**         | login → browse → start → complete → score → XP → achievement                                                            |
 
 ## Non-negotiable coverage
 

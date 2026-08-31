@@ -30,15 +30,15 @@ means re-embedding the whole corpus.
 
 This is the AI rule that matters. Generated text may never reach a privileged sink unvalidated:
 
-| Sink | Requirement |
-|---|---|
-| Published challenge content | Draft only → schema validation → human review → publish |
-| SQL / query building | Never. Model output is a value, never a fragment |
-| Shell / execution | Never |
-| Authorization decisions | Never |
-| Rendered HTML | Escaped, markdown sanitised, no raw HTML passthrough |
-| Structured data | Parsed and schema-validated; reject and retry on failure, never coerce |
-| Tool calls | Whitelisted tools, validated arguments, no dynamic dispatch |
+| Sink                        | Requirement                                                            |
+| --------------------------- | ---------------------------------------------------------------------- |
+| Published challenge content | Draft only → schema validation → human review → publish                |
+| SQL / query building        | Never. Model output is a value, never a fragment                       |
+| Shell / execution           | Never                                                                  |
+| Authorization decisions     | Never                                                                  |
+| Rendered HTML               | Escaped, markdown sanitised, no raw HTML passthrough                   |
+| Structured data             | Parsed and schema-validated; reject and retry on failure, never coerce |
+| Tool calls                  | Whitelisted tools, validated arguments, no dynamic dispatch            |
 
 Generation flow: `AI → draft → automated validation → review → published`.
 

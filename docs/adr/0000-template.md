@@ -7,7 +7,7 @@
 
 ## Context
 
-The forces at play, in the present tense, *before* the decision. What problem are we solving?
+The forces at play, in the present tense, _before_ the decision. What problem are we solving?
 What constraints are real — technical, operational, budgetary, time? What made this hard enough
 to need a record?
 

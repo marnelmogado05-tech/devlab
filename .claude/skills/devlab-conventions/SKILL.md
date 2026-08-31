@@ -17,7 +17,7 @@ progression system is what an attacker attacks.
 attempt validity · elapsed time · difficulty · permissions · ownership · leaderboard position.
 
 **Client-owned, freely:** rendering, animation, local puzzle state, optimistic UI, draft input,
-which panel is open, timers used *for display*.
+which panel is open, timers used _for display_.
 
 The client may send **intent** (`"I submit answer B"`). It may never send **outcome**
 (`"I scored 340"`). If a request body contains a number the user benefits from, that is a bug.
@@ -46,21 +46,21 @@ Route
 
 ## Naming
 
-| Thing | Convention | Example |
-|---|---|---|
-| Model | singular | `ChallengeAttempt` |
-| Table | plural snake | `challenge_attempts` |
-| Pivot | singular_singular alphabetical | `achievement_user` |
-| Action | `<Verb><Noun>` | `GrantExperiencePoints` |
-| Service | `<Area>Service` or `<Area>/<Concern>` | `Scoring/ScoreCalculator` |
-| Job | imperative | `EvaluateSubmission` |
-| Event | past tense | `ChallengeCompleted` |
-| Policy | `<Model>Policy` | `ChallengeAttemptPolicy` |
-| Form Request | `<Verb><Noun>Request` | `SubmitAttemptRequest` |
-| React page | PascalCase, path mirrors route | `pages/Challenge/Play.tsx` |
-| Experience module | PascalCase dir | `experiences/BugHunter/` |
-| Route name | dot namespace | `challenges.play` |
-| Config key | snake | `config('devlab.xp.easy')` |
+| Thing             | Convention                            | Example                    |
+| ----------------- | ------------------------------------- | -------------------------- |
+| Model             | singular                              | `ChallengeAttempt`         |
+| Table             | plural snake                          | `challenge_attempts`       |
+| Pivot             | singular_singular alphabetical        | `achievement_user`         |
+| Action            | `<Verb><Noun>`                        | `GrantExperiencePoints`    |
+| Service           | `<Area>Service` or `<Area>/<Concern>` | `Scoring/ScoreCalculator`  |
+| Job               | imperative                            | `EvaluateSubmission`       |
+| Event             | past tense                            | `ChallengeCompleted`       |
+| Policy            | `<Model>Policy`                       | `ChallengeAttemptPolicy`   |
+| Form Request      | `<Verb><Noun>Request`                 | `SubmitAttemptRequest`     |
+| React page        | PascalCase, path mirrors route        | `pages/Challenge/Play.tsx` |
+| Experience module | PascalCase dir                        | `experiences/BugHunter/`   |
+| Route name        | dot namespace                         | `challenges.play`          |
+| Config key        | snake                                 | `config('devlab.xp.easy')` |
 
 ## Constants are configuration
 

@@ -5,18 +5,18 @@ need to touch the backend.
 
 ## Ways to contribute
 
-| Category | Examples |
-|---|---|
-| **Challenges** | Cursed Code snippets, Bug Hunter cases, incident scenarios |
-| **Experiences** | Whole new activity types |
-| **Core** | Platform features, progression, recommendation |
-| **UI** | Components, experience interfaces, visual polish |
-| **Documentation** | Guides, architecture notes, fixing what confused you |
-| **Testing** | Coverage, regression tests, flake removal |
-| **Infrastructure** | Docker, CI, deployment |
-| **AI** | Hints, generation, evaluation (Phase 5) |
-| **Accessibility** | Audits and fixes — always welcome, always merged fast |
-| **Localisation** | Later phase |
+| Category           | Examples                                                   |
+| ------------------ | ---------------------------------------------------------- |
+| **Challenges**     | Cursed Code snippets, Bug Hunter cases, incident scenarios |
+| **Experiences**    | Whole new activity types                                   |
+| **Core**           | Platform features, progression, recommendation             |
+| **UI**             | Components, experience interfaces, visual polish           |
+| **Documentation**  | Guides, architecture notes, fixing what confused you       |
+| **Testing**        | Coverage, regression tests, flake removal                  |
+| **Infrastructure** | Docker, CI, deployment                                     |
+| **AI**             | Hints, generation, evaluation (Phase 5)                    |
+| **Accessibility**  | Audits and fixes — always welcome, always merged fast      |
+| **Localisation**   | Later phase                                                |
 
 ## Before you start
 

@@ -14,8 +14,9 @@ queue and a leaderboard index — never the only home of critical data (§23).
 - [ ] An index on every column used in a `WHERE`, `ORDER BY` or join, with the composite order
       chosen deliberately (equality and most-selective columns first)
 - [ ] A unique constraint for every business invariant — especially the ones preventing
-      double-awards: one XP transaction per `(source_type, source_id)`, one `achievement_user`
-      row per `(user_id, achievement_id)`, one completion per attempt
+      double-awards: one XP transaction per `(user_id, source_type, source_id)`, one
+      `achievement_user` row per `(user_id, achievement_id)`, one open attempt per
+      `(user_id, challenge_id)` (a partial unique index on `status = 'started'`)
 - [ ] `NOT NULL` and defaults decided consciously
 - [ ] Correct types: `decimal` not `float` for anything compared; timestamps with timezone;
       status values constrained and validated

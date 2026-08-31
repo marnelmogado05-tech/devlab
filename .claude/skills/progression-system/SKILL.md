@@ -44,8 +44,11 @@ xp_transactions
 - **Never** mutate a running total as the source of truth. Insert a row.
 - A cached `users.xp_total` is allowed as a derived read optimisation — but it must be
   rebuildable from the ledger, and the rebuild path must be tested.
-- **Unique constraint on `(source_type, source_id)`.** This is the primary defence against
-  double-awards; it makes a replayed job physically unable to grant twice.
+- **Unique constraint on `(user_id, source_type, source_id)`.** This is the primary defence
+  against double-awards; it makes a replayed job physically unable to grant twice. `user_id` is
+  part of the key because some sources are only unique per user — a daily bonus keyed by date.
+- Rows are **never updated or deleted.** A correction is a compensating negative transaction, so
+  the history stays auditable.
 - Baseline values: easy 50 · medium 100 · hard 200 · expert 500, plus daily and achievement
   bonuses — all from config.
 
@@ -71,6 +74,9 @@ user statistics or an event.
 
 - Redis sorted sets for ranking and reads: global, weekly, monthly, per-experience,
   per-category, per-technology.
+- There is **no `leaderboards` table.** Rankings are built from the `user_statistics` read model,
+  which is itself derived from `xp_transactions` and `challenge_attempts` — see
+  [ADR 0004](../../../docs/adr/0004-leaderboards-from-user-statistics.md).
 - PostgreSQL remains the source of truth; a documented, idempotent job rebuilds Redis from it.
 - Losing Redis costs latency, never data.
 - Rank is read from the server. Never accept a rank from the client, and never let a leaderboard

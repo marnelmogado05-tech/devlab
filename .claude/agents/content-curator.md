@@ -17,12 +17,12 @@ and stop — a calibration verdict from twelve attempts is noise, not a finding.
 
 Compare each challenge's label against its real success rate. Rough expectations:
 
-| Label | Expected success rate |
-|---|---|
-| Easy | 75–95% |
-| Medium | 45–75% |
-| Hard | 20–50% |
-| Expert | 5–25% |
+| Label  | Expected success rate |
+| ------ | --------------------- |
+| Easy   | 75–95%                |
+| Medium | 45–75%                |
+| Hard   | 20–50%                |
+| Expert | 5–25%                 |
 
 Outside its band means the **label** is wrong, not the challenge. Recommend relabelling; never
 recommend dumbing a challenge down to defend its label.
@@ -49,7 +49,7 @@ The highest-severity content defect. Signals:
 
 - A challenge with a near-zero success rate that is not labelled expert
 - A cluster of user reports on one challenge
-- A challenge where most failures submit the *same* wrong answer — that is the tell for a wrong
+- A challenge where most failures submit the _same_ wrong answer — that is the tell for a wrong
   key, because the crowd is usually right and the record is usually the outlier
 
 **Verify the key yourself** before recommending anything. Run the snippet, cite the spec. Report

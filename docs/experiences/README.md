@@ -15,20 +15,20 @@ frontend all build against — write it **before** writing the code.
 5. **Scoring** — how the result maps onto the shared scoring contract, and why speed is or is not
    weighted here.
 6. **Attempt lifecycle** — what counts as started, completed, failed, abandoned, expired.
-7. **Content guidance** — what makes a good challenge for *this* experience specifically.
+7. **Content guidance** — what makes a good challenge for _this_ experience specifically.
 
 ## Planned experiences (plan §9)
 
-| Experience | Phase | Doc |
-|---|---|---|
-| Dev Roulette | MVP | _not written_ |
-| Cursed Code | MVP | _not written_ |
-| Bug Hunter | MVP | _not written_ |
-| Git Simulator | 2 | _not written_ |
-| Docker Escape Room | 2 | _not written_ |
-| System Design Lab | 2 | _not written_ |
-| Code Arena | 3 (needs sandbox) | _not written_ |
-| Production Nightmare | 4 | _not written_ |
-| Debugging Detective | 4 | _not written_ |
+| Experience           | Phase             | Doc           |
+| -------------------- | ----------------- | ------------- |
+| Dev Roulette         | MVP               | _not written_ |
+| Cursed Code          | MVP               | _not written_ |
+| Bug Hunter           | MVP               | _not written_ |
+| Git Simulator        | 2                 | _not written_ |
+| Docker Escape Room   | 2                 | _not written_ |
+| System Design Lab    | 2                 | _not written_ |
+| Code Arena           | 3 (needs sandbox) | _not written_ |
+| Production Nightmare | 4                 | _not written_ |
+| Debugging Detective  | 4                 | _not written_ |
 
 Use `/devlab:new-experience <name>` to scaffold one against the contract.

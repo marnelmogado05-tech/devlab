@@ -31,16 +31,16 @@ challenge_reports
 
 ### Reasons
 
-| Reason | Meaning |
-|---|---|
-| `wrong_answer` | The recorded answer is incorrect. **Highest priority.** |
-| `unclear` | Ambiguous wording or missing context |
-| `broken` | The challenge does not load, render or evaluate |
-| `wrong_difficulty` | Mislabelled |
-| `offensive` | Inappropriate content |
-| `copyright` | Not original / lifted from elsewhere |
-| `security` | A security concern — routed privately, never displayed |
-| `other` | Requires `details` |
+| Reason             | Meaning                                                 |
+| ------------------ | ------------------------------------------------------- |
+| `wrong_answer`     | The recorded answer is incorrect. **Highest priority.** |
+| `unclear`          | Ambiguous wording or missing context                    |
+| `broken`           | The challenge does not load, render or evaluate         |
+| `wrong_difficulty` | Mislabelled                                             |
+| `offensive`        | Inappropriate content                                   |
+| `copyright`        | Not original / lifted from elsewhere                    |
+| `security`         | A security concern — routed privately, never displayed  |
+| `other`            | Requires `details`                                      |
 
 ### Constraints and indexes
 
@@ -96,7 +96,7 @@ notifications. All Phase 7 (§69).
 
 ## Relationship to `content-curator`
 
-The `content-curator` agent reads this table alongside attempt statistics. Reports say *what* is
-wrong; statistics say *how much* it is costing. A `wrong_answer` report on a challenge whose
+The `content-curator` agent reads this table alongside attempt statistics. Reports say _what_ is
+wrong; statistics say _how much_ it is costing. A `wrong_answer` report on a challenge whose
 failures cluster on one identical answer is near-conclusive evidence of a bad key — and that pair
 of signals is the reason this table exists in the MVP rather than in Phase 7.

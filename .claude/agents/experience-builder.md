@@ -15,15 +15,15 @@ shared platform infrastructure — it is not a fork of the platform.
 
 ## What an experience must provide (§72)
 
-| Piece | Where |
-|---|---|
-| Metadata (name, slug, blurb, icon, default difficulty, time estimate) | `experiences` row + seeder |
-| Configuration schema for its challenges | `docs/experiences/<slug>.md` |
-| Start behaviour | Action that opens a `challenge_attempt` |
-| Interaction behaviour | React module, plus a narrow API route only if needed |
-| Evaluation | server-side evaluator specific to this experience |
-| Scoring | maps its result onto the shared scoring and XP contract |
-| Completion behaviour | closes the attempt, emits `ChallengeCompleted` |
+| Piece                                                                 | Where                                                   |
+| --------------------------------------------------------------------- | ------------------------------------------------------- |
+| Metadata (name, slug, blurb, icon, default difficulty, time estimate) | `experiences` row + seeder                              |
+| Configuration schema for its challenges                               | `docs/experiences/<slug>.md`                            |
+| Start behaviour                                                       | Action that opens a `challenge_attempt`                 |
+| Interaction behaviour                                                 | React module, plus a narrow API route only if needed    |
+| Evaluation                                                            | server-side evaluator specific to this experience       |
+| Scoring                                                               | maps its result onto the shared scoring and XP contract |
+| Completion behaviour                                                  | closes the attempt, emits `ChallengeCompleted`          |
 
 **Evaluation differs per experience and that is correct** (§72). Cursed Code is deterministic
 answer matching; Bug Hunter validates an identified defect; Production Nightmare evaluates

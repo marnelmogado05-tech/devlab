@@ -1,25 +1,32 @@
 # Normalise line endings so Windows, macOS and Linux contributors produce identical diffs.
 * text=auto eol=lf
 
+# Better diffs for the languages we actually write.
+*.blade.php diff=html
+*.css       diff=css
+*.html      diff=html
+*.md        diff=markdown
+*.php       diff=php
+
 # Shell scripts and container files must stay LF or they break inside Linux containers.
-*.sh        text eol=lf
-*.bash      text eol=lf
-Dockerfile  text eol=lf
+*.sh         text eol=lf
+*.bash       text eol=lf
+Dockerfile   text eol=lf
 *.dockerfile text eol=lf
 
 # Binary — never touch.
-*.png  binary
-*.jpg  binary
-*.jpeg binary
-*.gif  binary
-*.webp binary
-*.avif binary
-*.ico  binary
-*.woff binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.woff  binary
 *.woff2 binary
-*.ttf  binary
-*.otf  binary
-*.pdf  binary
+*.ttf   binary
+*.otf   binary
+*.pdf   binary
 
 # Keep generated and vendored files out of diffs and language statistics.
 /public/build/**  linguist-generated

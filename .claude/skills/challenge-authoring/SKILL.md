@@ -9,21 +9,21 @@ Content is the product. A platform with perfect architecture and boring challeng
 
 ## Required fields (§70)
 
-| Field | Note |
-|---|---|
-| `title` | Specific and intriguing. Not "PHP Quiz 4". |
-| `description` | Sets the scene. Short. |
-| `objective` | Exactly what the user must produce. |
-| `difficulty` | easy / medium / hard / expert |
-| `estimated_time` | Minutes. Honest. |
-| `tags` | Language, technology, concept. |
-| `rules` | Constraints and what is off-limits. |
-| `input` | The snippet, logs, repo state, or scenario. |
-| `expected_behaviour` | What correct looks like. |
-| `evaluation` | How it is checked — deterministic wherever possible. |
-| `explanation` | Why. **The most valuable field in the record.** |
-| `author` | Attribution, for contributors. |
-| `version` | Integer, bumped on any behavioural change. |
+| Field                | Note                                                 |
+| -------------------- | ---------------------------------------------------- |
+| `title`              | Specific and intriguing. Not "PHP Quiz 4".           |
+| `description`        | Sets the scene. Short.                               |
+| `objective`          | Exactly what the user must produce.                  |
+| `difficulty`         | easy / medium / hard / expert                        |
+| `estimated_time`     | Minutes. Honest.                                     |
+| `tags`               | Language, technology, concept.                       |
+| `rules`              | Constraints and what is off-limits.                  |
+| `input`              | The snippet, logs, repo state, or scenario.          |
+| `expected_behaviour` | What correct looks like.                             |
+| `evaluation`         | How it is checked — deterministic wherever possible. |
+| `explanation`        | Why. **The most valuable field in the record.**      |
+| `author`             | Attribution, for contributors.                       |
+| `version`            | Integer, bumped on any behavioural change.           |
 
 A challenge depending on undocumented external state is invalid.
 
@@ -37,8 +37,8 @@ A challenge depending on undocumented external state is invalid.
   coercion in the abstract equality algorithm, and here is the spec step. Link it.
 - **Honest difficulty** (§9.3): easy = syntax, validation · medium = logic, null handling,
   database · hard = concurrency, performance · expert = distributed systems, subtle spec behaviour.
-- Cursed is not unfair. No typo-dependent tricks, no invisible characters unless *that is the
-  lesson* and it is discoverable.
+- Cursed is not unfair. No typo-dependent tricks, no invisible characters unless _that is the
+  lesson_ and it is discoverable.
 - Original code only — no copyrighted snippets.
 - Humour welcome; punching down is not.
 

@@ -38,17 +38,17 @@ instantiation or template compilation applied to user content is a blocking defe
 
 Every execution runs in a fresh, disposable container with:
 
-| Control | Requirement |
-|---|---|
-| CPU | Hard quota |
-| Memory | Hard limit, OOM-killed rather than swapped |
-| Wall clock | Timeout enforced by the orchestrator, not by the sandbox itself |
-| Processes | PID limit — fork bombs are the first thing anyone tries |
-| Filesystem | Read-only root, small writable tmpfs, no host mounts |
-| Network | Disabled by default. Enabled only for a challenge that documents why |
-| User | Non-root, no capabilities, no privilege escalation |
-| Output | Size-capped — a program printing infinite output must not fill the disk or the DB |
-| Lifetime | Destroyed after every run, success or failure. Cleanup is guaranteed, not best-effort |
+| Control    | Requirement                                                                           |
+| ---------- | ------------------------------------------------------------------------------------- |
+| CPU        | Hard quota                                                                            |
+| Memory     | Hard limit, OOM-killed rather than swapped                                            |
+| Wall clock | Timeout enforced by the orchestrator, not by the sandbox itself                       |
+| Processes  | PID limit — fork bombs are the first thing anyone tries                               |
+| Filesystem | Read-only root, small writable tmpfs, no host mounts                                  |
+| Network    | Disabled by default. Enabled only for a challenge that documents why                  |
+| User       | Non-root, no capabilities, no privilege escalation                                    |
+| Output     | Size-capped — a program printing infinite output must not fill the disk or the DB     |
+| Lifetime   | Destroyed after every run, success or failure. Cleanup is guaranteed, not best-effort |
 
 The sandbox host has no credentials, no database access and no route back into the application
 network. Compromising a sandbox must yield nothing.

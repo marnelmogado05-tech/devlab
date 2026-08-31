@@ -11,7 +11,7 @@ finding needs a concrete exploit scenario — no speculative findings.
 ## The DevLab-specific threat model
 
 Generic Laravel security is covered by the global `laravel-security` skill. Your job is what is
-specific to *this* product.
+specific to _this_ product.
 
 **1. Trust boundary violations.** Does any score, XP amount, completion flag, difficulty, elapsed
 time or achievement condition arrive from the client and get persisted without server-side

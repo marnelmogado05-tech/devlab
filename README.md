@@ -26,29 +26,33 @@ followed forty-five minutes later by:
 
 ## Status
 
-**Phase 0 — foundation.** The specification and project scaffolding exist; the application does
-not yet. See [`docs/DevLab_Project_Plan.md`](docs/DevLab_Project_Plan.md) for the full plan and
-[`docs/adr/`](docs/adr/) for decisions made so far.
+**Phase 0 — foundation.** The Laravel application, MVP database schema, Docker environment and
+configuration are in place. Authentication works. **No DevLab feature is built yet** — no
+experiences, no challenges, no scoring, no "I'm Bored". That is next.
+
+See [`docs/DevLab_Project_Plan.md`](docs/DevLab_Project_Plan.md) for the full plan and
+[`docs/adr/`](docs/adr/) for the decisions made so far.
 
 ## Stack
 
-Laravel (PHP 8.4) · React + TypeScript + Inertia.js · Tailwind CSS · PostgreSQL · Redis · Docker
+Laravel 13 (PHP 8.4) · React 19 + TypeScript + Inertia 3 · Tailwind 4 · PostgreSQL 17 ·
+Redis 8 · Docker · Pest 5
 
 Why this stack: [ADR 0001](docs/adr/0001-use-laravel-react-inertia.md).
 
 ## Planned experiences
 
-| Experience | What you do |
-|---|---|
-| **Dev Roulette** | Press the button, get assigned something |
-| **Cursed Code** | Predict what a horrifying snippet actually does |
-| **Bug Hunter** | Find the planted defect |
-| **Debugging Detective** | Investigate a fictional production issue from logs and traces |
-| **Docker Escape Room** | Work out why the container refuses to start |
-| **Production Nightmare** | Make incident decisions and live with the consequences |
-| **Git Simulator** | Fix repository disasters, visually |
-| **System Design Lab** | Design for the stated load, get evaluated against it |
-| **Code Arena** | Compete on correctness, speed and quality |
+| Experience               | What you do                                                   |
+| ------------------------ | ------------------------------------------------------------- |
+| **Dev Roulette**         | Press the button, get assigned something                      |
+| **Cursed Code**          | Predict what a horrifying snippet actually does               |
+| **Bug Hunter**           | Find the planted defect                                       |
+| **Debugging Detective**  | Investigate a fictional production issue from logs and traces |
+| **Docker Escape Room**   | Work out why the container refuses to start                   |
+| **Production Nightmare** | Make incident decisions and live with the consequences        |
+| **Git Simulator**        | Fix repository disasters, visually                            |
+| **System Design Lab**    | Design for the stated load, get evaluated against it          |
+| **Code Arena**           | Compete on correctness, speed and quality                     |
 
 MVP ships Dev Roulette, Cursed Code and Bug Hunter.
 
