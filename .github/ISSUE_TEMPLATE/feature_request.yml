@@ -1,0 +1,56 @@
+name: Feature or experience proposal
+description: Propose a platform feature or a whole new experience
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check `docs/DevLab_Project_Plan.md` §48–55 first — it may already be planned for a later
+        phase, in which case the useful discussion is about ordering, not whether.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind
+      options:
+        - A new experience (a whole activity type)
+        - A platform feature (progression, community, profile, discovery)
+        - An improvement to an existing experience
+        - Developer experience / tooling
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What is missing or annoying today? Describe the situation, not the solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The proposal
+      description: What you would build.
+    validations:
+      required: true
+
+  - type: textarea
+    id: loop
+    attributes:
+      label: The player loop
+      description: |
+        For a new experience: what does someone actually *do*, and how is it evaluated?
+        Remember evaluation must be server-side, and deterministic where possible.
+
+  - type: input
+    id: phase
+    attributes:
+      label: Which phase does this belong to?
+      description: See plan §48–55. If it belongs to a later phase, say why it should move earlier.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

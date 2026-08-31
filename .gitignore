@@ -1,0 +1,45 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+auth.json
+
+# PHP
+/vendor
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+.phpunit.result.cache
+.phpunit.cache
+.php-cs-fixer.cache
+
+# Node / frontend
+/node_modules
+/public/build
+/public/hot
+/public/storage
+npm-debug.log*
+yarn-error.log*
+
+# Editors / OS
+.idea
+.vscode/*
+!.vscode/extensions.json
+.fleet
+*.swp
+.DS_Store
+Thumbs.db
+
+# Claude Code — share the configuration, keep personal overrides local
+.claude/settings.local.json
+.claude/*.local.md
+
+# Local tooling output
+/graphify-out
+/coverage
+/.phpstan.cache

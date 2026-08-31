@@ -1,0 +1,68 @@
+name: Bug report
+description: Something in DevLab is broken
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Security issue?** Stop — report it privately instead. See `SECURITY.md`.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Start ...
+        3. Submit ...
+        4. See ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - A specific experience
+        - Challenge content (wrong answer, unclear wording)
+        - Scoring / XP / achievements
+        - Leaderboards
+        - Authentication / profile
+        - "I'm Bored" / recommendation
+        - UI / accessibility
+        - Local setup / Docker
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: challenge
+    attributes:
+      label: Challenge or experience slug
+      description: If it is about specific content, which one?
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        Browser:
+        OS:
+        Docker / local:
+        Commit or version:
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, errors or screenshots
+      description: Redact anything sensitive. Do not paste tokens or credentials.
+      render: text

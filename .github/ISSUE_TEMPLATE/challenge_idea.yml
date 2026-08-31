@@ -1,0 +1,78 @@
+name: Challenge idea
+description: Propose a challenge — a cursed snippet, a planted bug, an incident
+labels: ["content", "challenge"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Content is the product. This is the most valuable issue you can open.
+        Ready to write it yourself? Open a pull request instead — see `CONTRIBUTING.md`.
+
+  - type: dropdown
+    id: experience
+    attributes:
+      label: Which experience
+      options:
+        - Cursed Code
+        - Bug Hunter
+        - Debugging Detective
+        - Docker Escape Room
+        - Production Nightmare
+        - Git Simulator
+        - System Design Lab
+        - Code Arena
+        - Not sure / new experience
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: The challenge
+      description: The snippet, scenario or repository state. Enough that someone could build it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: insight
+    attributes:
+      label: The insight it teaches
+      description: What does a player understand afterwards that they did not before? One thing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: answer
+    attributes:
+      label: The answer, and how you verified it
+      description: Did you run it, or are you citing a spec? "I'm fairly sure" is not verification.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty
+      options:
+        - "Easy — syntax, validation"
+        - "Medium — logic, null handling, database"
+        - "Hard — concurrency, performance"
+        - "Expert — distributed systems, subtle spec behaviour"
+    validations:
+      required: true
+
+  - type: input
+    id: time
+    attributes:
+      label: Estimated time
+      placeholder: "5 minutes"
+
+  - type: checkboxes
+    id: originality
+    attributes:
+      label: Confirmation
+      options:
+        - label: This is original content, not copied from a copyrighted source
+          required: true
+        - label: The trick does not depend on an invisible typo — cursed, not unfair
+          required: true

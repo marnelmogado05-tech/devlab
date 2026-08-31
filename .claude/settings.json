@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(php artisan:*)",
+      "Bash(composer:*)",
+      "Bash(./vendor/bin/pest:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(./vendor/bin/phpstan:*)",
+      "Bash(npm run:*)",
+      "Bash(npm ci)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(rg:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./storage/logs/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Bash(php artisan migrate:fresh:*)",
+      "Bash(php artisan db:wipe:*)",
+      "Bash(git push --force:*)"
+    ],
+    "ask": [
+      "Bash(php artisan migrate:*)",
+      "Bash(docker compose down:*)",
+      "Bash(git push:*)"
+    ]
+  },
+  "env": {
+    "APP_ENV": "local"
+  }
+}
