@@ -22,8 +22,14 @@ services:
             - '${APP_PORT:-8000}:8000'
             - '${VITE_PORT:-5173}:5173'
         environment:
+            # Inside the network, the standard ports always apply. The host-side
+            # ports below are moved off the defaults to avoid colliding with a
+            # natively installed Postgres or Redis, which is common on a
+            # developer machine — so .env's DB_PORT is deliberately overridden.
             DB_HOST: postgres
+            DB_PORT: 5432
             REDIS_HOST: redis
+            REDIS_PORT: 6379
         depends_on:
             postgres:
                 condition: service_healthy
@@ -45,7 +51,9 @@ services:
             - /var/www/html/node_modules
         environment:
             DB_HOST: postgres
+            DB_PORT: 5432
             REDIS_HOST: redis
+            REDIS_PORT: 6379
         depends_on:
             postgres:
                 condition: service_healthy
@@ -64,7 +72,7 @@ services:
             # Deterministic collation, so ORDER BY does not differ between machines.
             POSTGRES_INITDB_ARGS: '--locale=C --encoding=UTF8'
         ports:
-            - '${DB_PORT_HOST:-5432}:5432'
+            - '${DB_PORT_HOST:-5433}:5432'
         volumes:
             - postgres-data:/var/lib/postgresql/data
             # Creates devlab_testing on first boot — the test suite runs on Postgres,
@@ -89,7 +97,7 @@ services:
         # rebuild job runs. Redis is still never the source of truth (plan §23).
         command: redis-server --appendonly yes
         ports:
-            - '${REDIS_PORT_HOST:-6379}:6379'
+            - '${REDIS_PORT_HOST:-6380}:6379'
         volumes:
             - redis-data:/data
         healthcheck:

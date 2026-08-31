@@ -40,8 +40,5 @@
             "Bash(docker compose down:*)",
             "Bash(git push:*)"
         ]
-    },
-    "env": {
-        "APP_ENV": "local"
     }
 }

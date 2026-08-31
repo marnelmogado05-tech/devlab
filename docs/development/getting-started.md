@@ -1,11 +1,9 @@
 # Getting Started
 
-> **Status:** the Docker path has **not been verified end to end** — Docker was unavailable on
-> the machine where this scaffold was built, so the image has never been built and the containers
-> have never run. Treat the Docker section as intended, not proven. If you hit a problem, fixing
-> this file is a genuinely useful first contribution.
->
-> The local (non-Docker) path is verified as far as dependency install, Pint and PHPStan.
+> **Status:** verified. The containers run, all 13 migrations apply and roll back cleanly against
+> PostgreSQL 17, the constraint behaviour is proven, and the full test suite passes 39/39.
+> The application **image** (`docker/app/Dockerfile`) has not yet been built — only the Postgres
+> and Redis services have been exercised.
 
 ## Requirements
 
@@ -36,10 +34,6 @@ Useful if you want your editor's PHP tooling to work directly against `vendor/`.
 
 ```bash
 cp .env.example .env
-# .env ships with Docker service names — point them at localhost:
-#   DB_HOST=127.0.0.1
-#   REDIS_HOST=127.0.0.1
-
 docker compose up -d postgres redis
 composer install
 php artisan key:generate
@@ -51,12 +45,18 @@ php artisan serve  # in another
 
 ## Services
 
-| Service    | Purpose                                 | Port        |
-| ---------- | --------------------------------------- | ----------- |
-| `app`      | Laravel + Vite                          | 8000 / 5173 |
-| `queue`    | Queue worker                            | —           |
-| `postgres` | Source of truth                         | 5432        |
-| `redis`    | Cache, queue, leaderboards, rate limits | 6379        |
+| Service    | Purpose                                 | Host port   | In-network |
+| ---------- | --------------------------------------- | ----------- | ---------- |
+| `app`      | Laravel + Vite                          | 8000 / 5173 | —          |
+| `queue`    | Queue worker                            | —           | —          |
+| `postgres` | Source of truth                         | **5433**    | 5432       |
+| `redis`    | Cache, queue, leaderboards, rate limits | **6380**    | 6379       |
+
+Postgres and Redis are published on **non-default host ports** so DevLab coexists with a natively
+installed PostgreSQL or Redis, which many developer machines already run. Inside the Compose
+network the standard ports still apply — `docker-compose.yml` overrides `DB_PORT` and
+`REDIS_PORT` for the app and queue containers, so one `.env` works on both paths without editing.
+Override `DB_PORT_HOST` / `REDIS_PORT_HOST` if 5433 or 6380 are also taken.
 
 Postgres creates two databases on first boot: `devlab` and `devlab_testing`.
 
@@ -102,7 +102,25 @@ next slice of work.
 
 **`docker compose up` fails to connect to the Docker daemon.** Docker Desktop is not running, or
 its engine has not finished starting. On Windows, check that the `docker-desktop` WSL distro is
-running: `wsl -l -v`.
+running: `wsl -l -v`. Starting Docker Desktop can take a few minutes on first launch.
+
+**`password authentication failed for user "devlab"`, but the container looks healthy.** You are
+almost certainly connecting to a _different_ PostgreSQL. If you have a native Postgres installed,
+it owns port 5432, and a connection to `127.0.0.1:5432` never reaches the container. DevLab
+publishes Postgres on **5433** for exactly this reason — check `DB_PORT` in your `.env`, and
+`netstat -ano | grep 5432` to see who holds the default.
+
+**Postgres starts but the `devlab` role does not exist.** `POSTGRES_USER` is only applied when
+the data volume is first initialised. If you changed `DB_USERNAME` after the first boot, the old
+volume persists: `docker compose rm -sf postgres && docker volume rm devlab_postgres-data`, then
+bring it back up. **This destroys the development database.**
+
+**Tests fail with 419 status codes on every POST.** Something in your shell is exporting
+`APP_ENV`. PHPUnit's `<env>` entries do not override a variable that is already set, so the app
+never enters the `testing` environment and CSRF validation is not bypassed. `unset APP_ENV`.
+
+**Every page returns 500 with `Vite manifest not found`.** Run `npm run build` (or `npm run dev`).
+The test suite renders real Inertia pages, so it needs built assets too.
 
 **Migrations fail with a syntax error near `jsonb`.** You are connected to SQLite or MySQL, not
 PostgreSQL. Check `DB_CONNECTION` in `.env`.

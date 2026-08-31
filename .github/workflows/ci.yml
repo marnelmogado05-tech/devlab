@@ -26,7 +26,9 @@ jobs:
           POSTGRES_DB: devlab_testing
           POSTGRES_USER: devlab
           POSTGRES_PASSWORD: change_me
-        ports: ["5432:5432"]
+        # Mapped off the default so the value matches phpunit.xml, which uses a
+        # non-default port to coexist with a natively installed Postgres.
+        ports: ["5433:5432"]
         options: >-
           --health-cmd pg_isready
           --health-interval 5s
@@ -35,7 +37,7 @@ jobs:
 
       redis:
         image: redis:8-alpine
-        ports: ["6379:6379"]
+        ports: ["6380:6379"]
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 5s
@@ -89,11 +91,12 @@ jobs:
         env:
           DB_CONNECTION: pgsql
           DB_HOST: 127.0.0.1
-          DB_PORT: 5432
+          DB_PORT: 5433
           DB_DATABASE: devlab_testing
           DB_USERNAME: devlab
           DB_PASSWORD: change_me
           REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6380
         run: php artisan test
 
       - name: Build assets
