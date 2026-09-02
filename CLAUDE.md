@@ -122,8 +122,9 @@ public with a privacy setting, and the `preferences` the recommender reads are f
 The **landing page** is DevLab's own, built around the "I'm Bored" button, with counts read at
 request time rather than written into the copy.
 
-Remaining MVP gap: there are **no frontend tests** and nothing in `tests/Integration`.
-`ChallengeCompleted` is dispatched and still has no listeners.
+**Frontend tests** run on `vp test` (Vitest, already in the toolchain) and are part of
+`composer ci:check` and CI. `tests/Integration` is still empty. `ChallengeCompleted` is dispatched
+and still has no listeners.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,

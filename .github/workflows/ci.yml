@@ -94,6 +94,11 @@ jobs:
       - name: Typecheck
         run: npm run types:check
 
+      # Frontend component tests (§38). They need no database or Redis, so they
+      # run before the services are touched and fail fast.
+      - name: Frontend tests
+        run: npm run test
+
       # Before the tests, not after: the suite renders real Inertia pages, so it
       # needs public/build/manifest.json or every page returns 500.
       - name: Build assets

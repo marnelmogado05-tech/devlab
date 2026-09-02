@@ -46,6 +46,22 @@ export default defineConfig({
             ],
         },
     },
+    /*
+     * Frontend tests (§38), on the runner the toolchain already ships — `vp test`
+     * is Vitest, so no separate runner was added.
+     *
+     * happy-dom rather than jsdom: it is markedly faster, and nothing here needs
+     * the corners of the DOM spec that jsdom implements more completely.
+     */
+    test: {
+        environment: 'happy-dom',
+        globals: true,
+        setupFiles: ['./resources/js/test/setup.ts'],
+        include: ['resources/js/**/*.test.{ts,tsx}'],
+        // Vitest would otherwise walk vendor/ and node_modules looking for specs.
+        exclude: ['node_modules/**', 'vendor/**', 'public/**'],
+    },
+
     lint: {
         ignorePatterns: [
             'vendor/**',
