@@ -19,6 +19,14 @@ pest()->extend(TestCase::class)
     ->in('Feature', 'Integration');
 
 /*
+ * Unit tests get a booted application but NOT RefreshDatabase. Services read
+ * their constants from config/devlab.php (scoring weights, rate limits), so they
+ * need the container; migrating a database for a pure function would make the
+ * fast suite slow for nothing.
+ */
+pest()->extend(TestCase::class)->in('Unit');
+
+/*
 |--------------------------------------------------------------------------
 | Expectations
 |--------------------------------------------------------------------------

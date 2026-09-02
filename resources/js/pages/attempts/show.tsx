@@ -2,8 +2,10 @@ import { Form, Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { destroy } from '@/routes/attempts';
+import { destroy, submit } from '@/routes/attempts';
 import {
     index as experiencesIndex,
     show as experienceShow,
@@ -15,6 +17,17 @@ interface Attempt {
     started_at: string;
     elapsed_seconds: number;
     challenge_version: number;
+}
+
+interface Result {
+    status: string;
+    correct: boolean;
+    feedback: string | null;
+    score: number | null;
+    max_score: number | null;
+    breakdown: Record<string, number> | null;
+    time_taken_seconds: number | null;
+    explanation: string | null;
 }
 
 interface PlayableChallenge {
@@ -35,10 +48,12 @@ export default function AttemptShow({
     attempt,
     challenge,
     experience,
+    result,
 }: {
     attempt: Attempt;
     challenge: PlayableChallenge;
     experience: { slug: string; name: string };
+    result: Result | null;
 }) {
     const elapsed = useElapsed(
         attempt.elapsed_seconds,
@@ -114,19 +129,150 @@ export default function AttemptShow({
                     </Card>
                 </div>
 
-                {attempt.status === 'started' && (
-                    <Form
-                        action={destroy(attempt.id)}
-                        method="delete"
-                        className="max-w-3xl"
-                    >
-                        <Button type="submit" variant="outline">
-                            Give up
-                        </Button>
-                    </Form>
+                {result ? (
+                    <ResultPanel result={result} />
+                ) : (
+                    <SubmissionForm attemptId={attempt.id} />
                 )}
             </div>
         </>
+    );
+}
+
+/**
+ * The generic submission form.
+ *
+ * Each experience will replace this with its own interface — a multiple choice,
+ * a code editor, a Git graph. A single free-text answer is the lowest common
+ * denominator that works for every experience until then, and it exercises the
+ * real submission path rather than pretending to.
+ */
+function SubmissionForm({ attemptId }: { attemptId: number }) {
+    return (
+        <div className="max-w-3xl space-y-3">
+            <Form
+                action={submit(attemptId)}
+                method="post"
+                className="space-y-3"
+            >
+                {({ processing, errors }) => (
+                    <>
+                        <div className="space-y-2">
+                            <Label htmlFor="answer">Your answer</Label>
+                            <Input
+                                id="answer"
+                                name="submission[answer]"
+                                autoComplete="off"
+                                aria-describedby={
+                                    errors['submission.answer']
+                                        ? 'answer-error'
+                                        : undefined
+                                }
+                                aria-invalid={
+                                    errors['submission.answer']
+                                        ? true
+                                        : undefined
+                                }
+                                className="font-mono"
+                            />
+                            {errors['submission.answer'] && (
+                                <p
+                                    id="answer-error"
+                                    role="alert"
+                                    className="text-destructive text-sm"
+                                >
+                                    {errors['submission.answer']}
+                                </p>
+                            )}
+                        </div>
+
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Checking…' : 'Submit answer'}
+                        </Button>
+                    </>
+                )}
+            </Form>
+
+            <Form action={destroy(attemptId)} method="delete">
+                <Button type="submit" variant="ghost" size="sm">
+                    Give up
+                </Button>
+            </Form>
+        </div>
+    );
+}
+
+/**
+ * The outcome. A wrong answer is data, not a verdict — the copy says what
+ * happened without shaming, per the design language.
+ */
+function ResultPanel({ result }: { result: Result }) {
+    return (
+        <div className="max-w-3xl space-y-4" role="status" aria-live="polite">
+            <Card>
+                <CardContent className="space-y-3 py-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <h2 className="font-mono text-xs tracking-widest uppercase">
+                            {result.correct ? 'Solved' : 'Not this time'}
+                        </h2>
+                        <p className="font-mono text-lg tabular-nums">
+                            {result.score} / {result.max_score}
+                        </p>
+                    </div>
+
+                    {result.feedback && (
+                        <p className="text-sm">{result.feedback}</p>
+                    )}
+
+                    {result.breakdown && (
+                        <dl className="text-muted-foreground grid grid-cols-2 gap-x-6 gap-y-1 font-mono text-xs sm:grid-cols-3">
+                            <ScoreLine
+                                label="base"
+                                value={result.breakdown.base}
+                            />
+                            <ScoreLine
+                                label="speed"
+                                value={result.breakdown.speed_bonus}
+                            />
+                            <ScoreLine
+                                label="accuracy"
+                                value={result.breakdown.accuracy_bonus}
+                            />
+                            <ScoreLine
+                                label="streak"
+                                value={result.breakdown.streak_bonus}
+                            />
+                            <ScoreLine
+                                label="no hint"
+                                value={result.breakdown.no_hint_bonus}
+                            />
+                        </dl>
+                    )}
+                </CardContent>
+            </Card>
+
+            {result.explanation && (
+                <Card>
+                    <CardContent className="space-y-2 py-4">
+                        <h2 className="font-mono text-xs tracking-widest uppercase">
+                            Why
+                        </h2>
+                        <p className="text-sm leading-relaxed whitespace-pre-line">
+                            {result.explanation}
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    );
+}
+
+function ScoreLine({ label, value }: { label: string; value: number }) {
+    return (
+        <div className="flex justify-between gap-2">
+            <dt>{label}</dt>
+            <dd className="tabular-nums">{value}</dd>
+        </div>
     );
 }
 

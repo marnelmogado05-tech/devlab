@@ -89,10 +89,13 @@ health, needs attempt data) · `docs-keeper` (docs drift).
 `config/devlab.php` exist, auth works via Fortify, and the schema's integrity constraints are
 covered by tests. The **catalogue** is built — `Experience` and `Challenge` models, policies,
 and the `/experiences`, `/experiences/{slug}`, `/challenges/{slug}` pages — and so is the
-**attempt lifecycle**: start (idempotent), play page, abandon, scheduled expiry.
+**attempt lifecycle**: start (idempotent), play, submit, score, abandon, scheduled expiry. The
+**scoring engine** exists — `ChallengeEvaluator` + `EvaluatorRegistry` + `ScoreCalculator` — but no
+experience registers an evaluator yet.
 
-Next in §56 order: scoring, then XP, achievements, leaderboards, "I'm Bored", and the experiences
-themselves. Not built yet — no submission, evaluation, scoring, XP or challenge content.
+Next in §56 order: XP, then achievements, leaderboards, "I'm Bored", and the experiences
+themselves. `ChallengeCompleted` is dispatched and has no listeners — that is the seam XP attaches
+to. Not built yet — no XP, achievements, leaderboards or challenge content.
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward

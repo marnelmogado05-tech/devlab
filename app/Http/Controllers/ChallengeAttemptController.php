@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\Attempts\AbandonAttempt;
 use App\Actions\Attempts\StartAttempt;
+use App\Actions\Attempts\SubmitAttempt;
+use App\Http\Requests\Attempts\SubmitAttemptRequest;
 use App\Models\Challenge;
 use App\Models\ChallengeAttempt;
 use Illuminate\Http\RedirectResponse;
@@ -61,11 +63,29 @@ class ChallengeAttemptController extends Controller
                 'challenge_version' => $attempt->challenge_version,
             ],
             'challenge' => $this->toPlayable($attempt->challenge),
+            'result' => $attempt->isOpen() ? null : $this->toResult($attempt),
             'experience' => [
                 'slug' => $attempt->challenge->experience->slug,
                 'name' => $attempt->challenge->experience->name,
             ],
         ]);
+    }
+
+    /**
+     * POST /attempts/{attempt}/submit
+     *
+     * Authorization and validation both happen in SubmitAttemptRequest — the
+     * request cannot reach here without an owned, open attempt and a payload the
+     * experience's own evaluator declared it can read.
+     */
+    public function submit(
+        SubmitAttemptRequest $request,
+        ChallengeAttempt $attempt,
+        SubmitAttempt $submitAttempt,
+    ): RedirectResponse {
+        $submitAttempt->handle($attempt, $request->validatedSubmission());
+
+        return to_route('attempts.show', $attempt);
     }
 
     /**
@@ -80,6 +100,32 @@ class ChallengeAttemptController extends Controller
         $abandonAttempt->handle($attempt);
 
         return to_route('challenges.show', $attempt->challenge);
+    }
+
+    /**
+     * The outcome, released only once the attempt is closed.
+     *
+     * `explanation` appears HERE and nowhere earlier: it is the payoff, and the
+     * thing an attacker wants before solving rather than after (§72). The
+     * evaluator's `details` stay server-side — they can describe how an answer
+     * was checked, which is a shorter path to the answer than the explanation is.
+     *
+     * @return array<string, mixed>
+     */
+    private function toResult(ChallengeAttempt $attempt): array
+    {
+        $evaluation = $attempt->evaluation ?? [];
+
+        return [
+            'status' => $attempt->status,
+            'correct' => (bool) ($evaluation['correct'] ?? false),
+            'feedback' => $evaluation['feedback'] ?? null,
+            'score' => $attempt->score,
+            'max_score' => $attempt->max_score,
+            'breakdown' => $evaluation['score_breakdown'] ?? null,
+            'time_taken_seconds' => $attempt->time_taken_seconds,
+            'explanation' => $attempt->challenge->explanation,
+        ];
     }
 
     /**

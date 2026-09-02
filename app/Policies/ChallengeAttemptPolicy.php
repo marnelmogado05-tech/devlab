@@ -30,6 +30,18 @@ class ChallengeAttemptPolicy
     }
 
     /**
+     * Only the owner may submit, and only while the attempt is open.
+     *
+     * The open check is authorization, not convenience: without it, the owner of
+     * a finished attempt could keep POSTing to it. The action would refuse to
+     * re-score, but the request would still run an evaluator on every call.
+     */
+    public function submit(User $user, ChallengeAttempt $attempt): bool
+    {
+        return $attempt->user_id === $user->id && $attempt->isOpen();
+    }
+
+    /**
      * Whether this user may open an attempt at all. Playable content only —
      * `ChallengePolicy::view()` decides what is playable.
      */

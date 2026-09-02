@@ -37,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('attempts/{attempt}', [ChallengeAttemptController::class, 'show'])
         ->name('attempts.show');
 
+    Route::post('attempts/{attempt}/submit', [ChallengeAttemptController::class, 'submit'])
+        ->middleware('throttle:submission')
+        ->name('attempts.submit');
+
     Route::delete('attempts/{attempt}', [ChallengeAttemptController::class, 'destroy'])
         ->name('attempts.destroy');
 });
