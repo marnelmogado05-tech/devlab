@@ -1,9 +1,9 @@
 # Getting Started
 
-> **Status:** verified. The containers run, all 13 migrations apply and roll back cleanly against
-> PostgreSQL 17, the schema's constraints are covered by tests (`tests/Feature/Schema/`), and the
-> full suite passes 67/67. The application **image** builds; the `app` container has not yet been
-> run end to end, so the entrypoint and the HTTP path on :8000 remain unexercised.
+> **Status:** verified end to end. `docker compose up -d` on a clean checkout brings up all five
+> services, applies the migrations, compiles the frontend and serves the app: `/`, `/login` and
+> `/register` return 200 and `/dashboard` redirects a guest. The schema's constraints are covered
+> by tests (`tests/Feature/Schema/`) and the suite passes 67/67.
 
 ## Requirements
 
@@ -20,8 +20,12 @@ cp .env.example .env
 docker compose up -d
 ```
 
-The entrypoint installs dependencies, generates `APP_KEY`, waits for Postgres and runs
-migrations on first boot. DevLab is then at `http://localhost:8000`, with Vite on `5173`.
+The entrypoint installs dependencies, generates `APP_KEY`, waits for Postgres, runs migrations
+and — because `public/build` is not committed — compiles the frontend assets on first boot. That
+last step takes a minute the first time and is skipped on every later start.
+
+DevLab is then at `http://localhost:8000`. The `vite` service serves hot module reloading on
+`5173`; the app works without it, but changes to `resources/js` then need `npm run build`.
 
 ```bash
 docker compose logs -f app     # watch it come up
@@ -45,12 +49,13 @@ php artisan serve  # in another
 
 ## Services
 
-| Service    | Purpose                                 | Host port   | In-network |
-| ---------- | --------------------------------------- | ----------- | ---------- |
-| `app`      | Laravel + Vite                          | 8000 / 5173 | —          |
-| `queue`    | Queue worker                            | —           | —          |
-| `postgres` | Source of truth                         | **5433**    | 5432       |
-| `redis`    | Cache, queue, leaderboards, rate limits | **6380**    | 6379       |
+| Service    | Purpose                                 | Host port | In-network |
+| ---------- | --------------------------------------- | --------- | ---------- |
+| `app`      | Laravel                                 | 8000      | —          |
+| `queue`    | Queue worker                            | —         | —          |
+| `vite`     | Frontend dev server, hot reloading      | 5173      | —          |
+| `postgres` | Source of truth                         | **5433**  | 5432       |
+| `redis`    | Cache, queue, leaderboards, rate limits | **6380**  | 6379       |
 
 Postgres and Redis are published on **non-default host ports** so DevLab coexists with a natively
 installed PostgreSQL or Redis, which many developer machines already run. Inside the Compose
@@ -120,7 +125,15 @@ bring it back up. **This destroys the development database.**
 never enters the `testing` environment and CSRF validation is not bypassed. `unset APP_ENV`.
 
 **Every page returns 500 with `Vite manifest not found`.** Run `npm run build` (or `npm run dev`).
-The test suite renders real Inertia pages, so it needs built assets too.
+The test suite renders real Inertia pages, so it needs built assets too. On the Docker path the
+entrypoint builds them for you on first boot; this is what you see if you are running Laravel on
+the host with no build yet.
+
+**The page loads but is unstyled and inert, with every asset 404ing.** Vite writes `public/hot`
+while the dev server is running, and Laravel prefers it over the compiled manifest. If the file
+outlives the server, the page points at a dev server that is gone. `docker compose stop` cleans it
+up for you; a hard kill of the container cannot. Delete `public/hot` — it is generated, and
+gitignored — and the app falls straight back to the compiled assets.
 
 **Migrations fail with a syntax error near `jsonb`.** You are connected to SQLite or MySQL, not
 PostgreSQL. Check `DB_CONNECTION` in `.env`.

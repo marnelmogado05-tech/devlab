@@ -24,23 +24,58 @@ if ! grep -q '^APP_KEY=base64:' .env; then
     php artisan key:generate --force
 fi
 
-if [ ! -d node_modules ]; then
+# Testing for the directory is not enough: `node_modules` is an anonymous volume,
+# so Docker always creates the mount point and an unpopulated one still passes
+# `-d`. Check that it has contents, the way the vendor check above does.
+if [ -z "$(ls -A node_modules 2>/dev/null)" ]; then
     echo "→ Installing Node dependencies"
     npm install
 fi
 
+# Only the PHP containers wait for PostgreSQL. The vite service must come up
+# whether or not the database does — a frontend dev server blocked on a database
+# is a confusing failure with no upside.
 # The compose healthcheck already gates on this, but the queue worker can start
 # fractionally ahead of Postgres accepting connections.
-echo "→ Waiting for the database"
-until php -r "new PDO('pgsql:host='.getenv('DB_HOST').';port='.(getenv('DB_PORT') ?: 5432).';dbname='.getenv('DB_DATABASE'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));" 2>/dev/null; do
-    sleep 1
-done
+if [ "${1:-}" = "php" ]; then
+    echo "→ Waiting for the database"
+    until php -r "new PDO('pgsql:host='.getenv('DB_HOST').';port='.(getenv('DB_PORT') ?: 5432).';dbname='.getenv('DB_DATABASE'), getenv('DB_USERNAME'), getenv('DB_PASSWORD'));" 2>/dev/null; do
+        sleep 1
+    done
+fi
 
-# Only the web container migrates. Two containers racing on the migration table
-# is a real failure mode, not a theoretical one.
+# Only the web container migrates and builds. Two containers racing on the
+# migration table — or writing public/build at the same time — is a real failure
+# mode, not a theoretical one.
 if [ "${1:-}" = "php" ] && [ "${3:-}" = "serve" ]; then
     echo "→ Running migrations"
     php artisan migrate --force
+
+    # public/build is gitignored, so a fresh clone has no compiled assets and
+    # every page would 500 with "Vite manifest not found". The vite service
+    # supersedes these with hot module reloading as soon as it is up; this build
+    # is the floor that keeps the app working when it is not.
+    if [ ! -f public/build/manifest.json ]; then
+        echo "→ Building frontend assets (first run, this takes a minute)"
+        npm run build
+    fi
 fi
+
+# The Vite dev server writes public/hot and removes it on a clean exit — but not
+# when Docker stops the container: the signal never reaches its cleanup hook, not
+# even with vp as PID 1, because the server runs in a forked child. A stale hot
+# file is a silent failure: Laravel keeps serving pages, but every asset points at
+# a dev server that is gone, so the app renders unstyled and inert. Remove it on
+# the way out instead of leaving it for the next person to debug.
+case "${1:-}" in
+    *"/vp")
+        trap 'rm -f public/hot' EXIT
+        trap 'kill -TERM "$child" 2>/dev/null' INT TERM
+        "$@" &
+        child=$!
+        wait "$child"
+        exit $?
+        ;;
+esac
 
 exec "$@"

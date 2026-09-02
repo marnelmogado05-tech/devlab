@@ -1,6 +1,6 @@
 # DevLab local development environment.
 #
-# Deliberately four services. Anything else gets added when a feature needs it,
+# Deliberately five services. Anything else gets added when a feature needs it,
 # not in advance (plan §24, §77). The Phase 3 sandbox is NOT here — it runs on
 # isolated infrastructure with no route back into this network.
 
@@ -20,7 +20,6 @@ services:
             - /var/www/html/node_modules
         ports:
             - '${APP_PORT:-8000}:8000'
-            - '${VITE_PORT:-5173}:5173'
         environment:
             # Inside the network, the standard ports always apply. The host-side
             # ports below are moved off the defaults to avoid colliding with a
@@ -28,6 +27,12 @@ services:
             # developer machine — so .env's DB_PORT is deliberately overridden.
             DB_HOST: postgres
             DB_PORT: 5432
+            # The entrypoint's wait-for-database probe is a bare `php -r`, so it runs
+            # before Laravel boots and never reads .env. It needs the credentials
+            # from the container environment or it retries forever as an empty user.
+            DB_DATABASE: '${DB_DATABASE:-devlab}'
+            DB_USERNAME: '${DB_USERNAME:-devlab}'
+            DB_PASSWORD: '${DB_PASSWORD:-change_me}'
             REDIS_HOST: redis
             REDIS_PORT: 6379
         depends_on:
@@ -52,6 +57,12 @@ services:
         environment:
             DB_HOST: postgres
             DB_PORT: 5432
+            # The entrypoint's wait-for-database probe is a bare `php -r`, so it runs
+            # before Laravel boots and never reads .env. It needs the credentials
+            # from the container environment or it retries forever as an empty user.
+            DB_DATABASE: '${DB_DATABASE:-devlab}'
+            DB_USERNAME: '${DB_USERNAME:-devlab}'
+            DB_PASSWORD: '${DB_PASSWORD:-change_me}'
             REDIS_HOST: redis
             REDIS_PORT: 6379
         depends_on:
@@ -59,6 +70,45 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_healthy
+        networks: [devlab]
+
+    vite:
+        build:
+            context: .
+            dockerfile: docker/app/Dockerfile
+        container_name: devlab-vite
+        restart: unless-stopped
+        working_dir: /var/www/html
+        # Hot module reloading for the React frontend. Without this the app still
+        # works — the entrypoint compiles assets on first boot — but every change
+        # to resources/js needs a manual rebuild.
+        #
+        # --host 0.0.0.0 is not optional: a dev server bound to 127.0.0.1 inside
+        # a container is unreachable from the host, whatever the port mapping says.
+        #
+        # Invoked directly rather than through `npm run dev` so that the entrypoint
+        # can exec it as PID 1. Behind npm it never sees SIGTERM, so `docker compose
+        # stop` leaves public/hot behind pointing at a dev server that is gone, and
+        # the next boot serves a page whose assets all 404.
+        command: ./node_modules/.bin/vp dev --host 0.0.0.0 --port 5173
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/vendor
+            - /var/www/html/node_modules
+        ports:
+            - '${VITE_PORT:-5173}:5173'
+        environment:
+            # The Wayfinder plugin shells out to `php artisan` during dev to
+            # regenerate the typed route helpers, so this container needs the same
+            # connection settings the app has. It still does not wait for Postgres:
+            # a frontend dev server must not be blocked by a database.
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_DATABASE: '${DB_DATABASE:-devlab}'
+            DB_USERNAME: '${DB_USERNAME:-devlab}'
+            DB_PASSWORD: '${DB_PASSWORD:-change_me}'
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
         networks: [devlab]
 
     postgres:
