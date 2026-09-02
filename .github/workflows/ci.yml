@@ -75,6 +75,13 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
+      # resources/js/{routes,actions,wayfinder} are generated, not committed, so
+      # a fresh checkout has none of them and every `@/routes` import fails to
+      # resolve. --with-form is required: vite.config.ts sets formVariants, and
+      # without it the .form helpers are missing and the typecheck still fails.
+      - name: Generate route helpers
+        run: php artisan wayfinder:generate --with-form
+
       - name: Check formatting
         run: ./vendor/bin/pint --parallel --test
 
@@ -87,6 +94,11 @@ jobs:
       - name: Typecheck
         run: npm run types:check
 
+      # Before the tests, not after: the suite renders real Inertia pages, so it
+      # needs public/build/manifest.json or every page returns 500.
+      - name: Build assets
+        run: npm run build
+
       - name: Tests
         env:
           DB_CONNECTION: pgsql
@@ -98,6 +110,3 @@ jobs:
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 6380
         run: php artisan test
-
-      - name: Build assets
-        run: npm run build
