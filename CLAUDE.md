@@ -104,9 +104,13 @@ constraint, with a public catalogue at `/achievements`.
 **Leaderboards** are built on Redis sorted sets over PostgreSQL, with a
 PostgreSQL fallback and an hourly rebuild.
 
-Next in §56 order: "I'm Bored", then the experiences themselves. `ChallengeCompleted` is dispatched
-and still has no listeners. Not built yet — no "I'm Bored", no challenge content, and no experience
-registers an evaluator, so nothing is actually playable end to end.
+**"I'm Bored"** is built: `GET /bored` weights the pool and picks, with
+deliberate randomness.
+
+Next in §56 order: the experiences themselves — Cursed Code, then Bug Hunter, then Dev Roulette.
+`ChallengeCompleted` is dispatched and still has no listeners. **Nothing is playable end to end
+yet**: there is no challenge content and no experience registers an evaluator, so "I'm Bored" has
+nothing to hand out.
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward

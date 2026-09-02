@@ -248,10 +248,36 @@ store. They skip on a host without phpredis and run in CI and in the container.
 `challenge_reports` gives players a way to say "this answer is wrong". Reports plus attempt
 statistics are how bad content is found. See [challenge-reports.md](challenge-reports.md).
 
-### Recommendation — "I'm Bored" _(not built)_
+### Recommendation — "I'm Bored"
+
+`GET /bored` (§75). The server picks; nothing about the choice is negotiable from the client —
+accepting a filter would turn the one feature the product is named for into a worse catalogue. It
+is a GET that redirects and creates nothing, so a refresh, prefetch or crawler cannot leave a trail
+of half-started attempts. Open to guests, because being handed something before signing up is the
+pitch.
 
 `BoredomRecommendationService` weighs history, preferences, diversity and popularity, with
-deliberate randomness retained as a feature. Starts simple.
+deliberate randomness retained as a feature. Every weight is in `config/devlab.php`:
+
+| Signal               | Effect                                                            |
+| -------------------- | ----------------------------------------------------------------- |
+| unplayed experience  | strongest pull, so the pool widens rather than narrows            |
+| preferred difficulty | from `profiles.preferences`                                       |
+| preferred technology | tag overlap with `profiles.preferences`                           |
+| popularity           | scaled against the most-attempted challenge                       |
+| recency penalty      | pushes away from the experience just played — the diversity lever |
+
+**The randomness is the feature, not a fallback.** A `wildcard_chance` of the draws throw the
+weights away entirely, which is the mechanic behind "I have never touched Docker and now I have
+spent 45 minutes on it". Weighting rather than filtering: every candidate keeps a base weight, so
+nothing is ever unreachable, and a negative total is floored at zero so one penalty cannot distort
+the wheel.
+
+Challenges completed within `bored.exclude_completed_days` are excluded; older ones come back
+deliberately, or an active user's pool would only ever shrink.
+
+The `Randomizer` is injectable, so a seeded engine makes any single draw exactly reproducible and
+the distribution tests assert the shape of 200 draws rather than the luck of one.
 
 ### AI _(Phase 5, not built)_
 
