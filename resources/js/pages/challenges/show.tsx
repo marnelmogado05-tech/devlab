@@ -1,10 +1,13 @@
-import { Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { store } from '@/routes/attempts';
 import {
     index as experiencesIndex,
     show as experienceShow,
 } from '@/routes/experiences';
+import { login } from '@/routes';
 import type { ChallengeDetail } from '@/types';
 
 export default function ChallengeShow({
@@ -63,15 +66,46 @@ export default function ChallengeShow({
                     )}
                 </div>
 
-                {/*
-                 * Starting an attempt is the next slice. Saying so plainly beats a
-                 * dead button — and the page is genuinely useful as a briefing.
-                 */}
-                <p className="text-muted-foreground max-w-3xl font-mono text-xs">
-                    Attempts are not wired up yet. This is the briefing only.
-                </p>
+                <StartAttempt challenge={challenge} />
             </div>
         </>
+    );
+}
+
+/**
+ * Browsing is public, so this button has two audiences. A guest is sent to sign
+ * in rather than shown a control that would fail — an attempt belongs to
+ * somebody, and anonymous progress cannot be awarded.
+ */
+function StartAttempt({ challenge }: { challenge: ChallengeDetail }) {
+    const user = usePage().props.auth?.user;
+
+    if (!user) {
+        return (
+            <div className="max-w-3xl space-y-2">
+                <Button asChild>
+                    <Link href={login()}>Sign in to attempt this</Link>
+                </Button>
+                <p className="text-muted-foreground font-mono text-xs">
+                    Browsing is open to everyone. Attempts are recorded, so they
+                    need an account.
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <Form
+            action={store(challenge.slug)}
+            method="post"
+            className="max-w-3xl"
+        >
+            {({ processing }) => (
+                <Button type="submit" disabled={processing}>
+                    {processing ? 'Starting…' : 'Start attempt'}
+                </Button>
+            )}
+        </Form>
     );
 }
 

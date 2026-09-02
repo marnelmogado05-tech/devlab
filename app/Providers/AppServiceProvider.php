@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +29,21 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->passContainerConnectionVariablesToServe();
+        $this->configureRateLimiting();
+    }
+
+    /**
+     * Every expensive or abusable operation is limited (plan §41).
+     *
+     * Keyed by user, not by IP: opening attempts is an authenticated action, and
+     * an IP key would throttle everyone behind one NAT together while doing
+     * nothing about a single account driving a script.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('attempt-start', fn (Request $request) => Limit::perMinute(
+            (int) config('devlab.rate_limits.attempt_start')
+        )->by($request->user()?->id ?: $request->ip()));
     }
 
     /**
