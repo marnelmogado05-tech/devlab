@@ -6,11 +6,12 @@ use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeReportController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\ProfileShowController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', LandingController::class)->name('home');
 
 /*
  * The catalogue is public. DevLab's entire premise is that a bored developer

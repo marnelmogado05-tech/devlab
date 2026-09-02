@@ -119,9 +119,11 @@ All three MVP experiences are done, and `challenge_reports` is built (ADR 0003) 
 **Public profiles** are built: created at registration, editable in settings, `/profile/{username}`
 public with a privacy setting, and the `preferences` the recommender reads are finally written.
 
-Remaining MVP gaps: the **landing page** does not carry the "I'm Bored" button, and there are **no
-frontend tests** and nothing in `tests/Integration`. `ChallengeCompleted` is dispatched and still
-has no listeners.
+The **landing page** is DevLab's own, built around the "I'm Bored" button, with counts read at
+request time rather than written into the copy.
+
+Remaining MVP gap: there are **no frontend tests** and nothing in `tests/Integration`.
+`ChallengeCompleted` is dispatched and still has no listeners.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
