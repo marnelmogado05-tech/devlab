@@ -69,12 +69,17 @@ Postgres creates two databases on first boot: `devlab` and `devlab_testing`.
 
 ```bash
 composer test          # pint --test, phpstan, then artisan test
-composer ci:check      # the above plus frontend lint and typecheck
+composer ci:check      # the above plus frontend lint, typecheck and frontend tests
 composer lint          # fix formatting
-php artisan test       # tests only
+php artisan test       # backend tests only
+npm run test           # frontend component tests
+npm run test:watch     # the same, in watch mode
 npm run dev            # Vite dev server
 npm run types:check    # tsc --noEmit
 ```
+
+Frontend tests run on `vp test`, which is Vitest — the toolchain already ships it, so no separate
+runner was added. They need no database and no Redis.
 
 Prefix with `docker compose exec app` if you are on the Docker path.
 
