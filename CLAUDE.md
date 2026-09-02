@@ -90,8 +90,7 @@ health, needs attempt data) · `docs-keeper` (docs drift).
 covered by tests. The **catalogue** is built — `Experience` and `Challenge` models, policies,
 and the `/experiences`, `/experiences/{slug}`, `/challenges/{slug}` pages — and so is the
 **attempt lifecycle**: start (idempotent), play, submit, score, abandon, scheduled expiry. The
-**scoring engine** exists — `ChallengeEvaluator` + `EvaluatorRegistry` + `ScoreCalculator` — but no
-experience registers an evaluator yet.
+**scoring engine** exists — `ChallengeEvaluator` + `EvaluatorRegistry` + `ScoreCalculator`.
 
 The **XP ledger** and the `user_statistics` read model are built: completing a
 challenge grants XP inside the completion transaction, once per challenge, and statistics are
@@ -107,10 +106,15 @@ PostgreSQL fallback and an hourly rebuild.
 **"I'm Bored"** is built: `GET /bored` weights the pool and picks, with
 deliberate randomness.
 
-Next in §56 order: the experiences themselves — Cursed Code, then Bug Hunter, then Dev Roulette.
-`ChallengeCompleted` is dispatched and still has no listeners. **Nothing is playable end to end
-yet**: there is no challenge content and no experience registers an evaluator, so "I'm Bored" has
-nothing to hand out.
+**Cursed Code and Bug Hunter are both playable end to end** - contract document, configuration
+validator, evaluator, React module and six verified challenges each - so the full loop runs: press
+"I'm Bored", get a challenge from either, answer it, earn XP.
+
+Next in §56 order: Dev Roulette, then testing and Docker/CI hardening. `ChallengeCompleted` is
+dispatched and still has no listeners. Dev Roulette is seeded as a draft and has no contract
+document - it is the dispatcher rather than a content library, so what it needs is a landing
+experience around `/bored`, not an evaluator.
+
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward
