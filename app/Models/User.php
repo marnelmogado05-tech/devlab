@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -59,6 +60,17 @@ class User extends Authenticatable implements PasskeyUser
     public function xpTransactions(): HasMany
     {
         return $this->hasMany(XpTransaction::class);
+    }
+
+    /**
+     * Achievements this user has unlocked.
+     *
+     * @return BelongsToMany<Achievement, $this>
+     */
+    public function achievements(): BelongsToMany
+    {
+        return $this->belongsToMany(Achievement::class)
+            ->withPivot(['unlocked_at', 'progress']);
     }
 
     /**
