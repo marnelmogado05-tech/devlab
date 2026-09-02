@@ -166,7 +166,7 @@ first registrations arrive with Cursed Code and Bug Hunter. Submitting against a
 no evaluator raises rather than silently marking everything wrong — that would corrupt the very
 statistics used to detect bad content.
 
-### Progression _(XP, statistics and achievements built; leaderboards not)_
+### Progression _(XP, statistics, achievements and leaderboards built)_
 
 Scoring → XP ledger → achievements → leaderboards, all inside one transaction at completion, all
 idempotent. See the `progression-system` skill.
@@ -215,6 +215,33 @@ has earned this yet", not a 500 on every completion for every user.
 Two of the plan's §15 examples are deliberately absent: "Regex Wizard" needs per-tag counts and
 "Explorer" needs per-category counts, and `user_statistics` tracks neither. They arrive with the
 statistic that can answer them, not as rules nobody can evaluate.
+
+### Leaderboards
+
+Redis sorted sets over PostgreSQL, with no `leaderboards` table (ADR 0004). All-time ranks from
+`user_statistics.total_xp`; the weekly and monthly boards sum `xp_transactions` inside a window,
+because "XP earned this week" is not a column anywhere and inventing one would be a third copy of
+derived data.
+
+**Losing Redis costs latency, never data.** Every read falls back to the same query that would have
+built the sorted set, so an empty, stale or unreachable Redis produces a slower correct answer
+rather than an empty board. `LeaderboardService` swallows and logs its own Redis errors: the sync
+runs after a completion has already been committed, and failing the user's request because a
+disposable index could not be updated would trade real work for a rebuildable one.
+
+Rebuilds stage into a temporary key and `RENAME` it into place, so a reader sees the old board or
+the new one, never a half-populated one. `devlab:rebuild-leaderboards` runs hourly as a repair pass
+— completions keep the sets current, and the schedule heals a Redis restart, a completion that
+landed while Redis was down, and the weekly/monthly windows rolling over.
+
+**The two paths break ties differently, and are reconciled.** Redis orders equal scores
+reverse-lexicographically by member; PostgreSQL orders them numerically by user id. A page read from
+Redis is re-sorted to match, so a rank cannot flip the moment the cache warms. A tie split across a
+page boundary can still land differently — the residual cost of ranking in Redis, recorded rather
+than pretended away.
+
+Ranking code is exercised by tests against a **real** Redis (ADR 0005's follow-up), not the array
+store. They skip on a host without phpredis and run in CI and in the container.
 
 ### Content integrity _(not built)_
 

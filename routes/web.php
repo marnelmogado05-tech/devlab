@@ -4,6 +4,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\LeaderboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -20,6 +21,7 @@ Route::get('experiences', [ExperienceController::class, 'index'])->name('experie
 Route::get('experiences/{experience}', [ExperienceController::class, 'show'])->name('experiences.show');
 Route::get('challenges/{challenge}', [ChallengeController::class, 'show'])->name('challenges.show');
 Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
+Route::get('leaderboards', [LeaderboardController::class, 'index'])->name('leaderboards.index');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');

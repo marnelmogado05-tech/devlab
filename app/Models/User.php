@@ -31,6 +31,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read UserStatistic|null $statistic Absent until the user has any progression history
+ * @property-read Profile|null $profile Absent until the user chooses a username
  * @property-read Collection<int, XpTransaction> $xpTransactions
  * @property-read Collection<int, ChallengeAttempt> $challengeAttempts
  */
@@ -50,6 +51,16 @@ class User extends Authenticatable implements PasskeyUser
     public function statistic(): HasOne
     {
         return $this->hasOne(UserStatistic::class);
+    }
+
+    /**
+     * The user's public identity. Absent until they choose a username.
+     *
+     * @return HasOne<Profile, $this>
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(Profile::class);
     }
 
     /**

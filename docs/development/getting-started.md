@@ -141,6 +141,11 @@ touching the cache — `schedule:list`, a queued job, `withoutOverlapping` — t
 unaffected (`phpunit.xml` uses the array store). Either install phpredis, or run that command
 through the container: `docker compose exec app php artisan schedule:list`.
 
+**Some tests report "Redis is unreachable" and skip.** The leaderboard ranking tests need a real
+Redis, because sorted-set behaviour is the reason for choosing Redis and the array cache driver
+cannot model it (ADR 0005). They skip on a host without the phpredis extension and run in CI. To run
+them locally: `docker compose exec app php artisan test`.
+
 **Migrations fail with a syntax error near `jsonb`.** You are connected to SQLite or MySQL, not
 PostgreSQL. Check `DB_CONNECTION` in `.env`.
 

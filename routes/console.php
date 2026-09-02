@@ -20,3 +20,13 @@ Artisan::command('inspire', function () {
 Schedule::command('devlab:expire-attempts')
     ->everyTenMinutes()
     ->withoutOverlapping();
+
+/*
+ * The sorted sets are kept current by each completion, so this is a repair pass
+ * rather than the main path: it heals drift from a Redis restart, a completion
+ * that landed while Redis was unreachable, or the weekly and monthly boards
+ * rolling over into a new window.
+ */
+Schedule::command('devlab:rebuild-leaderboards')
+    ->hourly()
+    ->withoutOverlapping();
