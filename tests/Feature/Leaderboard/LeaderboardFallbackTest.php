@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\UserStatistic;
 use App\Models\XpTransaction;
 use App\Services\Leaderboard\LeaderboardService;
-use Illuminate\Support\Facades\Redis;
 
 /*
  * The PostgreSQL path.
@@ -18,20 +17,6 @@ use Illuminate\Support\Facades\Redis;
 
 beforeEach(function () {
     $this->leaderboards = app(LeaderboardService::class);
-
-    /*
-     * RefreshDatabase rolls back PostgreSQL between tests; nothing rolls back
-     * Redis. Without this, a sorted set left behind by another test is read in
-     * preference to the database and these assertions see user ids that no
-     * longer exist.
-     */
-    try {
-        foreach ($this->leaderboards->periods() as $period) {
-            Redis::del($this->leaderboards->key($period));
-        }
-    } catch (Throwable) {
-        // No Redis on this machine, which is exactly the path being tested.
-    }
 });
 
 function rankedUser(int $totalXp): User

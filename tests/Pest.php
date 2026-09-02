@@ -1,6 +1,8 @@
 <?php
 
+use App\Services\Leaderboard\LeaderboardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Redis;
 use Tests\TestCase;
 
 /*
@@ -25,6 +27,36 @@ pest()->extend(TestCase::class)
  * fast suite slow for nothing.
  */
 pest()->extend(TestCase::class)->in('Unit');
+
+/*
+|--------------------------------------------------------------------------
+| Redis is not rolled back
+|--------------------------------------------------------------------------
+|
+| RefreshDatabase wraps each test in a transaction and rolls PostgreSQL back.
+| Nothing does that for Redis, so a leaderboard sorted set written by one test is
+| still there for the next — and because the service prefers Redis over the
+| database, the next test reads rankings for users that no longer exist.
+|
+| That bit three separate test files before this was centralised. Clearing the
+| keys the leaderboard owns, once, removes the whole class of failure rather than
+| the next instance of it.
+|
+| Wrapped, because a host without phpredis has no Redis to clear and that is a
+| supported way to run the suite.
+*/
+pest()->beforeEach(function (): void {
+    try {
+        $leaderboards = app(LeaderboardService::class);
+
+        foreach ($leaderboards->periods() as $period) {
+            Redis::del($leaderboards->key($period));
+        }
+    } catch (Throwable) {
+        // No Redis here. The leaderboard falls back to PostgreSQL, which is
+        // itself covered by LeaderboardFallbackTest.
+    }
+})->in('Feature', 'Integration');
 
 /*
 |--------------------------------------------------------------------------

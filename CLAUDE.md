@@ -123,8 +123,12 @@ The **landing page** is DevLab's own, built around the "I'm Bored" button, with 
 request time rather than written into the copy.
 
 **Frontend tests** run on `vp test` (Vitest, already in the toolchain) and are part of
-`composer ci:check` and CI. `tests/Integration` is still empty. `ChallengeCompleted` is dispatched
-and still has no listeners.
+`composer ci:check` and CI. `tests/Integration` holds §38's end-to-end chain and the real-Redis
+leaderboard tests.
+
+Every §56 item and every §48 MVP scope item is now built. `ChallengeCompleted` is dispatched and
+still has no listeners — the seam is there for Phase 2 work that derives from a completion without
+being a reward.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
