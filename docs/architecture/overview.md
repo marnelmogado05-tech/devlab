@@ -94,7 +94,7 @@ Tables arrive with the feature that needs them, not in advance.
 
 ## Subsystems
 
-### Experience engine _(catalogue built; attempts, evaluation and scoring not)_
+### Experience engine _(built; one experience implemented)_
 
 Experiences share the challenge/attempt/scoring plumbing and own their own configuration schema,
 interaction and evaluation. See the `experience-contract` skill and `docs/experiences/`.
@@ -161,10 +161,16 @@ or every success-rate figure — and the difficulty calibration built on it — 
 statistics refresh attach to (§56.8–9), which keeps those slices additive rather than surgery on
 the completion path.
 
-**No evaluator is registered.** The scoring engine is built before any experience, per §56, so the
-first registrations arrive with Cursed Code and Bug Hunter. Submitting against an experience with
-no evaluator raises rather than silently marking everything wrong — that would corrupt the very
-statistics used to detect bad content.
+**Cursed Code is the first experience to implement the contract** — contract document,
+configuration validator, evaluator, React module and six verified challenges. Bug Hunter and Dev
+Roulette have `experiences` rows but no evaluator; submitting against an experience with none raises
+rather than silently marking everything wrong, which would corrupt the very statistics used to
+detect bad content.
+
+The frontend dispatches on experience slug through `resources/js/experiences/registry.tsx`, lazily,
+so a visitor playing Cursed Code never downloads another experience's module. An experience with no
+module falls back to rendering its raw `configuration`, which is more honest than an empty panel and
+makes an authoring mistake visible.
 
 ### Progression _(XP, statistics, achievements and leaderboards built)_
 

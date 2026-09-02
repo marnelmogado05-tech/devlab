@@ -21,19 +21,19 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /*
-         * Experiences only. Challenge CONTENT is deliberately not seeded here:
-         * the shape of `challenges.configuration` is defined per experience in
-         * docs/experiences/<slug>.md and enforced by that experience's validator,
-         * and neither exists yet. Seeding content first would invent a schema
-         * that the validator then has to be built around, or migrate away from.
+         * Experiences, then achievements, then content — in that order, because
+         * each depends on the one before it.
          *
-         * Content arrives with each experience slice, in the order the
-         * experience contract sets out: doc, then validator, then evaluator,
-         * then challenges.
+         * Challenge content arrives with its experience, once that experience's
+         * contract document and configuration validator exist to define and
+         * enforce the shape of `challenges.configuration`. Cursed Code has both;
+         * Bug Hunter and Dev Roulette do not yet, so they seed no content.
          */
         $this->call([
             ExperienceSeeder::class,
             AchievementSeeder::class,
+            // Content comes after the experiences it attaches to.
+            CursedCodeSeeder::class,
         ]);
     }
 }
