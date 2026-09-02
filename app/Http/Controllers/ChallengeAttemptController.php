@@ -8,6 +8,7 @@ use App\Actions\Attempts\SubmitAttempt;
 use App\Http\Requests\Attempts\SubmitAttemptRequest;
 use App\Models\Challenge;
 use App\Models\ChallengeAttempt;
+use App\Models\XpTransaction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -125,7 +126,37 @@ class ChallengeAttemptController extends Controller
             'breakdown' => $evaluation['score_breakdown'] ?? null,
             'time_taken_seconds' => $attempt->time_taken_seconds,
             'explanation' => $attempt->challenge->explanation,
+            /*
+             * Read back from the ledger rather than recomputed for display, so
+             * what the player is told they earned is what was actually written.
+             * Null on a replay of a challenge already paid for — the attempt
+             * counts, the XP does not.
+             */
+            'xp_awarded' => $this->xpAwardedFor($attempt),
         ];
+    }
+
+    /**
+     * The ledger row this completion wrote, if it wrote one.
+     */
+    private function xpAwardedFor(ChallengeAttempt $attempt): ?int
+    {
+        if ($attempt->status !== ChallengeAttempt::STATUS_COMPLETED) {
+            return null;
+        }
+
+        $transaction = XpTransaction::query()
+            ->where('user_id', $attempt->user_id)
+            ->where('source_type', XpTransaction::SOURCE_CHALLENGE_COMPLETION)
+            ->where('source_id', (string) $attempt->challenge_id)
+            ->first();
+
+        // Only the attempt that actually earned it reports it, so a replay does
+        // not claim to have paid again.
+        return $transaction !== null
+            && ($transaction->metadata['attempt_id'] ?? null) === $attempt->id
+                ? $transaction->amount
+                : null;
     }
 
     /**

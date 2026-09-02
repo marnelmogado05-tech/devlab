@@ -8,6 +8,9 @@ use App\Models\Experience;
 use App\Models\User;
 
 beforeEach(function () {
+    // Elapsed time is asserted exactly, so the clock must not move mid-test.
+    $this->freezeTime();
+
     $experience = Experience::factory()->published()->create();
     $this->challenge = Challenge::factory()->published()->for($experience)->create();
     $this->owner = User::factory()->create();

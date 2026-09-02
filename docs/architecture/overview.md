@@ -166,10 +166,33 @@ first registrations arrive with Cursed Code and Bug Hunter. Submitting against a
 no evaluator raises rather than silently marking everything wrong — that would corrupt the very
 statistics used to detect bad content.
 
-### Progression _(not built)_
+### Progression _(XP and statistics built; achievements and leaderboards not)_
 
 Scoring → XP ledger → achievements → leaderboards, all inside one transaction at completion, all
 idempotent. See the `progression-system` skill.
+
+**The XP ledger is append-only.** `XpLedger` is the only writer, and the model refuses `update` and
+`delete` outright — a correction is a compensating negative row, so the history stays auditable.
+
+**One award per challenge, for the lifetime of the account.** The completion award is keyed
+`(user_id, 'challenge_completion', challenge_id)`, so the unique index means exactly that. Keying
+it by attempt id would have paid again on every replay, which `config/devlab.php` explicitly rules
+out. A user may replay a challenge freely; only the first completion pays.
+
+The grant runs in a **savepoint** inside the completion transaction. PostgreSQL aborts a whole
+transaction after any failed statement, so without it a duplicate award would roll back the
+completion itself — a replay would have failed to close the attempt at all.
+
+XP is written **inside the completion transaction**, never from a queued job (ADR 0005): a dropped
+job must not mean lost XP.
+
+**`user_statistics` is recomputed, never incremented.** `RefreshUserStatistics` derives every
+column from `xp_transactions` and `challenge_attempts`, and the live completion path and
+`devlab:rebuild-statistics` call the same method — so ADR 0004's "rebuildable from source" is true
+by construction rather than by a second copy of the arithmetic that has to be kept in step.
+
+Levels are derived from total XP by `LevelCalculator`; the stored `level` is a cache of what it
+returns. The titles are gamification, not qualifications (§9.10).
 
 ### Content integrity _(not built)_
 

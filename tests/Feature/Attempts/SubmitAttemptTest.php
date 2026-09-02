@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Event;
 use Tests\Support\FakeEvaluator;
 
 beforeEach(function () {
+    // Elapsed time is asserted exactly, so the clock must not move mid-test.
+    $this->freezeTime();
+
     FakeEvaluator::reset();
 
     $this->experience = Experience::factory()->published()->create(['slug' => 'test-experience']);

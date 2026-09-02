@@ -4,7 +4,11 @@ namespace App\Actions\Attempts;
 
 use App\Events\ChallengeCompleted;
 use App\Models\ChallengeAttempt;
+use App\Models\UserStatistic;
+use App\Models\XpTransaction;
 use App\Services\Challenge\EvaluatorRegistry;
+use App\Services\Progression\RefreshUserStatistics;
+use App\Services\Progression\XpLedger;
 use App\Services\Scoring\ScoreCalculator;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -41,6 +45,8 @@ class SubmitAttempt
     public function __construct(
         private readonly EvaluatorRegistry $evaluators,
         private readonly ScoreCalculator $calculator,
+        private readonly XpLedger $ledger,
+        private readonly RefreshUserStatistics $statistics,
     ) {}
 
     /**
@@ -77,8 +83,7 @@ class SubmitAttempt
                 evaluation: $evaluation,
                 elapsedSeconds: $elapsed,
                 hintsUsed: $fresh->hints_used,
-                // Streaks arrive with user statistics (§56.8).
-                streakDays: 0,
+                streakDays: $this->currentStreakFor($fresh->user_id),
             );
 
             $fresh->update([
@@ -102,6 +107,19 @@ class SubmitAttempt
                 ],
             ]);
 
+            /*
+             * XP is written INSIDE this transaction, not in a queued listener.
+             * ADR 0005 makes that binding: a dropped job must never mean lost XP,
+             * which is what allows the Redis queue's lack of durability to be
+             * acceptable elsewhere.
+             */
+            if ($evaluation->correct) {
+                $this->grantCompletionXp($fresh);
+            }
+
+            // Recomputed from source, including the rows just written.
+            $this->statistics->forUser($fresh->user);
+
             return [$fresh, true];
         });
 
@@ -111,5 +129,49 @@ class SubmitAttempt
         }
 
         return $completed;
+    }
+
+    /**
+     * The user's streak as it stands right now.
+     *
+     * Read straight from the table rather than through the relation: the attempt
+     * may have been loaded before anything touched statistics, and a stale
+     * in-memory relation would quietly score against yesterday's streak.
+     */
+    private function currentStreakFor(int $userId): int
+    {
+        return (int) (UserStatistic::query()
+            ->whereKey($userId)
+            ->value('current_streak_days') ?? 0);
+    }
+
+    /**
+     * The award for finishing a challenge for the first time.
+     *
+     * Keyed by CHALLENGE, not by attempt. The unique index on
+     * (user_id, source_type, source_id) then means "one award per challenge,
+     * ever" — keying it by attempt would pay a user again every time they
+     * replayed the same challenge, which config/devlab.php explicitly rules out.
+     */
+    private function grantCompletionXp(ChallengeAttempt $attempt): void
+    {
+        $amount = (int) config("devlab.xp.{$attempt->challenge->difficulty}", 0);
+
+        if ($amount <= 0) {
+            return;
+        }
+
+        $this->ledger->grant(
+            user: $attempt->user,
+            amount: $amount,
+            sourceType: XpTransaction::SOURCE_CHALLENGE_COMPLETION,
+            sourceId: (string) $attempt->challenge_id,
+            description: "Completed: {$attempt->challenge->title}",
+            metadata: [
+                'attempt_id' => $attempt->id,
+                'challenge_version' => $attempt->challenge_version,
+                'difficulty' => $attempt->challenge->difficulty,
+            ],
+        );
     }
 }
