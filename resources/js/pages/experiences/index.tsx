@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { BoredButton } from '@/components/challenge/bored-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { index as experiencesIndex, show } from '@/routes/experiences';
 import type { ExperienceCard } from '@/types';
@@ -13,14 +14,18 @@ export default function ExperiencesIndex({
             <Head title="Experiences" />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
-                <header className="space-y-1">
-                    <h1 className="text-2xl font-semibold tracking-tight">
-                        Experiences
-                    </h1>
-                    <p className="text-muted-foreground max-w-2xl text-sm">
-                        Each one is a different kind of trouble. Pick whichever
-                        looks worst.
-                    </p>
+                <header className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-semibold tracking-tight">
+                            Experiences
+                        </h1>
+                        <p className="text-muted-foreground max-w-2xl text-sm">
+                            Each one is a different kind of trouble. Pick
+                            whichever looks worst — or don&apos;t choose at all.
+                        </p>
+                    </div>
+
+                    <BoredButton />
                 </header>
 
                 {experiences.length === 0 ? (

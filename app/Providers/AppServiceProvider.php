@@ -51,6 +51,14 @@ class AppServiceProvider extends ServiceProvider
             (int) config('devlab.rate_limits.attempt_start')
         )->by($request->user()?->id ?: $request->ip()));
 
+        /*
+         * "I'm Bored" is a GET that queries every published challenge, and it is
+         * open to guests — so it is limited by IP as well as by account.
+         */
+        RateLimiter::for('bored', fn (Request $request) => Limit::perMinute(
+            (int) config('devlab.rate_limits.bored')
+        )->by($request->user()?->id ?: $request->ip()));
+
         // Submissions run an evaluator, so they cost more than a page view and
         // are the natural target for a brute-force search of the answer space.
         RateLimiter::for('submission', fn (Request $request) => Limit::perMinute(

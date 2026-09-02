@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\BoredController;
 use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ExperienceController;
@@ -22,6 +23,15 @@ Route::get('experiences/{experience}', [ExperienceController::class, 'show'])->n
 Route::get('challenges/{challenge}', [ChallengeController::class, 'show'])->name('challenges.show');
 Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
 Route::get('leaderboards', [LeaderboardController::class, 'index'])->name('leaderboards.index');
+
+/*
+ * The whole product in one route. Open to guests on purpose: being handed
+ * something before signing up is the pitch, and an account is only needed to
+ * record the attempt that follows.
+ */
+Route::get('bored', BoredController::class)
+    ->middleware('throttle:bored')
+    ->name('bored');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');

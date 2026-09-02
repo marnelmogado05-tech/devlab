@@ -29,8 +29,11 @@ followed forty-five minutes later by:
 **Phase 1 — MVP, early.** The foundation is done: Laravel application, MVP schema, Docker
 environment, configuration, authentication, and tests pinning the schema's integrity constraints.
 
-The **experience catalogue** is built and browsable — but read-only. There are no challenges
-written yet, and nothing is playable: attempts, evaluation, scoring, XP and "I'm Bored" are next.
+The platform is built: catalogue, attempts, evaluation, scoring, the XP ledger, achievements,
+leaderboards and **"I'm Bored"**.
+
+What is missing is the content. No challenges are written yet and no experience implements its
+evaluator, so pressing "I'm Bored" currently has nothing to hand you. That is the next work.
 
 See [`docs/DevLab_Project_Plan.md`](docs/DevLab_Project_Plan.md) for the full plan and
 [`docs/adr/`](docs/adr/) for the decisions made so far.
