@@ -7,6 +7,7 @@ use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeReportController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\LeaderboardController;
+use App\Http\Controllers\ProfileShowController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -24,6 +25,13 @@ Route::get('experiences/{experience}', [ExperienceController::class, 'show'])->n
 Route::get('challenges/{challenge}', [ChallengeController::class, 'show'])->name('challenges.show');
 Route::get('achievements', [AchievementController::class, 'index'])->name('achievements.index');
 Route::get('leaderboards', [LeaderboardController::class, 'index'])->name('leaderboards.index');
+
+/*
+ * Public profiles (§17, §74). A private profile still resolves and still ranks —
+ * hiding it would leave a gap in the leaderboard numbering and quietly reward
+ * making yourself invisible. It withholds activity detail, not existence.
+ */
+Route::get('profile/{profile}', ProfileShowController::class)->name('profiles.show');
 
 /*
  * The whole product in one route. Open to guests on purpose: being handed

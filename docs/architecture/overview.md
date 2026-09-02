@@ -275,6 +275,33 @@ so a reporter learns nothing from the difference.
 Filing a report never touches the reporter's attempt, score or XP — it must not become a way to
 escape a failed attempt, and there is a test for exactly that.
 
+### Profiles
+
+Every user gets a public identity at registration — `/profile/{username}` therefore resolves for
+everyone, and the leaderboard has a real handle rather than falling back to the account name.
+`devlab:backfill-profiles` covers accounts that predate this.
+
+Usernames are unique **case-insensitively** at the database level, and the character set is
+restricted to letters, numbers and single hyphens rather than merely escaped on output. A handle
+appears in a URL and beside other people's names, so closing off homoglyph impersonation at the
+input is worth more than trusting every future view to render it safely.
+
+**A private profile still resolves and still ranks.** Hiding it would leave a gap in the leaderboard
+numbering and quietly reward making yourself invisible. It withholds activity DETAIL — statistics,
+achievements, history, bio — while level and rank stay visible, because those are already public on
+the leaderboard and withholding them would be a privacy setting that hides nothing. The owner always
+sees their own profile in full.
+
+Recent activity carries no score and no submission: a profile records what someone did, and showing
+what they answered would leak a challenge's content to anyone reading it.
+
+Success rate is computed over FINISHED attempts, not started ones — an abandoned attempt is someone
+closing a tab, not someone getting it wrong — and is null rather than zero when nothing has been
+finished, because "no data" and "never right" are different claims.
+
+The profile is also where `preferences` are set: the difficulty and technologies that
+`BoredomRecommendationService` has read since it was written, and that nothing wrote until now.
+
 ### Recommendation — "I'm Bored"
 
 `GET /bored` (§75), presented as **Dev Roulette** (§9.1). The server picks; nothing about the choice
