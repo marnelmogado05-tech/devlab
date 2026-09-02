@@ -7,6 +7,7 @@ use App\Models\ChallengeAttempt;
 use App\Models\UserStatistic;
 use App\Models\XpTransaction;
 use App\Services\Challenge\EvaluatorRegistry;
+use App\Services\Leaderboard\LeaderboardService;
 use App\Services\Progression\AchievementUnlocker;
 use App\Services\Progression\RefreshUserStatistics;
 use App\Services\Progression\XpLedger;
@@ -49,6 +50,7 @@ class SubmitAttempt
         private readonly XpLedger $ledger,
         private readonly RefreshUserStatistics $statistics,
         private readonly AchievementUnlocker $achievements,
+        private readonly LeaderboardService $leaderboards,
     ) {}
 
     /**
@@ -143,8 +145,17 @@ class SubmitAttempt
             return [$fresh, true];
         });
 
-        // After commit, so no listener can observe uncommitted state.
         if ($wasScored) {
+            /*
+             * AFTER the commit, and deliberately outside the transaction: the
+             * sorted sets are a disposable index of data that is already durable
+             * in PostgreSQL. Failing a committed completion because a cache
+             * could not be updated would trade real work for a rebuildable one,
+             * so LeaderboardService swallows and logs its own errors.
+             */
+            $this->leaderboards->sync($completed->user);
+
+            // After commit, so no listener can observe uncommitted state.
             ChallengeCompleted::dispatch($completed);
         }
 
