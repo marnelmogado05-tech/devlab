@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Challenge\EvaluatorRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
@@ -19,7 +20,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        /*
+         * One registry for the process. Experiences register themselves into it
+         * at boot, so it has to be the same instance the submission path later
+         * resolves — a fresh instance per resolution would know about nothing.
+         */
+        $this->app->singleton(EvaluatorRegistry::class);
     }
 
     /**
@@ -43,6 +49,12 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('attempt-start', fn (Request $request) => Limit::perMinute(
             (int) config('devlab.rate_limits.attempt_start')
+        )->by($request->user()?->id ?: $request->ip()));
+
+        // Submissions run an evaluator, so they cost more than a page view and
+        // are the natural target for a brute-force search of the answer space.
+        RateLimiter::for('submission', fn (Request $request) => Limit::perMinute(
+            (int) config('devlab.rate_limits.submission')
         )->by($request->user()?->id ?: $request->ip()));
     }
 

@@ -112,10 +112,10 @@ to send.
 content. Content waits on each experience's contract document, which defines the shape of
 `challenges.configuration` that the validator then enforces.
 
-### Attempt lifecycle _(open, view and close built; submission and scoring not)_
+### Attempt lifecycle _(built; per-experience evaluators not)_
 
 `started → completed | failed | abandoned | expired` (§12). Built: opening an attempt, the play
-page, abandoning, and scheduled expiry.
+page, submitting, scoring, abandoning, and scheduled expiry.
 
 Opening is **idempotent**, and the guarantee is the database's rather than the action's: a partial
 unique index on `(user_id, challenge_id) WHERE status = 'started'` means a double-clicked Start, a
@@ -134,6 +134,37 @@ ownership is enforced by policy rather than by a query scope one controller reme
 Expiry (`devlab:expire-attempts`, every ten minutes) closes attempts left open past
 `devlab.attempts.expire_after_minutes`. It protects elapsed time from meaning nothing, and frees
 the one-open-attempt slot so a user who walked away is not locked out of that challenge.
+
+### Evaluation and scoring _(engine built; no evaluator registered yet)_
+
+Three pieces, deliberately separate:
+
+- **`ChallengeEvaluator`** — one implementation per experience, resolved from `EvaluatorRegistry`
+  by experience slug. Deterministic, stateless, and told nothing about the user, the timing or the
+  score, because none of that may influence whether an answer is correct. It also declares its own
+  submission validation rules, since it is the only thing that knows the shape it can read.
+- **`ScoreCalculator`** — a pure function of `(challenge, evaluation, elapsed, hints, streak)`
+  implementing §13. It reads no request and touches no database, which is what makes a historical
+  attempt reproducible. Every weight comes from `config/devlab.php`, and the tests read the same
+  keys rather than hard-coding numbers.
+- **`SubmitAttempt`** — the completion transaction. Locks the attempt row, re-reads its status
+  inside the lock, evaluates, scores, closes, and dispatches `ChallengeCompleted` **after commit**.
+
+An evaluator says what happened; the calculator decides what it is worth. Keeping those apart means
+a scoring rebalance cannot change what "correct" means, and an experience author never reasons
+about points.
+
+A wrong answer closes the attempt as `failed`, not `completed`. The two must stay distinguishable
+or every success-rate figure — and the difficulty calibration built on it — is wrong.
+
+`ChallengeCompleted` has no listeners yet. It is the seam the XP ledger, achievement evaluation and
+statistics refresh attach to (§56.8–9), which keeps those slices additive rather than surgery on
+the completion path.
+
+**No evaluator is registered.** The scoring engine is built before any experience, per §56, so the
+first registrations arrive with Cursed Code and Bug Hunter. Submitting against an experience with
+no evaluator raises rather than silently marking everything wrong — that would corrupt the very
+statistics used to detect bad content.
 
 ### Progression _(not built)_
 
