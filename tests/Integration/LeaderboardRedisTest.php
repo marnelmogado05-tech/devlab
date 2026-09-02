@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Redis;
  * without the phpredis extension (see getting-started.md). CI installs the
  * extension and runs a Redis service, so they execute there — and so does
  * `docker compose exec app php artisan test`.
+ *
+ * In the Integration suite rather than Feature, because they need PostgreSQL and
+ * Redis and the service to agree — which is what this suite is for.
  */
 
 beforeEach(function () {
@@ -31,11 +34,7 @@ beforeEach(function () {
 
     $this->leaderboards = app(LeaderboardService::class);
 
-    // The suite shares a Redis with whatever else is running, so clear only the
-    // keys this service owns rather than flushing the database.
-    foreach ($this->leaderboards->periods() as $period) {
-        Redis::del($this->leaderboards->key($period));
-    }
+    // Pest.php already clears the keys this service owns before every test.
 });
 
 function scoringUser(int $totalXp): User

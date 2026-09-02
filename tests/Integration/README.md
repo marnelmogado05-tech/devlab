@@ -14,4 +14,12 @@ What belongs here rather than in `Feature/`:
 `Feature/` covers one HTTP entry point. `Unit/` covers one class. If a test needs three
 subsystems to be right, it goes here.
 
-Empty until the scoring work lands, which is the first thing that spans subsystems.
+## What is here
+
+- `PlayerJourneyTest` — §38's end-to-end flow as one chain: register → browse → "I'm Bored" →
+  start → complete → score → XP → achievement → profile → leaderboard. Every link is covered
+  somewhere in `Feature/`, which is exactly the point: a per-slice test proves each part works
+  alone and says nothing about whether they agree. It runs against the real seeded content, so a
+  seeder change that breaks the loop fails here.
+- `LeaderboardRedisTest` — sorted-set behaviour against a real Redis, which the array cache driver
+  cannot model (ADR 0005). Skipped where phpredis is absent; runs in CI and in the container.
