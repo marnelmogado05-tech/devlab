@@ -26,14 +26,16 @@ class DatabaseSeeder extends Seeder
          *
          * Challenge content arrives with its experience, once that experience's
          * contract document and configuration validator exist to define and
-         * enforce the shape of `challenges.configuration`. Cursed Code has both;
-         * Bug Hunter and Dev Roulette do not yet, so they seed no content.
+         * enforce the shape of `challenges.configuration`. Cursed Code and Bug
+         * Hunter have both; Dev Roulette is the dispatcher and holds no content
+         * of its own.
          */
         $this->call([
             ExperienceSeeder::class,
             AchievementSeeder::class,
             // Content comes after the experiences it attaches to.
             CursedCodeSeeder::class,
+            BugHunterSeeder::class,
         ]);
     }
 }

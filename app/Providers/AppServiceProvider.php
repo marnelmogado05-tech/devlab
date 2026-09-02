@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Challenge\BugHunter\BugHunterEvaluator;
 use App\Services\Challenge\CursedCode\CursedCodeEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
 use Carbon\CarbonImmutable;
@@ -48,8 +49,10 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function registerExperienceEvaluators(): void
     {
-        $this->app->make(EvaluatorRegistry::class)
-            ->register('cursed-code', CursedCodeEvaluator::class);
+        $registry = $this->app->make(EvaluatorRegistry::class);
+
+        $registry->register('cursed-code', CursedCodeEvaluator::class);
+        $registry->register('bug-hunter', BugHunterEvaluator::class);
     }
 
     /**
