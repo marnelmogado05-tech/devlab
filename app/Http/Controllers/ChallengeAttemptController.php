@@ -62,6 +62,14 @@ class ChallengeAttemptController extends Controller
                  */
                 'elapsed_seconds' => $attempt->elapsedSeconds(),
                 'challenge_version' => $attempt->challenge_version,
+                /*
+                 * What they submitted, so a closed attempt can show their choice
+                 * back to them. This is their own input returned — never the
+                 * answer key, which is not sent at any point.
+                 */
+                'submitted_answer' => is_string($attempt->submission['answer'] ?? null)
+                    ? $attempt->submission['answer']
+                    : null,
             ],
             'challenge' => $this->toPlayable($attempt->challenge),
             'result' => $attempt->isOpen() ? null : $this->toResult($attempt),

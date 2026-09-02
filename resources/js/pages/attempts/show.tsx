@@ -1,6 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
+import { ExperienceModule, hasExperienceModule } from '@/experiences/registry';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,8 @@ interface Attempt {
     started_at: string;
     elapsed_seconds: number;
     challenge_version: number;
+    // What they chose, so a closed attempt can show it back. Never the answer.
+    submitted_answer: string | null;
 }
 
 interface Result {
@@ -103,29 +106,41 @@ export default function AttemptShow({
                         </CardContent>
                     </Card>
 
-                    {/*
-                     * The experience module renders `configuration` — the snippet,
-                     * the logs, the options. Until an experience implements its
-                     * interface, showing the raw payload is more honest than an
-                     * empty panel, and it makes an authoring mistake visible.
-                     */}
                     <Card>
-                        <CardContent className="space-y-2 py-4">
-                            <h2 className="font-mono text-xs tracking-widest uppercase">
-                                Challenge payload
-                            </h2>
-                            <pre className="bg-muted overflow-x-auto rounded-md p-3 font-mono text-xs">
-                                {JSON.stringify(
-                                    challenge.configuration,
-                                    null,
-                                    2,
-                                )}
-                            </pre>
-                            <p className="text-muted-foreground text-xs">
-                                No experience interface is wired up yet, so this
-                                is the raw payload. Submitting and scoring come
-                                next.
-                            </p>
+                        <CardContent className="py-4">
+                            {hasExperienceModule(experience.slug) ? (
+                                <ExperienceModule
+                                    slug={experience.slug}
+                                    configuration={
+                                        challenge.configuration as never
+                                    }
+                                    attemptId={attempt.id}
+                                    readOnly={result !== null}
+                                    chosen={attempt.submitted_answer}
+                                />
+                            ) : (
+                                /*
+                                 * No module for this experience yet. Showing the raw
+                                 * payload is more honest than an empty panel, and it
+                                 * makes an authoring mistake visible.
+                                 */
+                                <div className="space-y-2">
+                                    <h2 className="font-mono text-xs tracking-widest uppercase">
+                                        Challenge payload
+                                    </h2>
+                                    <pre className="bg-muted overflow-x-auto rounded-md p-3 font-mono text-xs">
+                                        {JSON.stringify(
+                                            challenge.configuration,
+                                            null,
+                                            2,
+                                        )}
+                                    </pre>
+                                    <p className="text-muted-foreground text-xs">
+                                        This experience has no interface yet, so
+                                        this is the raw payload.
+                                    </p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -133,7 +148,11 @@ export default function AttemptShow({
                 {result ? (
                     <ResultPanel result={result} />
                 ) : (
-                    <SubmissionForm attemptId={attempt.id} />
+                    // An experience module carries its own submit control; the
+                    // generic form is the fallback for one that does not.
+                    !hasExperienceModule(experience.slug) && (
+                        <SubmissionForm attemptId={attempt.id} />
+                    )
                 )}
             </div>
         </>

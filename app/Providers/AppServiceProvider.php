@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Challenge\CursedCode\CursedCodeEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -36,6 +37,19 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->passContainerConnectionVariablesToServe();
         $this->configureRateLimiting();
+        $this->registerExperienceEvaluators();
+    }
+
+    /**
+     * Each experience registers its evaluator here, keyed by experience slug.
+     *
+     * Registration lives in the provider rather than inside the registry so that
+     * adding an experience never means editing the registry itself.
+     */
+    protected function registerExperienceEvaluators(): void
+    {
+        $this->app->make(EvaluatorRegistry::class)
+            ->register('cursed-code', CursedCodeEvaluator::class);
     }
 
     /**
