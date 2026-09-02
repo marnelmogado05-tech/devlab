@@ -1,9 +1,9 @@
 # Getting Started
 
 > **Status:** verified. The containers run, all 13 migrations apply and roll back cleanly against
-> PostgreSQL 17, the constraint behaviour is proven, and the full test suite passes 39/39.
-> The application **image** (`docker/app/Dockerfile`) has not yet been built — only the Postgres
-> and Redis services have been exercised.
+> PostgreSQL 17, the schema's constraints are covered by tests (`tests/Feature/Schema/`), and the
+> full suite passes 67/67. The application **image** builds; the `app` container has not yet been
+> run end to end, so the entrypoint and the HTTP path on :8000 remain unexercised.
 
 ## Requirements
 
