@@ -4,6 +4,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\BoredController;
 use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
+use App\Http\Controllers\ChallengeReportController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\LeaderboardController;
 use Illuminate\Support\Facades\Route;
@@ -57,6 +58,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('attempts/{attempt}', [ChallengeAttemptController::class, 'destroy'])
         ->name('attempts.destroy');
+
+    /*
+     * Reporting a challenge (ADR 0003). Authenticated: anonymous reporting is an
+     * abuse surface with no upside, and the anti-spam guard is a unique index
+     * keyed on the reporter. There is no matching read route — reports are never
+     * publicly visible.
+     */
+    Route::post('challenges/{challenge}/reports', [ChallengeReportController::class, 'store'])
+        ->middleware('throttle:report')
+        ->name('challenges.reports.store');
 });
 
 require __DIR__.'/settings.php';

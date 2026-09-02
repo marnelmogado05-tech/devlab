@@ -113,8 +113,13 @@ validator, evaluator, React module and six verified challenges each - so the ful
 **Dev Roulette** is implemented as the assignment reveal at `/bored` - it is the dispatcher, not a
 content library, so it has no challenges, schema or evaluator by design.
 
-All three MVP experiences are now done. Next in §56 order: testing (15) and Docker/CI (16), then
-Phase 2. `ChallengeCompleted` is dispatched and still has no listeners.
+All three MVP experiences are done, and `challenge_reports` is built (ADR 0003) — write-only, with
+`devlab:reports` as the maintainer read path.
+
+Remaining MVP gaps: **public profiles** (no profile is ever created, and there is no
+`/profile/{username}` page), the **landing page** does not carry the "I'm Bored" button, and there
+are **no frontend tests** and nothing in `tests/Integration`. `ChallengeCompleted` is dispatched and
+still has no listeners.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,

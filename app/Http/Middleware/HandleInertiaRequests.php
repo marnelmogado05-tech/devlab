@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ChallengeReport;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +43,13 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+
+            /*
+             * The report reason list, shared from config so the form, the
+             * validator and the model cannot drift apart. Cheap and static.
+             */
+            'reportReasons' => ChallengeReport::reasons(),
+            'reportReasonsNeedingDetails' => ChallengeReport::reasonsRequiringDetails(),
         ];
     }
 }
