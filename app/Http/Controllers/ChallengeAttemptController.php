@@ -67,9 +67,7 @@ class ChallengeAttemptController extends Controller
                  * back to them. This is their own input returned — never the
                  * answer key, which is not sent at any point.
                  */
-                'submitted_answer' => is_string($attempt->submission['answer'] ?? null)
-                    ? $attempt->submission['answer']
-                    : null,
+                'submitted_answer' => $this->submittedChoice($attempt),
             ],
             'challenge' => $this->toPlayable($attempt->challenge),
             'result' => $attempt->isOpen() ? null : $this->toResult($attempt),
@@ -142,6 +140,29 @@ class ChallengeAttemptController extends Controller
              */
             'xp_awarded' => $this->xpAwardedFor($attempt),
         ];
+    }
+
+    /**
+     * The player's own choice, echoed back so a closed attempt can show it.
+     *
+     * Experiences name their answer field differently — Cursed Code sends an
+     * option key, Bug Hunter a line number — so this returns whichever single
+     * scalar was submitted, as a string. It is the player's own input; the answer
+     * key is never sent at any point.
+     */
+    private function submittedChoice(ChallengeAttempt $attempt): ?string
+    {
+        $submission = $attempt->submission ?? [];
+
+        foreach (['answer', 'line'] as $field) {
+            $value = $submission[$field] ?? null;
+
+            if (is_string($value) || is_int($value)) {
+                return (string) $value;
+            }
+        }
+
+        return null;
     }
 
     /**

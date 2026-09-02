@@ -27,7 +27,7 @@ validator, a registered evaluator, a React module and content.
 | -------------------- | ----------------- | -------------------------------- | -------------------------- |
 | Dev Roulette         | MVP               | _not written_                    | seeded, draft              |
 | Cursed Code          | MVP               | [cursed-code.md](cursed-code.md) | **playable**, 6 challenges |
-| Bug Hunter           | MVP               | _not written_                    | seeded, published          |
+| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)   | **playable**, 6 challenges |
 | Git Simulator        | 2                 | _not written_                    | —                          |
 | Docker Escape Room   | 2                 | _not written_                    | —                          |
 | System Design Lab    | 2                 | _not written_                    | —                          |

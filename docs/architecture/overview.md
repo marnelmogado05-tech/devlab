@@ -161,11 +161,15 @@ or every success-rate figure — and the difficulty calibration built on it — 
 statistics refresh attach to (§56.8–9), which keeps those slices additive rather than surgery on
 the completion path.
 
-**Cursed Code is the first experience to implement the contract** — contract document,
-configuration validator, evaluator, React module and six verified challenges. Bug Hunter and Dev
-Roulette have `experiences` rows but no evaluator; submitting against an experience with none raises
-rather than silently marking everything wrong, which would corrupt the very statistics used to
-detect bad content.
+**Cursed Code and Bug Hunter both implement the contract** — contract document, configuration
+validator, evaluator, React module and six verified challenges each. Dev Roulette has an
+`experiences` row but no evaluator; submitting against an experience with none raises rather than
+silently marking everything wrong, which would corrupt the very statistics used to detect bad
+content.
+
+Neither experience executes anything. Bug Hunter asks _where_ the defect is rather than for a fix,
+because running player-submitted code needs the Phase 3 sandbox, its own ADR and a dedicated
+security review (§25) — and the experience is designed so it never has to.
 
 The frontend dispatches on experience slug through `resources/js/experiences/registry.tsx`, lazily,
 so a visitor playing Cursed Code never downloads another experience's module. An experience with no

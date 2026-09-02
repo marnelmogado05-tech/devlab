@@ -13,6 +13,7 @@ const modules: Record<
     () => Promise<{ default: ComponentType<ExperienceModuleProps> }>
 > = {
     'cursed-code': () => import('@/experiences/CursedCode'),
+    'bug-hunter': () => import('@/experiences/BugHunter'),
 };
 
 export interface ExperienceModuleProps {
