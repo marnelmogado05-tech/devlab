@@ -2,8 +2,9 @@
 
 > **Status:** foundation laid and verified. The Laravel application, MVP schema, Docker
 > environment and configuration exist; migrations apply and roll back cleanly against
-> PostgreSQL 17 and the suite passes 39/39. Sections marked _(not built)_ describe intent from the plan, not code that
-> exists. Update this file as each subsystem lands.
+> PostgreSQL 17, the integrity constraints below are pinned by tests, and the suite passes 67/67.
+> Sections marked _(not built)_ describe intent from the plan, not code that exists. Update this
+> file as each subsystem lands.
 >
 > **Framework:** Laravel 13 · PHP 8.4 (container) · Inertia 3 · React 19 · Tailwind 4 · Pest 5.
 > Authentication is provided by Laravel Fortify via the React starter kit.

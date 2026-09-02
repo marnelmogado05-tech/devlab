@@ -29,6 +29,13 @@ export default defineConfig({
         }),
     ]),
     server: {
+        // Bind and advertise are different things. In Docker the dev server has
+        // to listen on 0.0.0.0 to be reachable through the port mapping, but the
+        // URL laravel-vite-plugin writes into public/hot — and the HMR socket the
+        // browser dials — must be an address a browser can actually route to.
+        // Left alone, --host 0.0.0.0 makes both of those 0.0.0.0 and the page
+        // loads no assets at all. Override for a remote or renamed dev host.
+        hmr: { host: process.env.VITE_HMR_HOST ?? 'localhost' },
         watch: {
             ignored: [
                 '**/.agents/**',
