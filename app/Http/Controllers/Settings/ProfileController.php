@@ -19,9 +19,26 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $profile = $request->user()->profile;
+
         return Inertia::render('settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+
+            // The public identity, edited on the same page as the account it
+            // belongs to but by its own form and its own controller.
+            'publicProfile' => [
+                'username' => $profile?->username,
+                'display_name' => $profile?->display_name,
+                'bio' => $profile?->bio,
+                'location' => $profile?->location,
+                'website' => $profile?->website,
+                'github_handle' => $profile?->github_handle,
+                'is_public' => (bool) ($profile->is_public ?? true),
+                'preferred_difficulty' => $profile?->preferences['difficulty'] ?? null,
+                'technologies' => $profile?->preferences['technologies'] ?? [],
+            ],
+            'difficulties' => config('devlab.difficulty.levels'),
         ]);
     }
 

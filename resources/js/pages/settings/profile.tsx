@@ -2,6 +2,10 @@ import { Form, Head, usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
+import {
+    PublicProfileForm,
+    type PublicProfile,
+} from '@/components/profile/public-profile-form';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -18,9 +22,13 @@ type PageProps = {
 export default function Profile({
     mustVerifyEmail,
     status,
+    publicProfile,
+    difficulties,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    publicProfile: PublicProfile;
+    difficulties: string[];
 }) {
     const { auth } = usePage<PageProps>().props;
 
@@ -129,6 +137,24 @@ export default function Profile({
                         </>
                     )}
                 </Form>
+            </div>
+
+            {/*
+             * The PUBLIC identity, on the same page as the account it belongs
+             * to but in its own form, posting to its own controller. Keeping
+             * them separate means a failed username does not discard an email
+             * change, and vice versa.
+             */}
+            <div className="space-y-6">
+                <Heading
+                    title="Public profile"
+                    description="How you appear to everyone else, and what you would like to be assigned."
+                />
+
+                <PublicProfileForm
+                    profile={publicProfile}
+                    difficulties={difficulties}
+                />
             </div>
 
             <DeleteUser />

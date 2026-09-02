@@ -116,10 +116,12 @@ content library, so it has no challenges, schema or evaluator by design.
 All three MVP experiences are done, and `challenge_reports` is built (ADR 0003) — write-only, with
 `devlab:reports` as the maintainer read path.
 
-Remaining MVP gaps: **public profiles** (no profile is ever created, and there is no
-`/profile/{username}` page), the **landing page** does not carry the "I'm Bored" button, and there
-are **no frontend tests** and nothing in `tests/Integration`. `ChallengeCompleted` is dispatched and
-still has no listeners.
+**Public profiles** are built: created at registration, editable in settings, `/profile/{username}`
+public with a privacy setting, and the `preferences` the recommender reads are finally written.
+
+Remaining MVP gaps: the **landing page** does not carry the "I'm Bored" button, and there are **no
+frontend tests** and nothing in `tests/Integration`. `ChallengeCompleted` is dispatched and still
+has no listeners.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
