@@ -26,9 +26,11 @@ followed forty-five minutes later by:
 
 ## Status
 
-**Phase 0 — foundation.** The Laravel application, MVP database schema, Docker environment and
-configuration are in place. Authentication works. **No DevLab feature is built yet** — no
-experiences, no challenges, no scoring, no "I'm Bored". That is next.
+**Phase 1 — MVP, early.** The foundation is done: Laravel application, MVP schema, Docker
+environment, configuration, authentication, and tests pinning the schema's integrity constraints.
+
+The **experience catalogue** is built and browsable — but read-only. There are no challenges
+written yet, and nothing is playable: attempts, evaluation, scoring, XP and "I'm Bored" are next.
 
 See [`docs/DevLab_Project_Plan.md`](docs/DevLab_Project_Plan.md) for the full plan and
 [`docs/adr/`](docs/adr/) for the decisions made so far.

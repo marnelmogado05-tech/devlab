@@ -19,16 +19,24 @@ frontend all build against — write it **before** writing the code.
 
 ## Planned experiences (plan §9)
 
-| Experience           | Phase             | Doc           |
-| -------------------- | ----------------- | ------------- |
-| Dev Roulette         | MVP               | _not written_ |
-| Cursed Code          | MVP               | _not written_ |
-| Bug Hunter           | MVP               | _not written_ |
-| Git Simulator        | 2                 | _not written_ |
-| Docker Escape Room   | 2                 | _not written_ |
-| System Design Lab    | 2                 | _not written_ |
-| Code Arena           | 3 (needs sandbox) | _not written_ |
-| Production Nightmare | 4                 | _not written_ |
-| Debugging Detective  | 4                 | _not written_ |
+`_seeded_` means the `experiences` row exists and the experience appears in the catalogue; it does
+not mean the experience is playable. None are yet.
+
+| Experience           | Phase             | Doc           | Row               |
+| -------------------- | ----------------- | ------------- | ----------------- |
+| Dev Roulette         | MVP               | _not written_ | seeded, draft     |
+| Cursed Code          | MVP               | _not written_ | seeded, published |
+| Bug Hunter           | MVP               | _not written_ | seeded, published |
+| Git Simulator        | 2                 | _not written_ | —                 |
+| Docker Escape Room   | 2                 | _not written_ | —                 |
+| System Design Lab    | 2                 | _not written_ | —                 |
+| Code Arena           | 3 (needs sandbox) | _not written_ | —                 |
+| Production Nightmare | 4                 | _not written_ | —                 |
+| Debugging Detective  | 4                 | _not written_ | —                 |
+
+Dev Roulette is seeded as a **draft** on purpose. It is the "I'm Bored" dispatcher (§9.1, §10)
+rather than a content library, so it holds no challenges of its own and is excluded from its own
+recommendation pool — an experience that can recommend itself produces a button that sometimes
+just asks you to press it again. It is published when the recommender exists.
 
 Use `/devlab:new-experience <name>` to scaffold one against the contract.
