@@ -28,6 +28,7 @@ interface Result {
     breakdown: Record<string, number> | null;
     time_taken_seconds: number | null;
     explanation: string | null;
+    xp_awarded: number | null;
 }
 
 interface PlayableChallenge {
@@ -222,6 +223,12 @@ function ResultPanel({ result }: { result: Result }) {
 
                     {result.feedback && (
                         <p className="text-sm">{result.feedback}</p>
+                    )}
+
+                    {result.xp_awarded !== null && (
+                        <p className="font-mono text-sm text-emerald-700 dark:text-emerald-300">
+                            +{result.xp_awarded} XP
+                        </p>
                     )}
 
                     {result.breakdown && (

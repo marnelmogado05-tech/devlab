@@ -93,9 +93,13 @@ and the `/experiences`, `/experiences/{slug}`, `/challenges/{slug}` pages — an
 **scoring engine** exists — `ChallengeEvaluator` + `EvaluatorRegistry` + `ScoreCalculator` — but no
 experience registers an evaluator yet.
 
-Next in §56 order: XP, then achievements, leaderboards, "I'm Bored", and the experiences
-themselves. `ChallengeCompleted` is dispatched and has no listeners — that is the seam XP attaches
-to. Not built yet — no XP, achievements, leaderboards or challenge content.
+The **XP ledger** and the `user_statistics` read model are built: completing a
+challenge grants XP inside the completion transaction, once per challenge, and statistics are
+recomputed from source by the same code path `devlab:rebuild-statistics` uses.
+
+Next in §56 order: achievements, then leaderboards, "I'm Bored", and the experiences themselves.
+`ChallengeCompleted` is dispatched and still has no listeners. Not built yet — no achievements,
+leaderboards or challenge content.
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward
