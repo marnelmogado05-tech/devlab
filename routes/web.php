@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ExperienceController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,24 @@ Route::get('challenges/{challenge}', [ChallengeController::class, 'show'])->name
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+    /*
+     * Attempts. Browsing is public; playing is not — an attempt belongs to
+     * somebody, and anonymous progress is progress that cannot be awarded.
+     *
+     * Starting is throttled (§41): it writes a row and, once scoring exists,
+     * starts a clock. Viewing and abandoning are not — they are cheap, and a
+     * user hammering their own attempt page harms nobody.
+     */
+    Route::post('challenges/{challenge}/attempts', [ChallengeAttemptController::class, 'store'])
+        ->middleware('throttle:attempt-start')
+        ->name('attempts.store');
+
+    Route::get('attempts/{attempt}', [ChallengeAttemptController::class, 'show'])
+        ->name('attempts.show');
+
+    Route::delete('attempts/{attempt}', [ChallengeAttemptController::class, 'destroy'])
+        ->name('attempts.destroy');
 });
 
 require __DIR__.'/settings.php';
