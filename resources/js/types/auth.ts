@@ -11,7 +11,11 @@ export type User = {
 };
 
 export type Auth = {
-    user: User;
+    /**
+     * Null for a guest. The catalogue is public, so a page cannot assume this is
+     * populated — pages behind `auth` middleware may, but must say so.
+     */
+    user: User | null;
 };
 
 export type Passkey = {

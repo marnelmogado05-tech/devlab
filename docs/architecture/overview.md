@@ -108,9 +108,32 @@ Controllers whitelist their props by naming what goes in, never by removing what
 search the whole response body, because the failure being guarded against is a prop nobody meant
 to send.
 
-**Not built:** starting an attempt, the per-experience configuration validator, evaluators,
-scoring, and challenge content. Content waits on each experience's contract document, which
-defines the shape of `challenges.configuration` that the validator then enforces.
+**Not built:** the per-experience configuration validator, evaluators, scoring, and challenge
+content. Content waits on each experience's contract document, which defines the shape of
+`challenges.configuration` that the validator then enforces.
+
+### Attempt lifecycle _(open, view and close built; submission and scoring not)_
+
+`started → completed | failed | abandoned | expired` (§12). Built: opening an attempt, the play
+page, abandoning, and scheduled expiry.
+
+Opening is **idempotent**, and the guarantee is the database's rather than the action's: a partial
+unique index on `(user_id, challenge_id) WHERE status = 'started'` means a double-clicked Start, a
+retried request or two tabs all land on one attempt. `StartAttempt` attempts the insert and treats
+a unique violation as "someone else won the race, use their row" — a check-then-insert would let
+both requests find nothing and both insert. A second open attempt would mean a second `started_at`,
+and therefore a shorter elapsed time to submit against once scoring exists.
+
+Elapsed time is computed server-side from `started_at`. The client renders a clock, but it is
+presentation: pausing or editing it changes nothing but that screen.
+
+Attempts are private to their owner (`ChallengeAttemptPolicy`). Ids are sequential, so
+`/attempts/{id}` is guessable by construction — this is the platform's first IDOR surface and
+ownership is enforced by policy rather than by a query scope one controller remembers to apply.
+
+Expiry (`devlab:expire-attempts`, every ten minutes) closes attempts left open past
+`devlab.attempts.expire_after_minutes`. It protects elapsed time from meaning nothing, and frees
+the one-open-attempt slot so a user who walked away is not locked out of that challenge.
 
 ### Progression _(not built)_
 

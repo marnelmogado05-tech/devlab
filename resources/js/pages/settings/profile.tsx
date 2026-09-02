@@ -24,6 +24,14 @@ export default function Profile({
 }) {
     const { auth } = usePage<PageProps>().props;
 
+    // This page sits behind `auth` middleware, so a null user here would mean the
+    // route was misconfigured rather than that a guest arrived.
+    const user = auth.user;
+
+    if (!user) {
+        return null;
+    }
+
     return (
         <>
             <Head title="Profile settings" />
@@ -52,7 +60,7 @@ export default function Profile({
                                 <Input
                                     id="name"
                                     className="mt-1 block w-full"
-                                    defaultValue={auth.user.name}
+                                    defaultValue={user.name}
                                     name="name"
                                     required
                                     autoComplete="name"
@@ -72,7 +80,7 @@ export default function Profile({
                                     id="email"
                                     type="email"
                                     className="mt-1 block w-full"
-                                    defaultValue={auth.user.email}
+                                    defaultValue={user.email}
                                     name="email"
                                     required
                                     autoComplete="username"
@@ -86,7 +94,7 @@ export default function Profile({
                             </div>
 
                             {mustVerifyEmail &&
-                                auth.user.email_verified_at === null && (
+                                user.email_verified_at === null && (
                                     <div>
                                         <p className="text-muted-foreground -mt-4 text-sm">
                                             Your email address is unverified.{' '}

@@ -135,6 +135,12 @@ outlives the server, the page points at a dev server that is gone. `docker compo
 up for you; a hard kill of the container cannot. Delete `public/hot` — it is generated, and
 gitignored — and the app falls straight back to the compiled assets.
 
+**`Class "Redis" not found` when running artisan on the host.** Option B runs PHP on your machine,
+where the `phpredis` extension is usually absent, while `.env` sets `CACHE_STORE=redis`. Anything
+touching the cache — `schedule:list`, a queued job, `withoutOverlapping` — then fails. The tests are
+unaffected (`phpunit.xml` uses the array store). Either install phpredis, or run that command
+through the container: `docker compose exec app php artisan schedule:list`.
+
 **Migrations fail with a syntax error near `jsonb`.** You are connected to SQLite or MySQL, not
 PostgreSQL. Check `DB_CONNECTION` in `.env`.
 
