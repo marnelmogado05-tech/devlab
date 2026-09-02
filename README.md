@@ -26,14 +26,19 @@ followed forty-five minutes later by:
 
 ## Status
 
-**Phase 1 — MVP, early.** The foundation is done: Laravel application, MVP schema, Docker
-environment, configuration, authentication, and tests pinning the schema's integrity constraints.
+**Phase 1 — MVP.** The platform is built: catalogue, attempts, evaluation, scoring, the XP ledger,
+achievements, leaderboards and **"I'm Bored"** — and all three MVP experiences are in.
 
-The platform is built: catalogue, attempts, evaluation, scoring, the XP ledger, achievements,
-leaderboards and **"I'm Bored"**.
+The loop runs end to end. Press the button, see what Dev Roulette assigns you, start it, answer it,
+find out why you were wrong, earn XP.
 
-What is missing is the content. No challenges are written yet and no experience implements its
-evaluator, so pressing "I'm Bored" currently has nothing to hand you. That is the next work.
+| Experience       | What you do                                     | Content        |
+| ---------------- | ----------------------------------------------- | -------------- |
+| **Dev Roulette** | Press the button, take what you are given       | the dispatcher |
+| **Cursed Code**  | Predict what a horrifying snippet actually does | 6 challenges   |
+| **Bug Hunter**   | Find the line with the planted defect           | 6 challenges   |
+
+Every answer in that content was verified by running the snippet, not from memory.
 
 See [`docs/DevLab_Project_Plan.md`](docs/DevLab_Project_Plan.md) for the full plan and
 [`docs/adr/`](docs/adr/) for the decisions made so far.

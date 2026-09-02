@@ -23,21 +23,24 @@ frontend all build against — write it **before** writing the code.
 not mean the experience is playable. **Playable** means it has a contract document, a configuration
 validator, a registered evaluator, a React module and content.
 
-| Experience           | Phase             | Doc                              | Row                        |
-| -------------------- | ----------------- | -------------------------------- | -------------------------- |
-| Dev Roulette         | MVP               | _not written_                    | seeded, draft              |
-| Cursed Code          | MVP               | [cursed-code.md](cursed-code.md) | **playable**, 6 challenges |
-| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)   | **playable**, 6 challenges |
-| Git Simulator        | 2                 | _not written_                    | —                          |
-| Docker Escape Room   | 2                 | _not written_                    | —                          |
-| System Design Lab    | 2                 | _not written_                    | —                          |
-| Code Arena           | 3 (needs sandbox) | _not written_                    | —                          |
-| Production Nightmare | 4                 | _not written_                    | —                          |
-| Debugging Detective  | 4                 | _not written_                    | —                          |
+| Experience           | Phase             | Doc                                | Row                         |
+| -------------------- | ----------------- | ---------------------------------- | --------------------------- |
+| Dev Roulette         | MVP               | [dev-roulette.md](dev-roulette.md) | **implemented** as `/bored` |
+| Cursed Code          | MVP               | [cursed-code.md](cursed-code.md)   | **playable**, 6 challenges  |
+| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)     | **playable**, 6 challenges  |
+| Git Simulator        | 2                 | _not written_                      | —                           |
+| Docker Escape Room   | 2                 | _not written_                      | —                           |
+| System Design Lab    | 2                 | _not written_                      | —                           |
+| Code Arena           | 3 (needs sandbox) | _not written_                      | —                           |
+| Production Nightmare | 4                 | _not written_                      | —                           |
+| Debugging Detective  | 4                 | _not written_                      | —                           |
 
-Dev Roulette is seeded as a **draft** on purpose. It is the "I'm Bored" dispatcher (§9.1, §10)
-rather than a content library, so it holds no challenges of its own and is excluded from its own
-recommendation pool — an experience that can recommend itself produces a button that sometimes
-just asks you to press it again. It is published when the recommender exists.
+Dev Roulette is the odd one out and stays a **draft** on purpose. It is the "I'm Bored" dispatcher
+(§9.1, §10) rather than a content library: it holds no challenges, has no configuration schema and
+no evaluator, and is realised as the assignment reveal at `/bored`. Publishing the row would put a
+catalogue card in front of visitors that leads to a page listing zero challenges, and a card that
+goes nowhere is worse than no card. It is excluded from its own recommendation pool for the same
+reason it holds no content — an experience that can recommend itself produces a button that
+sometimes just asks you to press it again.
 
 Use `/devlab:new-experience <name>` to scaffold one against the contract.
