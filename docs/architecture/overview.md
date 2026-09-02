@@ -260,11 +260,18 @@ statistics are how bad content is found. See [challenge-reports.md](challenge-re
 
 ### Recommendation — "I'm Bored"
 
-`GET /bored` (§75). The server picks; nothing about the choice is negotiable from the client —
-accepting a filter would turn the one feature the product is named for into a worse catalogue. It
-is a GET that redirects and creates nothing, so a refresh, prefetch or crawler cannot leave a trail
-of half-started attempts. Open to guests, because being handed something before signing up is the
-pitch.
+`GET /bored` (§75), presented as **Dev Roulette** (§9.1). The server picks; nothing about the choice
+is negotiable from the client — accepting a filter would turn the one feature the product is named
+for into a worse catalogue. It is a GET that creates nothing, so a refresh, a prefetch, a crawler or
+a re-spin cannot leave a trail of half-started attempts. Open to guests, because being handed
+something before signing up is the pitch.
+
+The endpoint RENDERS the assignment rather than redirecting to it. The redirect worked and threw
+away the product's moment: DevLab is named for pressing a button and being handed something, and a
+silent redirect made that indistinguishable from clicking a link. The reveal names the challenge and
+its experience, states difficulty and time before the player commits, and offers a re-spin — which
+is part of the mechanic rather than a failure of it. It carries no `configuration`, so re-spinning
+past a challenge cannot spoil it.
 
 `BoredomRecommendationService` weighs history, preferences, diversity and popularity, with
 deliberate randomness retained as a feature. Every weight is in `config/devlab.php`:

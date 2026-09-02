@@ -260,14 +260,15 @@ describe('the whole loop', function () {
 
     it('is reachable from the Bored button', function () {
         // An experience is not shipped until the button can actually hand it to
-        // you (§10). Asserting the redirect lands on a real published challenge,
-        // rather than merely that a redirect happened.
+        // you (§10). Dev Roulette reveals the assignment rather than redirecting,
+        // so this asserts the revealed challenge is a real published one.
         $slugs = Challenge::query()->published()->pluck('slug')->all();
 
-        $response = $this->get(route('bored'))->assertRedirect();
-
-        $landedOn = str((string) $response->headers->get('Location'))->afterLast('/')->value();
-
-        expect($slugs)->toContain($landedOn);
+        $this->get(route('bored'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('roulette/index')
+                ->where('assignment.slug', fn ($slug) => in_array($slug, $slugs, true))
+            );
     });
 });

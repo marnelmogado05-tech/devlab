@@ -110,10 +110,11 @@ deliberate randomness.
 validator, evaluator, React module and six verified challenges each - so the full loop runs: press
 "I'm Bored", get a challenge from either, answer it, earn XP.
 
-Next in §56 order: Dev Roulette, then testing and Docker/CI hardening. `ChallengeCompleted` is
-dispatched and still has no listeners. Dev Roulette is seeded as a draft and has no contract
-document - it is the dispatcher rather than a content library, so what it needs is a landing
-experience around `/bored`, not an evaluator.
+**Dev Roulette** is implemented as the assignment reveal at `/bored` - it is the dispatcher, not a
+content library, so it has no challenges, schema or evaluator by design.
+
+All three MVP experiences are now done. Next in §56 order: testing (15) and Docker/CI (16), then
+Phase 2. `ChallengeCompleted` is dispatched and still has no listeners.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
