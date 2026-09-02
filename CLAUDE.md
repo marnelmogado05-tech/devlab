@@ -97,9 +97,13 @@ The **XP ledger** and the `user_statistics` read model are built: completing a
 challenge grants XP inside the completion transaction, once per challenge, and statistics are
 recomputed from source by the same code path `devlab:rebuild-statistics` uses.
 
-Next in §56 order: achievements, then leaderboards, "I'm Bored", and the experiences themselves.
-`ChallengeCompleted` is dispatched and still has no listeners. Not built yet — no achievements,
-leaderboards or challenge content.
+**Achievements** are built too: declarative rules in
+`achievements.criteria`, evaluated inside the completion transaction, idempotent by unique
+constraint, with a public catalogue at `/achievements`.
+
+Next in §56 order: leaderboards, then "I'm Bored", and the experiences themselves.
+`ChallengeCompleted` is dispatched and still has no listeners. Not built yet — no leaderboards,
+no "I'm Bored", no challenge content, and no experience registers an evaluator.
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward

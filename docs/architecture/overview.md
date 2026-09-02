@@ -166,7 +166,7 @@ first registrations arrive with Cursed Code and Bug Hunter. Submitting against a
 no evaluator raises rather than silently marking everything wrong — that would corrupt the very
 statistics used to detect bad content.
 
-### Progression _(XP and statistics built; achievements and leaderboards not)_
+### Progression _(XP, statistics and achievements built; leaderboards not)_
 
 Scoring → XP ledger → achievements → leaderboards, all inside one transaction at completion, all
 idempotent. See the `progression-system` skill.
@@ -193,6 +193,28 @@ by construction rather than by a second copy of the arithmetic that has to be ke
 
 Levels are derived from total XP by `LevelCalculator`; the stored `level` is a cache of what it
 returns. The titles are gamification, not qualifications (§9.10).
+
+**Achievements are rules, not code.** `achievements.criteria` holds the unlock condition
+declaratively and `AchievementCriteria` is the only thing that reads it, so adding an achievement is
+an INSERT — it requires no change to challenge, attempt or scoring code (§15). Rules compare
+`user_statistics` columns, or per-experience figures from `user_statistics.per_experience`, through
+an allow-list rather than by reflecting a string onto the model.
+
+Unlocking is idempotent by construction: attempt the insert into `achievement_user` and treat the
+unique violation on `(user_id, achievement_id)` as "they already had it". The bonus is keyed by the
+achievement's stable KEY, not its id, so reseeding or renaming cannot pay a holder twice.
+
+Evaluation runs **inside** the completion transaction rather than from a queued listener. The
+progression skill's diagram enqueues it, but ADR 0005 is binding and more specific: an achievement
+grants XP, and no reward may exist only in a job. It is cheap — declarative rules read against one
+already-refreshed statistics row, with no query per achievement.
+
+A malformed rule evaluates to false rather than throwing. A typo in seed data should mean "nobody
+has earned this yet", not a 500 on every completion for every user.
+
+Two of the plan's §15 examples are deliberately absent: "Regex Wizard" needs per-tag counts and
+"Explorer" needs per-category counts, and `user_statistics` tracks neither. They arrive with the
+statistic that can answer them, not as rules nobody can evaluate.
 
 ### Content integrity _(not built)_
 

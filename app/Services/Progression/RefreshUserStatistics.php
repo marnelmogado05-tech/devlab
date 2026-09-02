@@ -43,6 +43,9 @@ class RefreshUserStatistics
                 'challenges_abandoned' => $counts['abandoned'],
                 'total_time_seconds' => $counts['total_time'],
                 'experiences_played' => $counts['experiences'],
+                'per_experience' => $this->perExperience($user),
+                'achievements_unlocked' => DB::table('achievement_user')
+                    ->where('user_id', $user->id)->count(),
                 'current_streak_days' => $streaks['current'],
                 'longest_streak_days' => $streaks['longest'],
                 'last_activity_on' => $streaks['last_activity'],
@@ -61,7 +64,7 @@ class RefreshUserStatistics
          * `challenges_started` counts every attempt ever opened, which is what
          * makes completed/started a meaningful success rate.
          */
-        $row = ChallengeAttempt::query()
+        $row = DB::table('challenge_attempts')
             ->where('user_id', $user->id)
             ->selectRaw('COUNT(*) AS started')
             ->selectRaw("COUNT(*) FILTER (WHERE status = 'completed') AS completed")
@@ -70,7 +73,7 @@ class RefreshUserStatistics
             ->selectRaw('COALESCE(SUM(time_taken_seconds), 0) AS total_time')
             ->first();
 
-        $experiences = ChallengeAttempt::query()
+        $experiences = DB::table('challenge_attempts')
             ->where('challenge_attempts.user_id', $user->id)
             ->join('challenges', 'challenges.id', '=', 'challenge_attempts.challenge_id')
             ->distinct()
@@ -87,6 +90,38 @@ class RefreshUserStatistics
     }
 
     /**
+     * Per-experience attempt counts, keyed by experience slug.
+     *
+     * Achievements read this — "complete 100 Bug Hunter challenges" is a rule
+     * against a figure, and the rule must not have to run its own query.
+     *
+     * @return array<string, array{started: int, completed: int}>
+     */
+    private function perExperience(User $user): array
+    {
+        $rows = DB::table('challenge_attempts')
+            ->where('challenge_attempts.user_id', $user->id)
+            ->join('challenges', 'challenges.id', '=', 'challenge_attempts.challenge_id')
+            ->join('experiences', 'experiences.id', '=', 'challenges.experience_id')
+            ->groupBy('experiences.slug')
+            ->selectRaw('experiences.slug AS slug')
+            ->selectRaw('COUNT(*) AS started')
+            ->selectRaw("COUNT(*) FILTER (WHERE challenge_attempts.status = 'completed') AS completed")
+            ->get();
+
+        $breakdown = [];
+
+        foreach ($rows as $row) {
+            $breakdown[(string) $row->slug] = [
+                'started' => (int) $row->started,
+                'completed' => (int) $row->completed,
+            ];
+        }
+
+        return $breakdown;
+    }
+
+    /**
      * Consecutive days on which the user finished at least one challenge.
      *
      * Derived from the attempt history rather than maintained incrementally, so
@@ -97,7 +132,7 @@ class RefreshUserStatistics
     private function streaks(User $user): array
     {
         /** @var array<int, string> $days */
-        $days = ChallengeAttempt::query()
+        $days = DB::table('challenge_attempts')
             ->where('user_id', $user->id)
             ->where('status', ChallengeAttempt::STATUS_COMPLETED)
             ->selectRaw('DISTINCT DATE(completed_at) AS day')

@@ -31,6 +31,9 @@ class DatabaseSeeder extends Seeder
          * experience contract sets out: doc, then validator, then evaluator,
          * then challenges.
          */
-        $this->call(ExperienceSeeder::class);
+        $this->call([
+            ExperienceSeeder::class,
+            AchievementSeeder::class,
+        ]);
     }
 }

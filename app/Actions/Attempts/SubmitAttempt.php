@@ -7,6 +7,7 @@ use App\Models\ChallengeAttempt;
 use App\Models\UserStatistic;
 use App\Models\XpTransaction;
 use App\Services\Challenge\EvaluatorRegistry;
+use App\Services\Progression\AchievementUnlocker;
 use App\Services\Progression\RefreshUserStatistics;
 use App\Services\Progression\XpLedger;
 use App\Services\Scoring\ScoreCalculator;
@@ -47,6 +48,7 @@ class SubmitAttempt
         private readonly ScoreCalculator $calculator,
         private readonly XpLedger $ledger,
         private readonly RefreshUserStatistics $statistics,
+        private readonly AchievementUnlocker $achievements,
     ) {}
 
     /**
@@ -119,6 +121,24 @@ class SubmitAttempt
 
             // Recomputed from source, including the rows just written.
             $this->statistics->forUser($fresh->user);
+
+            /*
+             * Achievements are evaluated here rather than from a queued
+             * listener. The progression skill's diagram enqueues this step, but
+             * ADR 0005 is binding and more specific: an achievement grants XP,
+             * and no reward may exist only in a job.
+             *
+             * Statistics are refreshed first, because the rules are read against
+             * them — evaluating before the refresh would judge the user on the
+             * state they were in before this completion.
+             */
+            $unlocked = $this->achievements->evaluateFor($fresh->user->refresh());
+
+            if ($unlocked !== []) {
+                // An unlock grants XP, which changes the totals the next rule
+                // would read.
+                $this->statistics->forUser($fresh->user);
+            }
 
             return [$fresh, true];
         });
