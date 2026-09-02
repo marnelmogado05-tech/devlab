@@ -85,9 +85,14 @@ health, needs attempt data) · `docs-keeper` (docs drift).
 
 ## Current phase
 
-**Phase 0 — foundation.** The Laravel app, MVP schema, Docker environment and `config/devlab.php`
-exist; auth works via Fortify. No DevLab feature is built yet — no experiences, challenges,
-scoring, XP or "I'm Bored". MVP scope (§48): auth, profiles,
+**Phase 1 — MVP.** Phase 0 is closed: the Laravel app, MVP schema, Docker environment and
+`config/devlab.php` exist, auth works via Fortify, and the schema's integrity constraints are
+covered by tests. The read-only **catalogue** is built — `Experience` and `Challenge` models,
+policies, and the `/experiences`, `/experiences/{slug}`, `/challenges/{slug}` pages.
+
+Next in §56 order: attempts, then scoring, XP, achievements, leaderboards, "I'm Bored", and the
+experiences themselves. Not built yet — no attempts, evaluation, scoring, XP or challenge content.
+MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward
 from Phase 7 by [ADR 0003](docs/adr/0003-challenge-reports-in-mvp.md). Sandboxing, AI, multiplayer

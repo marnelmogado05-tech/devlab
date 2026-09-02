@@ -94,10 +94,23 @@ Tables arrive with the feature that needs them, not in advance.
 
 ## Subsystems
 
-### Experience engine _(not built)_
+### Experience engine _(catalogue built; attempts, evaluation and scoring not)_
 
 Experiences share the challenge/attempt/scoring plumbing and own their own configuration schema,
 interaction and evaluation. See the `experience-contract` skill and `docs/experiences/`.
+
+**Built:** the `Experience` and `Challenge` models, their policies, and the read-only catalogue —
+`/experiences`, `/experiences/{slug}`, `/challenges/{slug}`. The catalogue is public; visibility is
+decided per row by policy, and a challenge is withdrawn when its experience is unpublished.
+
+Controllers whitelist their props by naming what goes in, never by removing what must stay out.
+`solution` and `explanation` are absent from every catalogue response and covered by tests that
+search the whole response body, because the failure being guarded against is a prop nobody meant
+to send.
+
+**Not built:** starting an attempt, the per-experience configuration validator, evaluators,
+scoring, and challenge content. Content waits on each experience's contract document, which
+defines the shape of `challenges.configuration` that the validator then enforces.
 
 ### Progression _(not built)_
 

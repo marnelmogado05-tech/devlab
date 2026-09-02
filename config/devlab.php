@@ -107,6 +107,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Catalogue
+    |--------------------------------------------------------------------------
+    |
+    | Browsing surface. A challenge listing is paginated from the start: an
+    | experience with a healthy content library is the goal, not the exception.
+    |
+    */
+
+    'catalogue' => [
+        'page_size' => 24,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | "I'm Bored" recommendation
     |--------------------------------------------------------------------------
     |
