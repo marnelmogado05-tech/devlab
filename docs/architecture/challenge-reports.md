@@ -1,6 +1,8 @@
 # Challenge Reports
 
-> **Status:** specified, not built. This is the contract the MVP implementation must satisfy.
+> **Status:** built. `ChallengeReport`, `ChallengeReportPolicy`, `ReportChallenge`,
+> `StoreChallengeReportRequest`, one write route, a report dialog on the challenge and play pages,
+> and `devlab:reports` for the maintainer read path.
 > Rationale: [ADR 0003](../adr/0003-challenge-reports-in-mvp.md).
 
 A player-facing channel for "something is wrong with this challenge" — primarily to catch **wrong
@@ -64,7 +66,7 @@ Player hits "Something's wrong with this challenge"
   challenge_reports row (status: open)
         │
         ▼
-  maintainer reads          ← MVP: queried from the database
+  maintainer reads          ← MVP: `php artisan devlab:reports`
         │                      Phase 7: moderation UI (§69)
         ├── confirmed → fix content, bump version (§71), resolve with a note
         └── not a defect → dismiss with a note

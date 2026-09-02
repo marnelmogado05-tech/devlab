@@ -253,10 +253,27 @@ than pretended away.
 Ranking code is exercised by tests against a **real** Redis (ADR 0005's follow-up), not the array
 store. They skip on a host without phpredis and run in CI and in the container.
 
-### Content integrity _(not built)_
+### Content integrity
 
 `challenge_reports` gives players a way to say "this answer is wrong". Reports plus attempt
 statistics are how bad content is found. See [challenge-reports.md](challenge-reports.md).
+
+Write-only by design: there is exactly one route, and a test asserts no listing route exists.
+Reports are never shown on a challenge page — a visible report count is a spoiler, since "this one
+is broken" changes how you play it, and a harassment vector against the author.
+
+The policy **fails closed**. Listing, resolving and dismissing are maintainer actions and DevLab has
+no maintainer role, so those abilities return false for everyone rather than inventing a role system
+to satisfy a method (§77). The MVP read path is `devlab:reports`, run by whoever has server access —
+which is the only maintainer check that currently exists.
+
+One open report per person, per reason, per challenge, enforced by the partial unique index rather
+than by a check in PHP. That single constraint is both the anti-spam guard and the idempotency
+guard for a double-clicked submit, and a duplicate returns the existing report rather than an error,
+so a reporter learns nothing from the difference.
+
+Filing a report never touches the reporter's attempt, score or XP — it must not become a way to
+escape a failed attempt, and there is a test for exactly that.
 
 ### Recommendation — "I'm Bored"
 

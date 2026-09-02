@@ -1,6 +1,7 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
+import { ReportChallenge } from '@/components/challenge/report-challenge';
 import { ExperienceModule, hasExperienceModule } from '@/experiences/registry';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +64,7 @@ export default function AttemptShow({
         attempt.elapsed_seconds,
         attempt.status === 'started',
     );
+    const { reportReasons, reportReasonsNeedingDetails } = usePage().props;
 
     return (
         <>
@@ -143,6 +145,21 @@ export default function AttemptShow({
                             )}
                         </CardContent>
                     </Card>
+                </div>
+
+                {/*
+                 * The likeliest place a wrong answer key is noticed: someone has
+                 * just been told they were wrong and is certain they were not.
+                 * The attempt id travels with the report so a maintainer can see
+                 * what was actually submitted.
+                 */}
+                <div className="max-w-3xl">
+                    <ReportChallenge
+                        challengeSlug={challenge.slug}
+                        attemptId={attempt.id}
+                        reasons={reportReasons}
+                        reasonsNeedingDetails={reportReasonsNeedingDetails}
+                    />
                 </div>
 
                 {result ? (

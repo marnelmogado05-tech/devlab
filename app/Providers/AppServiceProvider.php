@@ -76,6 +76,14 @@ class AppServiceProvider extends ServiceProvider
             (int) config('devlab.rate_limits.bored')
         )->by($request->user()?->id ?: $request->ip()));
 
+        /*
+         * Reporting is cheap to do and expensive to moderate, so it is the
+         * tightest limit of the three (§41).
+         */
+        RateLimiter::for('report', fn (Request $request) => Limit::perMinute(
+            (int) config('devlab.rate_limits.report')
+        )->by($request->user()?->id ?: $request->ip()));
+
         // Submissions run an evaluator, so they cost more than a page view and
         // are the natural target for a brute-force search of the answer space.
         RateLimiter::for('submission', fn (Request $request) => Limit::perMinute(

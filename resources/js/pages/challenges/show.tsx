@@ -1,5 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
+import { ReportChallenge } from '@/components/challenge/report-challenge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { store } from '@/routes/attempts';
@@ -66,9 +67,39 @@ export default function ChallengeShow({
                     )}
                 </div>
 
-                <StartAttempt challenge={challenge} />
+                <div className="flex max-w-3xl flex-wrap items-center justify-between gap-4">
+                    <StartAttempt challenge={challenge} />
+                    <ReportControl slug={challenge.slug} />
+                </div>
             </div>
         </>
+    );
+}
+
+/**
+ * Reporting needs an account, like every other write. A guest sees nothing rather
+ * than a control that would bounce them to a sign-in page.
+ */
+function ReportControl({
+    slug,
+    attemptId = null,
+}: {
+    slug: string;
+    attemptId?: number | null;
+}) {
+    const page = usePage().props;
+
+    if (!page.auth?.user) {
+        return null;
+    }
+
+    return (
+        <ReportChallenge
+            challengeSlug={slug}
+            attemptId={attemptId}
+            reasons={page.reportReasons}
+            reasonsNeedingDetails={page.reportReasonsNeedingDetails}
+        />
     );
 }
 
