@@ -5,6 +5,7 @@ use App\Http\Controllers\BoredController;
 use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeReportController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LeaderboardController;
@@ -44,7 +45,12 @@ Route::get('bored', BoredController::class)
     ->name('bored');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    /*
+     * Where a signed-in player lands. It was a static Inertia route rendering a
+     * page of placeholders; it now reads their progress, so it needs a
+     * controller.
+     */
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     /*
      * Attempts. Browsing is public; playing is not — an attempt belongs to

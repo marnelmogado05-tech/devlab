@@ -1,13 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
+import {
+    ProgressionCard,
+    type Progression,
+} from '@/components/profile/progression-card';
+import { StatGrid } from '@/components/profile/stat-grid';
 import { Card, CardContent } from '@/components/ui/card';
 import { show as challengeShow } from '@/routes/challenges';
-
-interface Rung {
-    level: number;
-    title: string;
-    xp_required: number;
-}
 
 interface Props {
     profile: {
@@ -22,13 +21,7 @@ interface Props {
     };
     isOwner: boolean;
     detailed: boolean;
-    progression: {
-        total_xp: number;
-        level: Rung;
-        next_level: Rung | null;
-        progress: number;
-        rank: number | null;
-    };
+    progression: Progression;
     statistics: {
         challenges_completed: number;
         challenges_started: number;
@@ -86,7 +79,7 @@ export default function ProfileShow({
                     <ProfileLinks profile={profile} />
                 </header>
 
-                <Progression progression={progression} />
+                <ProgressionCard progression={progression} />
 
                 {!detailed && (
                     <Card>
@@ -156,54 +149,6 @@ function ProfileLinks({ profile }: { profile: Props['profile'] }) {
     );
 }
 
-function Progression({ progression }: { progression: Props['progression'] }) {
-    const percent = Math.round(progression.progress * 100);
-
-    return (
-        <Card>
-            <CardContent className="space-y-3 py-4">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-medium">
-                        Level {progression.level.level} ·{' '}
-                        {progression.level.title}
-                    </p>
-                    <p className="text-muted-foreground font-mono text-sm tabular-nums">
-                        {progression.total_xp.toLocaleString()} XP
-                        {progression.rank !== null && ` · #${progression.rank}`}
-                    </p>
-                </div>
-
-                {progression.next_level ? (
-                    <div className="space-y-1">
-                        <div
-                            className="bg-muted h-2 overflow-hidden rounded-full"
-                            role="progressbar"
-                            aria-valuenow={percent}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-label={`Progress to level ${progression.next_level.level}`}
-                        >
-                            <div
-                                className="bg-primary h-full transition-[width] motion-reduce:transition-none"
-                                style={{ width: `${percent}%` }}
-                            />
-                        </div>
-                        <p className="text-muted-foreground font-mono text-xs">
-                            {progression.next_level.xp_required -
-                                progression.total_xp}{' '}
-                            XP to {progression.next_level.title}
-                        </p>
-                    </div>
-                ) : (
-                    <p className="text-muted-foreground font-mono text-xs">
-                        Top of the ladder.
-                    </p>
-                )}
-            </CardContent>
-        </Card>
-    );
-}
-
 function Statistics({
     statistics,
 }: {
@@ -238,22 +183,7 @@ function Statistics({
             >
                 Statistics
             </h2>
-            <Card>
-                <CardContent className="py-4">
-                    <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        {stats.map(([label, value]) => (
-                            <div key={label} className="space-y-1">
-                                <dt className="text-muted-foreground font-mono text-xs">
-                                    {label}
-                                </dt>
-                                <dd className="font-mono text-lg tabular-nums">
-                                    {value}
-                                </dd>
-                            </div>
-                        ))}
-                    </dl>
-                </CardContent>
-            </Card>
+            <StatGrid stats={stats} />
         </section>
     );
 }
