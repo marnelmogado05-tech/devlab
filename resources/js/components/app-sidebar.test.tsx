@@ -105,10 +105,21 @@ describe('AppSidebar', () => {
         expect(href(/leaderboards/i)).toBe('/leaderboards');
     });
 
-    it('points its footer at DevLab, not at the starter kit it grew out of', () => {
+    it('leads nowhere but back into DevLab', () => {
+        /*
+         * The sidebar used to end with the starter kit's Repository and
+         * Documentation links, pointing at laravel/react-starter-kit. They are
+         * gone, and this asserts nothing external takes their place: a sidebar
+         * is for getting around the application, and a link out of it is a link
+         * out of the session someone came here to have.
+         */
         renderSidebar();
 
-        expect(href(/repository/i)).toContain('devlab');
-        expect(href(/documentation/i)).not.toContain('laravel.com');
+        const external = screen
+            .getAllByRole('link')
+            .map((link) => link.getAttribute('href') ?? '')
+            .filter((href) => href.startsWith('http'));
+
+        expect(external).toEqual([]);
     });
 });
