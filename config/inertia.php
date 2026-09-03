@@ -16,7 +16,16 @@ return [
     */
 
     'ssr' => [
-        'enabled' => true,
+        /*
+         * Off under test. With the documented dev stack running, the Vite dev
+         * server answers as an SSR renderer, so a host-run suite silently starts
+         * getting server-rendered HTML — and the render it returns is stale, so
+         * any test that reads response content sees the props from a previous
+         * request. That made `composer test` pass or fail depending on whether
+         * `docker compose up -d` had been run, which is the worst kind of flake:
+         * it follows the setup we tell contributors to follow.
+         */
+        'enabled' => (bool) env('INERTIA_SSR_ENABLED', true),
         'url' => 'http://127.0.0.1:13714',
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 

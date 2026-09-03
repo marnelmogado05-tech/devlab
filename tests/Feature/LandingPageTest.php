@@ -18,9 +18,24 @@ it('is public', function () {
 });
 
 it('offers the button that the product is named for', function () {
-    // It was absent from this page until now: the button existed on the
-    // dashboard and the catalogue, but not on the page a stranger arrives at.
-    $this->get(route('home'))->assertOk()->assertSee('/bored', escape: false);
+    /*
+     * It was absent from this page until now: the button existed on the
+     * dashboard and the catalogue, but not on the page a stranger arrives at.
+     *
+     * The button itself is a client-side component, so what the server can
+     * honestly promise is that the page it renders is the one carrying the
+     * button, and that the route the button points at is live for a guest.
+     * `welcome.test.tsx` asserts the button is on the page.
+     */
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('welcome'));
+
+    // And the route it points at is live for a guest with content to hand out.
+    $experience = Experience::factory()->published()->create();
+    Challenge::factory()->published()->for($experience)->create();
+
+    $this->get(route('bored'))->assertOk();
 });
 
 it('shows the real challenge count', function () {

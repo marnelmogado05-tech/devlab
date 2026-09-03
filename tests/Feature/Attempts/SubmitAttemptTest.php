@@ -136,16 +136,23 @@ it('validates the payload against the rules the experience declares', function (
 });
 
 it('withholds the explanation until the attempt is closed', function () {
-    $open = $this->actingAs($this->user)->get(route('attempts.show', $this->attempt));
-
-    expect($open->getContent())->not->toContain('THE-EXPLANATION');
+    /*
+     * Asserted on the props rather than on the rendered HTML. What matters is
+     * the server's decision not to send the explanation — a string search over
+     * the response only ever tested that indirectly, and it depended on whether
+     * a server-side renderer happened to be running, which is not something a
+     * test should be able to notice.
+     */
+    $this->actingAs($this->user)
+        ->get(route('attempts.show', $this->attempt))
+        ->assertInertia(fn ($page) => $page->where('result', null));
 
     $this->actingAs($this->user)->post(route('attempts.submit', $this->attempt), payload());
 
-    $closed = $this->actingAs($this->user)->get(route('attempts.show', $this->attempt));
-
     // The payoff, released on completion and not before.
-    expect($closed->getContent())->toContain('THE-EXPLANATION');
+    $this->actingAs($this->user)
+        ->get(route('attempts.show', $this->attempt))
+        ->assertInertia(fn ($page) => $page->where('result.explanation', 'THE-EXPLANATION'));
 });
 
 it('stores the score breakdown for a later dispute', function () {
