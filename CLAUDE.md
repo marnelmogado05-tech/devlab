@@ -130,6 +130,19 @@ Every §56 item and every §48 MVP scope item is now built. `ChallengeCompleted`
 still has no listeners — the seam is there for Phase 2 work that derives from a completion without
 being a reward.
 
+**Phase 2 is built.** System Design Lab, Docker Escape Room and Git Simulator are all playable —
+contract document, configuration validator, evaluator, React module and six verified challenges
+each. System Design Lab introduced partial credit; Docker Escape Room scores locating and fixing
+as independent halves; Git Simulator duplicates its Git model in PHP and TypeScript on purpose
+([ADR 0006](docs/adr/0006-duplicate-the-git-model-rather-than-trust-the-client.md)).
+
+**Phase 3 has a design and no code.** [ADR 0007](docs/adr/0007-execution-engine-architecture.md)
+splits privilege three ways — the application never holds container-creation privilege, the
+orchestrator never holds credentials, the sandbox holds nothing — and
+[the sandbox threat model](docs/security/sandbox-threat-model.md) is the dedicated security design
+§25 and §50 require. Nothing executes yet, and law 2 still holds absolutely until the abuse suite
+and the security review in that document's checklist are done.
+
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward
