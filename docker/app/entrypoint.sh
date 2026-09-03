@@ -17,6 +17,12 @@ fi
 if [ ! -d vendor ] || [ ! -f vendor/autoload.php ]; then
     echo "→ Installing PHP dependencies"
     composer install --no-interaction --prefer-dist
+elif [ composer.lock -nt vendor/composer/installed.json ]; then
+    # A dependency added since this container last installed. See the note on
+    # the Node check below: "already installed" is not "installed what the
+    # lockfile now says".
+    echo "→ PHP dependencies are out of date"
+    composer install --no-interaction --prefer-dist
 fi
 
 if ! grep -q '^APP_KEY=base64:' .env; then
@@ -29,6 +35,25 @@ fi
 # `-d`. Check that it has contents, the way the vendor check above does.
 if [ -z "$(ls -A node_modules 2>/dev/null)" ]; then
     echo "→ Installing Node dependencies"
+    npm install
+elif [ package-lock.json -nt node_modules/.package-lock.json ]; then
+    #
+    # Populated is not the same as current. node_modules lives in an anonymous
+    # volume that outlives `docker compose up`, so a dependency added to the
+    # lockfile after a container first booted was never installed into it: the
+    # emptiness check above passes and nothing else looked.
+    #
+    # That is not hypothetical. `@testing-library/react` was added months after
+    # these volumes were created, so the container had `@testing-library/dom`
+    # and `user-event` but not `react` — the frontend suite could not run in the
+    # container at all, and the dev server logged a resolve error every time it
+    # crawled a test file.
+    #
+    # npm writes node_modules/.package-lock.json on every install, which makes
+    # it an honest record of what is actually on disk. If it is missing, `-nt`
+    # is true and we install, which is the safe direction.
+    #
+    echo "→ Node dependencies are out of date"
     npm install
 fi
 
