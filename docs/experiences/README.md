@@ -30,7 +30,7 @@ validator, a registered evaluator, a React module and content.
 | Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)                 | **playable**, 6 challenges  |
 | System Design Lab    | 2                 | [system-design-lab.md](system-design-lab.md)   | **playable**, 6 challenges  |
 | Docker Escape Room   | 2                 | [docker-escape-room.md](docker-escape-room.md) | **playable**, 6 challenges  |
-| Git Simulator        | 2                 | _not written_                                  | —                           |
+| Git Simulator        | 2                 | [git-simulator.md](git-simulator.md)           | **playable**, 6 challenges  |
 | Code Arena           | 3 (needs sandbox) | _not written_                                  | —                           |
 | Production Nightmare | 4                 | _not written_                                  | —                           |
 | Debugging Detective  | 4                 | _not written_                                  | —                           |

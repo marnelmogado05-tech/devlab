@@ -97,6 +97,23 @@ class ExperienceSeeder extends Seeder
                 'config' => [],
             ],
             [
+                'slug' => 'git-simulator',
+                'name' => 'Git Simulator',
+                'tagline' => 'The history is wrong. Fix it without deleting anything.',
+                'description' => 'A repository in a state somebody has to explain in a stand-up: '
+                    .'work on a detached HEAD, a commit on the wrong branch, a bad change already '
+                    .'pulled by three people. Type commands, watch the history change, and reach '
+                    .'the shape the challenge asks for — by any route that works.',
+                'icon' => 'GitBranch',
+                'category' => 'version-control',
+                'status' => Experience::STATUS_PUBLISHED,
+                'default_difficulty' => 'medium',
+                'estimated_minutes' => 10,
+                'available_in_bored' => true,
+                'sort_order' => 50,
+                'config' => [],
+            ],
+            [
                 /*
                  * Dev Roulette is the "I'm Bored" dispatcher (plan §9.1, §10) — it
                  * assigns you something rather than holding challenges of its own.
