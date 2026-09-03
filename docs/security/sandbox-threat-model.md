@@ -122,6 +122,11 @@ whatever reads it — a browser, a log aggregator, or a maintainer's terminal.
 deserialized and never used in a string comparison that selects a code path. Control characters are
 stripped before storage, because a log viewer is a reader too.
 
+**Built.** `App\Services\Execution\OutputSanitiser` — capped while reading, control characters
+stripped, invalid UTF-8 repaired so hostile bytes cannot reach the database driver and become an
+application error. HTML is deliberately left alone: escaping belongs where the target syntax is
+known, and doing it here would double-encode in JSON and leave the stored value wrong everywhere.
+
 **Test.** A submission printing ANSI escapes, HTML and a serialized PHP object; assertions that
 each is stored inert and rendered as text.
 
@@ -147,13 +152,22 @@ attempts). Pool exhaustion is a **normal condition**: the attempt stays open and
 retried. It is never marked failed — failing somebody's answer because of a capacity problem is
 the platform lying about their work.
 
+**Built.** `App\Services\Execution\ExecutionQuota` — an atomic Redis increment, so two
+submissions arriving together cannot both pass a read. Slots carry a TTL: a worker dying while
+holding one would otherwise leak it permanently, and a user who hit that twice could never run
+anything again, which is a denial of service the platform inflicts on itself. Rate limiting bounds
+how _fast_ someone submits; this bounds how much of the pool they hold at any instant.
+
 **Test.** Documented and tested behaviour when the pool is exhausted or the orchestrator is down.
 
 ## Before this subsystem ships
 
 - [ ] ADR 0007 accepted — **done**
 - [ ] This threat model reviewed — **in review**
-- [ ] Abuse test suite: S1, S3, S4, S5 above, each as an executable test
+- [x] The boundary itself: `SandboxOrchestrator`, with a default binding that **refuses** rather
+      than fakes, so a misconfigured deployment cannot silently grade against nothing
+- [x] S5 and S7 controls built and tested — the remaining controls need a runner to attack
+- [ ] Abuse test suite: S1, S3, S4 above, each as an executable test against a real sandbox
 - [ ] A dedicated security review by `devlab-security`; ordinary feature review does not cover this
 - [ ] Per-execution resource logging (CPU, memory, duration, exit code, killed-by) as both an abuse
       signal and a cost signal (§42)

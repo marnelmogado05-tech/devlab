@@ -107,6 +107,60 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Execution
+    |--------------------------------------------------------------------------
+    |
+    | Phase 3 (§50). Limits for the sandbox that runs user-submitted code.
+    | Architecture: ADR 0007. Controls and their threats: the sandbox threat
+    | model, docs/security/sandbox-threat-model.md.
+    |
+    | Nothing executes yet. `enabled` is false, and the container binds an
+    | orchestrator that refuses — a default that quietly pretended to work would
+    | be the worst possible failure mode for this subsystem.
+    |
+    */
+
+    'execution' => [
+        'enabled' => (bool) env('DEVLAB_EXECUTION_ENABLED', false),
+
+        /*
+         * S3. Enforced by the sandbox; the orchestrator holds a second, longer
+         * deadline and destroys a container that ignores its own (ADR 0007).
+         */
+        'limits' => [
+            'cpu_cores' => (float) env('DEVLAB_EXECUTION_CPU', 0.5),
+            'memory_mb' => (int) env('DEVLAB_EXECUTION_MEMORY_MB', 256),
+            'timeout_seconds' => (int) env('DEVLAB_EXECUTION_TIMEOUT', 10),
+            'processes' => (int) env('DEVLAB_EXECUTION_PIDS', 64),
+            'tmpfs_mb' => (int) env('DEVLAB_EXECUTION_TMPFS_MB', 16),
+        ],
+
+        /*
+         * S5. A byte cap enforced while reading, not by truncating afterwards:
+         * a program printing infinitely fills the reader's memory long before
+         * anyone gets to truncate the result.
+         */
+        'output' => [
+            'max_bytes' => (int) env('DEVLAB_EXECUTION_OUTPUT_BYTES', 64 * 1024),
+        ],
+
+        /*
+         * S7. One user must not be able to starve the pool.
+         */
+        'quota' => [
+            'redis_prefix' => 'devlab:execution',
+            'per_user_concurrent' => (int) env('DEVLAB_EXECUTION_PER_USER', 2),
+            /*
+             * A slot is released when the run finishes. This is the backstop for
+             * a worker that dies holding one — without it, a crash leaks a slot
+             * per occurrence until the user can never run anything again.
+             */
+            'slot_ttl_seconds' => (int) env('DEVLAB_EXECUTION_SLOT_TTL', 120),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Catalogue
     |--------------------------------------------------------------------------
     |
