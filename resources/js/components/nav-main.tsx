@@ -9,12 +9,23 @@ import {
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import type { NavItem } from '@/types';
 
-export function NavMain({ items }: { items: NavItem[] }) {
+/**
+ * One labelled group of sidebar links.
+ *
+ * The label is a prop rather than the hardcoded "Platform" it used to be:
+ * DevLab's sidebar is several groups, and a component that can only ever render
+ * one of them forces the alternative to be a copy of it.
+ */
+export function NavMain({ label, items }: { label: string; items: NavItem[] }) {
     const { isCurrentUrl } = useCurrentUrl();
+
+    if (items.length === 0) {
+        return null;
+    }
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel>{label}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>

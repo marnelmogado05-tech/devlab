@@ -12,3 +12,16 @@ export type NavItem = {
     icon?: LucideIcon | null;
     isActive?: boolean;
 };
+
+/**
+ * An experience as the sidebar needs it: enough to link to it and name it.
+ *
+ * Shared on every request from the published catalogue, so the navigation
+ * cannot list something the catalogue does not.
+ */
+export type NavExperience = {
+    slug: string;
+    name: string;
+    /** A lucide icon name, resolved by `experienceIcon`. */
+    icon: string | null;
+};
