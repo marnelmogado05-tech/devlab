@@ -183,19 +183,19 @@ how _fast_ someone submits; this bounds how much of the pool they hold at any in
 Run on 2026-09-03 against a real orchestrator and real containers, on Docker Desktop, **runtime
 `runc`**.
 
-| Control                                   | Threat | Verified | Note                                          |
-| ----------------------------------------- | ------ | -------- | --------------------------------------------- |
-| Fork bomb contained                       | S3     | yes      | PID limit                                     |
-| Memory bomb OOM-killed, not swapped       | S3     | yes      | `--memory` = `--memory-swap`                  |
-| Infinite loop stopped                     | S3     | yes      | Orchestrator deadline                         |
-| No network reachable                      | S4     | yes      | `--network none`                              |
-| Read-only root, entrypoint not writable   | S4     | yes      |                                               |
-| No credentials in the sandbox environment | S4     | yes      |                                               |
-| Unprivileged user, no capabilities        | S1/S3  | yes      | `uid=65534`, `CapEff: 0000000000000000`       |
-| Hostile output stored inert               | S5     | yes      | Escapes and NULs stripped, HTML kept as text  |
-| Output flood capped end to end            | S5     | **no**   | Not completed here — see below                |
-| One submission cannot see another         | S4     | **no**   | Not completed here — see below                |
-| **Container escape**                      | **S1** | **no**   | Needs gVisor; not runnable on Docker Desktop  |
+| Control                                   | Threat | Verified | Note                                         |
+| ----------------------------------------- | ------ | -------- | -------------------------------------------- |
+| Fork bomb contained                       | S3     | yes      | PID limit                                    |
+| Memory bomb OOM-killed, not swapped       | S3     | yes      | `--memory` = `--memory-swap`                 |
+| Infinite loop stopped                     | S3     | yes      | Orchestrator deadline                        |
+| No network reachable                      | S4     | yes      | `--network none`                             |
+| Read-only root, entrypoint not writable   | S4     | yes      |                                              |
+| No credentials in the sandbox environment | S4     | yes      |                                              |
+| Unprivileged user, no capabilities        | S1/S3  | yes      | `uid=65534`, `CapEff: 0000000000000000`      |
+| Hostile output stored inert               | S5     | yes      | Escapes and NULs stripped, HTML kept as text |
+| Output flood capped end to end            | S5     | **no**   | Not completed here — see below               |
+| One submission cannot see another         | S4     | **no**   | Not completed here — see below               |
+| **Container escape**                      | **S1** | **no**   | Needs gVisor; not runnable on Docker Desktop |
 
 **Why two rows say "not completed" rather than "failed".** Container start on the machine used
 ranged from 12 to over 60 seconds under load, which is longer than a submission's own timeout. A
