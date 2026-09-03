@@ -1,8 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    BookOpen,
     Dices,
-    FolderGit2,
     LayoutGrid,
     Library,
     LogIn,
@@ -11,7 +9,6 @@ import {
     UserPlus,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -65,19 +62,6 @@ const progressNavItems: NavItem[] = [
         title: 'Leaderboards',
         href: leaderboardsIndex(),
         icon: Trophy,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/marnelmogado05-tech/devlab',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://github.com/marnelmogado05-tech/devlab/tree/main/docs',
-        icon: BookOpen,
     },
 ];
 
@@ -143,7 +127,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 {signedIn ? <NavUser /> : <GuestActions />}
             </SidebarFooter>
         </Sidebar>
