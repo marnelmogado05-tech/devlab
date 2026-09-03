@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\ChallengeReport;
+use App\Models\Experience;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -50,6 +51,21 @@ class HandleInertiaRequests extends Middleware
              */
             'reportReasons' => ChallengeReport::reasons(),
             'reportReasonsNeedingDetails' => ChallengeReport::reasonsRequiringDetails(),
+
+            /*
+             * The experiences the sidebar lists, read rather than hardcoded.
+             * Publishing an experience puts it in the navigation without a
+             * frontend change, and un-publishing takes it out — which is what
+             * makes this list safe to render for a guest.
+             *
+             * Three indexed columns for a handful of rows, so it is not worth a
+             * cache: an invalidation bug here would show visitors a catalogue
+             * that no longer exists, which costs more than the query saves.
+             */
+            'navExperiences' => Experience::query()
+                ->published()
+                ->inCatalogueOrder()
+                ->get(['slug', 'name', 'icon']),
         ];
     }
 }

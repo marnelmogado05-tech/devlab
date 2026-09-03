@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { NavExperience } from '@/types/navigation';
 
 declare module 'react' {
     interface InputHTMLAttributes<T> {
@@ -14,6 +15,7 @@ declare module '@inertiajs/core' {
             reportReasons: string[];
             reportReasonsNeedingDetails: string[];
             sidebarOpen: boolean;
+            navExperiences: NavExperience[];
             [key: string]: unknown;
         };
     }
