@@ -30,6 +30,7 @@ class ContentSeeder extends Seeder
             BugHunterSeeder::class,
             SystemDesignLabSeeder::class,
             DockerEscapeRoomSeeder::class,
+            GitSimulatorSeeder::class,
         ]);
     }
 }
