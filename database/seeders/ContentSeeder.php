@@ -28,6 +28,7 @@ class ContentSeeder extends Seeder
             // Content comes after the experiences it attaches to.
             CursedCodeSeeder::class,
             BugHunterSeeder::class,
+            SystemDesignLabSeeder::class,
         ]);
     }
 }

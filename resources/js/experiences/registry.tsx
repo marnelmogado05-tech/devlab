@@ -14,6 +14,7 @@ const modules: Record<
 > = {
     'cursed-code': () => import('@/experiences/CursedCode'),
     'bug-hunter': () => import('@/experiences/BugHunter'),
+    'system-design-lab': () => import('@/experiences/SystemDesignLab'),
 };
 
 export interface ExperienceModuleProps {

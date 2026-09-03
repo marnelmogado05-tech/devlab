@@ -23,17 +23,17 @@ frontend all build against — write it **before** writing the code.
 not mean the experience is playable. **Playable** means it has a contract document, a configuration
 validator, a registered evaluator, a React module and content.
 
-| Experience           | Phase             | Doc                                | Row                         |
-| -------------------- | ----------------- | ---------------------------------- | --------------------------- |
-| Dev Roulette         | MVP               | [dev-roulette.md](dev-roulette.md) | **implemented** as `/bored` |
-| Cursed Code          | MVP               | [cursed-code.md](cursed-code.md)   | **playable**, 6 challenges  |
-| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)     | **playable**, 6 challenges  |
-| Git Simulator        | 2                 | _not written_                      | —                           |
-| Docker Escape Room   | 2                 | _not written_                      | —                           |
-| System Design Lab    | 2                 | _not written_                      | —                           |
-| Code Arena           | 3 (needs sandbox) | _not written_                      | —                           |
-| Production Nightmare | 4                 | _not written_                      | —                           |
-| Debugging Detective  | 4                 | _not written_                      | —                           |
+| Experience           | Phase             | Doc                                          | Row                         |
+| -------------------- | ----------------- | -------------------------------------------- | --------------------------- |
+| Dev Roulette         | MVP               | [dev-roulette.md](dev-roulette.md)           | **implemented** as `/bored` |
+| Cursed Code          | MVP               | [cursed-code.md](cursed-code.md)             | **playable**, 6 challenges  |
+| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)               | **playable**, 6 challenges  |
+| System Design Lab    | 2                 | [system-design-lab.md](system-design-lab.md) | **playable**, 6 challenges  |
+| Git Simulator        | 2                 | _not written_                                | —                           |
+| Docker Escape Room   | 2                 | _not written_                                | —                           |
+| Code Arena           | 3 (needs sandbox) | _not written_                                | —                           |
+| Production Nightmare | 4                 | _not written_                                | —                           |
+| Debugging Detective  | 4                 | _not written_                                | —                           |
 
 Dev Roulette is the odd one out and stays a **draft** on purpose. It is the "I'm Bored" dispatcher
 (§9.1, §10) rather than a content library: it holds no challenges, has no configuration schema and

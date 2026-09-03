@@ -6,7 +6,8 @@ use App\Models\Experience;
 use Illuminate\Database\Seeder;
 
 /**
- * The three MVP experiences (plan §48).
+ * DevLab's experiences: the three from the MVP (plan §48), then Phase 2's (§49)
+ * as each becomes playable.
  *
  * Idempotent by slug: running it twice updates rather than duplicates, so it is
  * safe on an existing database and safe to re-run after editing a tagline.
@@ -59,6 +60,23 @@ class ExperienceSeeder extends Seeder
                 'estimated_minutes' => 10,
                 'available_in_bored' => true,
                 'sort_order' => 20,
+                'config' => [],
+            ],
+            [
+                'slug' => 'system-design-lab',
+                'name' => 'System Design Lab',
+                'tagline' => 'Assemble an architecture that survives the requirements.',
+                'description' => 'A brief, a list of things the system must do, and a set of '
+                    .'decisions to make. Pick a cache, a database, a queue — or decide you do not '
+                    .'need one. The first experience here that gives partial credit, because an '
+                    .'architecture that meets four requirements out of five is a real answer.',
+                'icon' => 'Network',
+                'category' => 'architecture',
+                'status' => Experience::STATUS_PUBLISHED,
+                'default_difficulty' => 'medium',
+                'estimated_minutes' => 8,
+                'available_in_bored' => true,
+                'sort_order' => 30,
                 'config' => [],
             ],
             [

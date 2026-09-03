@@ -123,14 +123,23 @@ it('serves the catalogue to a signed-in user too', function () {
         ->assertOk();
 });
 
-it('seeds the MVP experiences idempotently', function () {
+it('seeds the experiences idempotently', function () {
     // The seeder is safe to re-run: a maintainer editing a tagline should not
     // have to wonder whether they are about to create a second Cursed Code.
-    $this->seed(ExperienceSeeder::class);
+    //
+    // Counted against itself rather than against a literal. The subject here is
+    // idempotency, and a hardcoded total makes this test fail every time an
+    // experience is added — which says nothing about whether re-running the
+    // seeder duplicated anything.
     $this->seed(ExperienceSeeder::class);
 
-    expect(Experience::query()->count())->toBe(3)
-        ->and(Experience::query()->published()->count())->toBe(2);
+    $afterOneRun = Experience::query()->count();
+
+    $this->seed(ExperienceSeeder::class);
+
+    expect($afterOneRun)->toBeGreaterThan(0)
+        ->and(Experience::query()->count())->toBe($afterOneRun)
+        ->and(Experience::query()->published()->count())->toBe($afterOneRun - 1);
 
     // Dev Roulette is the "I'm Bored" dispatcher, so it must not sit in its own
     // recommendation pool.
