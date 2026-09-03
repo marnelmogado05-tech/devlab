@@ -29,6 +29,17 @@ pest()->extend(TestCase::class)
 pest()->extend(TestCase::class)->in('Unit');
 
 /*
+ * The sandbox abuse suite tests a BOUNDARY, not the application: it attacks a
+ * real container and never reads a row. Binding it to RefreshDatabase gave it a
+ * database dependency it does not have, and a saturated Postgres then failed
+ * tests about container isolation — a failure with nothing to say about the
+ * thing under test.
+ *
+ * It needs the application only for configuration and the HTTP client.
+ */
+pest()->extend(TestCase::class)->in('Sandbox');
+
+/*
 |--------------------------------------------------------------------------
 | Redis is not rolled back
 |--------------------------------------------------------------------------

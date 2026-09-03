@@ -8,6 +8,7 @@ use App\Services\Challenge\DockerEscapeRoom\DockerEscapeRoomEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
 use App\Services\Challenge\GitSimulator\GitSimulatorEvaluator;
 use App\Services\Challenge\SystemDesignLab\SystemDesignLabEvaluator;
+use App\Services\Execution\HttpOrchestrator;
 use App\Services\Execution\SandboxOrchestrator;
 use App\Services\Execution\UnavailableOrchestrator;
 use Carbon\CarbonImmutable;
@@ -43,7 +44,12 @@ class AppServiceProvider extends ServiceProvider
          * Nothing binds a real orchestrator yet, and law 2 holds until the
          * checklist in docs/security/sandbox-threat-model.md is done.
          */
-        $this->app->bind(SandboxOrchestrator::class, UnavailableOrchestrator::class);
+        $this->app->bind(
+            SandboxOrchestrator::class,
+            fn () => config('devlab.execution.enabled')
+                ? HttpOrchestrator::fromConfig()
+                : new UnavailableOrchestrator,
+        );
     }
 
     /**

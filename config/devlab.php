@@ -124,6 +124,22 @@ return [
         'enabled' => (bool) env('DEVLAB_EXECUTION_ENABLED', false),
 
         /*
+         * The orchestrator, on the internal network. The application reaches
+         * the container runtime through this and no other way (ADR 0007).
+         */
+        'orchestrator_url' => (string) env('DEVLAB_ORCHESTRATOR_URL', 'http://orchestrator:8090'),
+
+        /*
+         * Headroom on top of a submission's own timeout, for the time a
+         * container takes to exist before the code starts. Measured at ~12s on
+         * Docker Desktop and tens of milliseconds on a Linux host, so it is
+         * configurable rather than assumed. A timeout on this side means the
+         * ORCHESTRATOR is wedged, which is a platform failure — not a slow
+         * submission, which is an outcome.
+         */
+        'orchestrator_overhead_seconds' => (int) env('DEVLAB_EXECUTION_OVERHEAD', 60),
+
+        /*
          * S3. Enforced by the sandbox; the orchestrator holds a second, longer
          * deadline and destroys a container that ignores its own (ADR 0007).
          */
