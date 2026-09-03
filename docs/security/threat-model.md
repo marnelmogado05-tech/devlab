@@ -2,6 +2,10 @@
 
 > **Status:** scaffold. Assets and boundaries are settled; mitigations are recorded as each
 > subsystem is built. Reviewed against plan §25, §27, §39–41.
+>
+> The execution engine has its own document, as §25 requires:
+> [sandbox threat model](sandbox-threat-model.md), with
+> [ADR 0007](../adr/0007-execution-engine-architecture.md) for the architecture it defends.
 
 ## What an attacker wants
 
@@ -49,15 +53,17 @@ keys are released on completion only. Prop payloads are part of security review.
 
 User content reaches `exec`, `eval`, `unserialize`, dynamic instantiation or template compilation.
 **Mitigation:** absolute prohibition in the application process. Execution occurs only in the
-Phase 3 sandbox subsystem, which requires its own ADR, threat model and dedicated review before
-it ships. See the `sandbox-execution` skill.
+Phase 3 sandbox subsystem. Its architecture is [ADR 0007](../adr/0007-execution-engine-architecture.md)
+and its dedicated design is the [sandbox threat model](sandbox-threat-model.md); the dedicated
+security review remains outstanding until the subsystem ships. See the `sandbox-execution` skill.
 
 ### T5 — Container escape and resource exhaustion
 
 Sandbox breakout, fork bomb, memory bomb, disk fill, output flood.
 **Mitigation:** ephemeral non-root containers; CPU, memory, PID, wall-clock, filesystem and
 output limits; network disabled by default; guaranteed cleanup; no credentials or platform
-network reachability from the sandbox host; per-user concurrency quotas.
+network reachability from the sandbox host; per-user concurrency quotas. Expanded, with the
+controls and their tests, as S1–S7 of the [sandbox threat model](sandbox-threat-model.md).
 
 ### T6 — Prompt injection
 
