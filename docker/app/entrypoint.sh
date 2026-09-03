@@ -51,6 +51,18 @@ if [ "${1:-}" = "php" ] && [ "${3:-}" = "serve" ]; then
     echo "→ Running migrations"
     php artisan migrate --force
 
+    # Content, every boot. The header above promises a playable instance, and
+    # without this the catalogue is empty: "I'm Bored" has nothing to hand out
+    # and quietly redirects to a list of nothing, which is the one first-run
+    # experience §78 says counts as a bug.
+    #
+    # Safe to repeat: every seeder is keyed updateOrCreate on a slug or key, so
+    # this refreshes the catalogue rather than duplicating it, and it picks up
+    # new challenges on a later `docker compose up` without a reset. It does not
+    # touch players — users, attempts and XP are written by the app, never here.
+    echo "→ Seeding experiences, achievements and challenges"
+    php artisan db:seed --force --class=Database\\Seeders\\ContentSeeder
+
     # public/build is gitignored, so a fresh clone has no compiled assets and
     # every page would 500 with "Vite manifest not found". The vite service
     # supersedes these with hot module reloading as soon as it is up; this build

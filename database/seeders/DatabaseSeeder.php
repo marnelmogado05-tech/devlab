@@ -21,8 +21,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /*
-         * Experiences, then achievements, then content — in that order, because
-         * each depends on the one before it.
+         * The catalogue lives in ContentSeeder, which the container entrypoint
+         * also runs on every boot. Keeping one list means a newly authored
+         * experience cannot reach a fresh clone but miss a running one.
          *
          * Challenge content arrives with its experience, once that experience's
          * contract document and configuration validator exist to define and
@@ -30,12 +31,6 @@ class DatabaseSeeder extends Seeder
          * Hunter have both; Dev Roulette is the dispatcher and holds no content
          * of its own.
          */
-        $this->call([
-            ExperienceSeeder::class,
-            AchievementSeeder::class,
-            // Content comes after the experiences it attaches to.
-            CursedCodeSeeder::class,
-            BugHunterSeeder::class,
-        ]);
+        $this->call(ContentSeeder::class);
     }
 }

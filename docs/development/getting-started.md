@@ -1,9 +1,10 @@
 # Getting Started
 
 > **Status:** verified end to end. `docker compose up -d` on a clean checkout brings up all five
-> services, applies the migrations, compiles the frontend and serves the app: `/`, `/login` and
-> `/register` return 200 and `/dashboard` redirects a guest. The schema's constraints are covered
-> by tests (`tests/Feature/Schema/`) and the suite passes 67/67.
+> services, applies the migrations, seeds the catalogue, compiles the frontend and serves the
+> app: `/`, `/login` and `/register` return 200, `/dashboard` redirects a guest, and **I'm Bored**
+> hands you a real challenge. The schema's constraints are covered by tests
+> (`tests/Feature/Schema/`); the suite is 337 backend tests and 21 frontend tests.
 
 ## Requirements
 
@@ -20,9 +21,14 @@ cp .env.example .env
 docker compose up -d
 ```
 
-The entrypoint installs dependencies, generates `APP_KEY`, waits for Postgres, runs migrations
-and — because `public/build` is not committed — compiles the frontend assets on first boot. That
-last step takes a minute the first time and is skipped on every later start.
+The entrypoint installs dependencies, generates `APP_KEY`, waits for Postgres, runs migrations,
+seeds the catalogue and — because `public/build` is not committed — compiles the frontend assets
+on first boot. That last step takes a minute the first time and is skipped on every later start.
+
+Seeding runs on **every** boot, not just the first. Every content seeder is keyed
+`updateOrCreate` on a slug or key, so it refreshes the catalogue and picks up newly authored
+challenges rather than duplicating what is there. It writes no players: users, attempts and XP
+come from the app.
 
 DevLab is then at `http://localhost:8000`. The `vite` service serves hot module reloading on
 `5173`; the app works without it, but changes to `resources/js` then need `npm run build`.
@@ -42,6 +48,7 @@ docker compose up -d postgres redis
 composer install
 php artisan key:generate
 php artisan migrate
+php artisan db:seed --class=Database\Seeders\ContentSeeder   # the catalogue, without a demo user
 npm install
 npm run dev        # in one terminal
 php artisan serve  # in another

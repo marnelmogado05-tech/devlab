@@ -77,6 +77,10 @@ cp .env.example .env
 docker compose up -d
 ```
 
+That brings up the five services, migrates, seeds the catalogue and serves DevLab at
+<http://localhost:8000>. Press **I'm Bored** and it hands you something to do — a clone that
+boots into an empty catalogue is a bug (§78).
+
 ## Contributing
 
 DevLab is designed for contributors — and writing challenges is as valuable as writing code. See
