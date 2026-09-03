@@ -80,6 +80,23 @@ class ExperienceSeeder extends Seeder
                 'config' => [],
             ],
             [
+                'slug' => 'docker-escape-room',
+                'name' => 'Docker Escape Room',
+                'tagline' => 'The container will not start. The evidence is in front of you.',
+                'description' => 'A Dockerfile, a compose file, the logs, and a symptom that makes '
+                    .'no sense. Read across all of it, find the fault, and say what fixes it — the '
+                    .'second half being the one that separates recognising a failure from '
+                    .'understanding it.',
+                'icon' => 'Container',
+                'category' => 'operations',
+                'status' => Experience::STATUS_PUBLISHED,
+                'default_difficulty' => 'medium',
+                'estimated_minutes' => 9,
+                'available_in_bored' => true,
+                'sort_order' => 40,
+                'config' => [],
+            ],
+            [
                 /*
                  * Dev Roulette is the "I'm Bored" dispatcher (plan §9.1, §10) — it
                  * assigns you something rather than holding challenges of its own.

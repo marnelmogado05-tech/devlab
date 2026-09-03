@@ -143,34 +143,41 @@ class ChallengeAttemptController extends Controller
     }
 
     /**
-     * The player's own choice, echoed back so a closed attempt can show it.
+     * The player's own submission, echoed back so a closed attempt can show it.
      *
-     * Experiences name their answer field differently — Cursed Code sends an
-     * option key, Bug Hunter a line number, System Design Lab a map of slot to
-     * option — so this returns whichever one was submitted, as a string. A
-     * composite answer is JSON, which keeps one prop shape across every
-     * experience rather than a union the page has to narrow.
+     * Experiences answer in different shapes — Cursed Code an option key, Bug
+     * Hunter a line number, System Design Lab a map of slot to option, Docker
+     * Escape Room a file, a line and a remedy. Rather than keep a list of field
+     * names that every new experience has to be added to, this reports the shape
+     * it finds: a lone scalar as itself, anything else as JSON.
      *
-     * It is the player's own input. The answer key is never sent at any point,
-     * and re-encoding what they sent cannot leak one.
+     * One prop shape across every experience, so the page never has to narrow a
+     * union. It is the player's own input; re-encoding what they sent cannot
+     * leak an answer key, which is never sent at any point.
      */
     private function submittedChoice(ChallengeAttempt $attempt): ?string
     {
         $submission = $attempt->submission ?? [];
 
-        foreach (['answer', 'line', 'choices'] as $field) {
-            $value = $submission[$field] ?? null;
+        if ($submission === []) {
+            return null;
+        }
+
+        if (count($submission) === 1) {
+            $value = reset($submission);
 
             if (is_string($value) || is_int($value)) {
                 return (string) $value;
             }
 
+            // A single composite field is echoed as that field, not wrapped in
+            // its own name — the module that reads it knows what it asked for.
             if (is_array($value)) {
                 return json_encode($value) ?: null;
             }
         }
 
-        return null;
+        return json_encode($submission) ?: null;
     }
 
     /**
