@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\Challenge\BugHunter\BugHunterEvaluator;
 use App\Services\Challenge\CursedCode\CursedCodeEvaluator;
+use App\Services\Challenge\DockerEscapeRoom\DockerEscapeRoomEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
 use App\Services\Challenge\SystemDesignLab\SystemDesignLabEvaluator;
 use Carbon\CarbonImmutable;
@@ -55,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         $registry->register('cursed-code', CursedCodeEvaluator::class);
         $registry->register('bug-hunter', BugHunterEvaluator::class);
         $registry->register('system-design-lab', SystemDesignLabEvaluator::class);
+        $registry->register('docker-escape-room', DockerEscapeRoomEvaluator::class);
     }
 
     /**

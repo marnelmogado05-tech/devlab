@@ -19,7 +19,10 @@ use Database\Seeders\SystemDesignLabSeeder;
  */
 function designChallenge(array $configuration = [], array $solution = []): Challenge
 {
-    $experience = Experience::factory()->published()->create(['slug' => 'system-design-lab']);
+    // Reused rather than recreated, so a test may build more than one challenge
+    // without violating the slug index.
+    $experience = Experience::query()->firstWhere('slug', 'system-design-lab')
+        ?? Experience::factory()->published()->create(['slug' => 'system-design-lab']);
 
     return Challenge::factory()->published()->for($experience)->make([
         'configuration' => [
