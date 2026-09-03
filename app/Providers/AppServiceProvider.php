@@ -8,6 +8,8 @@ use App\Services\Challenge\DockerEscapeRoom\DockerEscapeRoomEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
 use App\Services\Challenge\GitSimulator\GitSimulatorEvaluator;
 use App\Services\Challenge\SystemDesignLab\SystemDesignLabEvaluator;
+use App\Services\Execution\SandboxOrchestrator;
+use App\Services\Execution\UnavailableOrchestrator;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
@@ -31,6 +33,17 @@ class AppServiceProvider extends ServiceProvider
          * resolves — a fresh instance per resolution would know about nothing.
          */
         $this->app->singleton(EvaluatorRegistry::class);
+
+        /*
+         * Phase 3's boundary (ADR 0007). The default REFUSES rather than fakes:
+         * a stub returning a plausible outcome would let a misconfigured
+         * deployment grade submissions against nothing, which looks like it
+         * works and is worse than an outage.
+         *
+         * Nothing binds a real orchestrator yet, and law 2 holds until the
+         * checklist in docs/security/sandbox-threat-model.md is done.
+         */
+        $this->app->bind(SandboxOrchestrator::class, UnavailableOrchestrator::class);
     }
 
     /**
