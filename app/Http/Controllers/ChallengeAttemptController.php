@@ -146,19 +146,27 @@ class ChallengeAttemptController extends Controller
      * The player's own choice, echoed back so a closed attempt can show it.
      *
      * Experiences name their answer field differently — Cursed Code sends an
-     * option key, Bug Hunter a line number — so this returns whichever single
-     * scalar was submitted, as a string. It is the player's own input; the answer
-     * key is never sent at any point.
+     * option key, Bug Hunter a line number, System Design Lab a map of slot to
+     * option — so this returns whichever one was submitted, as a string. A
+     * composite answer is JSON, which keeps one prop shape across every
+     * experience rather than a union the page has to narrow.
+     *
+     * It is the player's own input. The answer key is never sent at any point,
+     * and re-encoding what they sent cannot leak one.
      */
     private function submittedChoice(ChallengeAttempt $attempt): ?string
     {
         $submission = $attempt->submission ?? [];
 
-        foreach (['answer', 'line'] as $field) {
+        foreach (['answer', 'line', 'choices'] as $field) {
             $value = $submission[$field] ?? null;
 
             if (is_string($value) || is_int($value)) {
                 return (string) $value;
+            }
+
+            if (is_array($value)) {
+                return json_encode($value) ?: null;
             }
         }
 
