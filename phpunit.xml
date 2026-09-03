@@ -14,6 +14,9 @@
         <testsuite name="Integration">
             <directory>tests/Integration</directory>
         </testsuite>
+        <testsuite name="Sandbox">
+            <directory>tests/Sandbox</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

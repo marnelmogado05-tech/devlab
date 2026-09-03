@@ -157,6 +157,48 @@ services:
             retries: 10
         networks: [devlab]
 
+    # The execution orchestrator (ADR 0007). Phase 3.
+    #
+    # Behind a PROFILE, so it does not start with `docker compose up`. This is
+    # the one service that holds container-creation privilege, and the default
+    # development stack should not silently gain a privileged container because
+    # somebody pulled main. Start it deliberately:
+    #
+    #     docker compose --profile execution up -d orchestrator
+    #
+    # It holds the Docker socket and nothing else — no database, no Redis, no
+    # application code. A component that cannot reach the database cannot leak
+    # it, however badly it is compromised.
+    orchestrator:
+        profiles: ['execution']
+        build:
+            context: .
+            dockerfile: docker/orchestrator/Dockerfile
+        container_name: devlab-orchestrator
+        restart: unless-stopped
+        environment:
+            ORCHESTRATOR_PORT: 8090
+            # gVisor is what S1 actually depends on, and it is not present on
+            # Docker Desktop. Left empty here so a local stack runs the weaker
+            # runc boundary KNOWINGLY — the /health endpoint reports which is in
+            # use. See docs/security/sandbox-threat-model.md.
+            SANDBOX_RUNTIME: '${SANDBOX_RUNTIME:-}'
+            # How long a container may take to EXIST before the submission's own
+            # clock starts. Tens of milliseconds on a Linux host; measured at 12
+            # to 35 seconds on Docker Desktop under load, which is longer than
+            # most submissions are allowed to run. Without a separate allowance
+            # a slow machine looks exactly like hostile code.
+            SANDBOX_START_ALLOWANCE_MS: '${SANDBOX_START_ALLOWANCE_MS:-25000}'
+        volumes:
+            # The privilege this whole architecture exists to contain. It is
+            # here and nowhere else: no other service mounts it, and a test in
+            # the suite asserts that.
+            - /var/run/docker.sock:/var/run/docker.sock
+        ports:
+            - '${ORCHESTRATOR_PORT_HOST:-8090}:8090'
+        networks:
+            - devlab
+
 volumes:
     postgres-data:
     redis-data:

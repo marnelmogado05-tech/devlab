@@ -166,14 +166,47 @@ how _fast_ someone submits; this bounds how much of the pool they hold at any in
 - [ ] This threat model reviewed — **in review**
 - [x] The boundary itself: `SandboxOrchestrator`, with a default binding that **refuses** rather
       than fakes, so a misconfigured deployment cannot silently grade against nothing
-- [x] S5 and S7 controls built and tested — the remaining controls need a runner to attack
-- [ ] Abuse test suite: S1, S3, S4 above, each as an executable test against a real sandbox
+- [x] S5 and S7 controls built and tested
+- [x] Abuse suite written and run against a real container — `tests/Sandbox/`, opt-in via
+      `DEVLAB_SANDBOX_TESTS=1`. **See the verification table below for what it actually proved.**
+- [ ] The suite green on a Linux host with `runsc`, which is the only run that speaks to S1
+- [ ] Independent security review by `devlab-security`
 - [ ] A dedicated security review by `devlab-security`; ordinary feature review does not cover this
 - [ ] Per-execution resource logging (CPU, memory, duration, exit code, killed-by) as both an abuse
       signal and a cost signal (§42)
 - [ ] Documented behaviour when the pool is exhausted or the orchestrator is unavailable
 - [ ] A written statement of which runtime a deployment uses, because the `runc` fallback is
       materially weaker than gVisor and nobody should have to read a compose file to find out
+
+## Verification status
+
+Run on 2026-09-03 against a real orchestrator and real containers, on Docker Desktop, **runtime
+`runc`**.
+
+| Control                                   | Threat | Verified | Note                                         |
+| ----------------------------------------- | ------ | -------- | -------------------------------------------- |
+| Fork bomb contained                       | S3     | yes      | PID limit                                    |
+| Memory bomb OOM-killed, not swapped       | S3     | yes      | `--memory` = `--memory-swap`                 |
+| Infinite loop stopped                     | S3     | yes      | Orchestrator deadline                        |
+| No network reachable                      | S4     | yes      | `--network none`                             |
+| Read-only root, entrypoint not writable   | S4     | yes      |                                              |
+| No credentials in the sandbox environment | S4     | yes      |                                              |
+| Unprivileged user, no capabilities        | S1/S3  | yes      | `uid=65534`, `CapEff: 0000000000000000`      |
+| Hostile output stored inert               | S5     | yes      | Escapes and NULs stripped, HTML kept as text |
+| Output flood capped end to end            | S5     | **no**   | Not completed here — see below               |
+| One submission cannot see another         | S4     | **no**   | Not completed here — see below               |
+| **Container escape**                      | **S1** | **no**   | Needs gVisor; not runnable on Docker Desktop |
+
+**Why two rows say "not completed" rather than "failed".** Container start on the machine used
+ranged from 12 to over 60 seconds under load, which is longer than a submission's own timeout. A
+run killed while the container is still starting returns an empty result, and the test then fails
+having exercised nothing. That is a statement about the machine, not about the control. Both tests
+are in the suite and expected to pass on a host where a container starts in tens of milliseconds.
+
+**S1 remains unverified, and no run on Docker Desktop can change that.** gVisor is what the control
+depends on and `runsc` does not run there. The suite prints a warning when it detects the fallback,
+and the orchestrator's `/health` reports the runtime in use, so a green run cannot be mistaken for
+evidence it is not.
 
 ## What this model does not cover
 
