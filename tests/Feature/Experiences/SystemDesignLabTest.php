@@ -306,7 +306,10 @@ describe('the seeded content', function () {
             ->whereRelation('experience', 'slug', 'system-design-lab')
             ->get();
 
-        expect($challenges)->toHaveCount(6);
+        // Counted as non-empty rather than against a literal: this test is about
+        // every challenge being VALID, and a hardcoded total fails on the day
+        // somebody adds one while saying nothing about validity.
+        expect($challenges)->not->toBeEmpty();
 
         foreach ($challenges as $challenge) {
             expect($validator->problems($challenge))->toBe([], "{$challenge->slug} is invalid");

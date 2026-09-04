@@ -264,6 +264,76 @@ class CursedCodeSeeder extends Seeder
                     .'empty: the result is -Infinity, which is a number, so it passes a typeof check '
                     .'and then poisons whatever arithmetic follows.',
             ],
+            [
+                'slug' => 'php-dangling-foreach-reference',
+                'title' => 'The loop that ate its own tail',
+                'description' => 'Two loops. The second one only reads. The array changes anyway.',
+                'objective' => 'Predict what this prints.',
+                'difficulty' => 'expert',
+                'type' => 'guess_output',
+                'points' => 500,
+                'estimated_minutes' => 8,
+                'tags' => ['php', 'references', 'foreach'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'language' => 'php',
+                    'mode' => 'guess_output',
+                    'snippet' => '<?php
+
+'
+                        ."\$items = ['a', 'b', 'c'];
+
+"
+                        .'foreach ($items as &$item) {
+'
+                        .'    $item = strtoupper($item);
+'
+                        .'}
+
+'
+                        .'foreach ($items as $item) {
+'
+                        .'    // deliberately empty
+'
+                        .'}
+
+'
+                        .'print_r($items);',
+                    'prompt' => 'What does this print?',
+                    'options' => [
+                        ['key' => 'a', 'text' => 'Array ( [0] => A [1] => B [2] => C )'],
+                        ['key' => 'b', 'text' => 'Array ( [0] => A [1] => B [2] => B )'],
+                        ['key' => 'c', 'text' => 'Array ( [0] => a [1] => b [2] => c )'],
+                        ['key' => 'd', 'text' => 'Array ( [0] => A [1] => A [2] => A )'],
+                    ],
+                ],
+                'solution' => ['answer' => 'b'],
+                'explanation' => 'It prints [A, B, B]. Verified on PHP 8.5.9.
+
+'
+                    .'The first loop is the ordinary part: each element is upper-cased through the '
+                    .'reference, giving [A, B, C]. What matters is what SURVIVES it — after a '
+                    .'foreach by reference, $item is still a reference to the last element, and PHP '
+                    .'does not unset it when the loop ends.
+
+'
+                    .'So the second loop is not reading into a fresh variable. Every iteration '
+                    ."assigns into \$items[2]. Pass one writes 'A' there, pass two writes 'B', and "
+                    ."pass three reads \$items[2] — which is now 'B' — and writes it back to "
+                    .'itself. The array ends [A, B, B].
+
+'
+                    .'The tell is that the last element always ends up holding the SECOND-TO-LAST '
+                    .'value: the final read happens after the slot has already been overwritten.
+
+'
+                    .'`unset($item)` immediately after any foreach by reference ends it. This is '
+                    .'why some teams ban `foreach ($x as &$y)` outright — the bug appears in code '
+                    .'far from the reference, and reads as data corruption rather than as a loop '
+                    .'problem.',
+            ],
         ];
     }
 }

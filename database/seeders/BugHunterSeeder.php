@@ -323,6 +323,78 @@ class BugHunterSeeder extends Seeder
                     .'genuine concurrency — which is also why the database, not the application, has '
                     .'to be the thing enforcing it.',
             ],
+            [
+                'slug' => 'distributed-lock-released-by-a-stranger',
+                'title' => 'The lock that let three workers in',
+                'description' => 'A payout runs twice a month, always under load, never in staging.',
+                'objective' => 'Find the line containing the defect.',
+                'difficulty' => 'expert',
+                'type' => 'locate',
+                'points' => 500,
+                'estimated_minutes' => 12,
+                'tags' => ['distributed-systems', 'locking', 'redis', 'concurrency'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'language' => 'php',
+                    'mode' => 'locate',
+                    'context' => 'Take a lock so only one worker pays out a given payout, then release it.',
+                    'snippet' => implode('
+', [
+                        'public function processPayout(int $payoutId): void',
+                        '{',
+                        '    $acquired = $this->redis->set(',
+                        '        "payout:{$payoutId}", $this->workerId, ["NX", "EX" => 30]',
+                        '    );',
+                        '',
+                        '    if (! $acquired) {',
+                        '        return;',
+                        '    }',
+                        '',
+                        '    try {',
+                        '        $payout = $this->payouts->find($payoutId);',
+                        '        $this->bank->transfer($payout->account, $payout->amount);',
+                        '        $this->payouts->markSent($payoutId);',
+                        '    } finally {',
+                        '        $this->redis->del("payout:{$payoutId}");',
+                        '    }',
+                        '}',
+                    ]),
+                    'prompt' => 'Which line lets a second worker be paid out?',
+                ],
+                'solution' => [
+                    'lines' => [16],
+                    'summary' => 'The release does not check that the lock is still ours.',
+                ],
+                'explanation' => 'The defect is the unconditional delete in the finally block.
+
+'
+                    .'Acquisition is correct: SET NX EX is atomic, and the worker id is written as '
+                    .'the value precisely so ownership can be checked later. Nothing checks it.
+
+'
+                    .'The failure needs the 30-second expiry to pass while the transfer is still '
+                    .'running — a slow bank call, a long GC pause, or the worker being descheduled. '
+                    .'At that moment the lock expires on its own and worker B legitimately acquires '
+                    .'it. Worker A then finishes, reaches its finally, and deletes a key it no longer '
+                    .'owns. The lock is now free while worker B still believes it holds it, so '
+                    .'worker C acquires it too — and the payout goes out twice.
+
+'
+                    .'Nothing in the code is wrong in isolation, which is why this survives review '
+                    .'and never reproduces in staging: it needs real latency and real concurrency at '
+                    .'the same time.
+
+'
+                    .'The release must be conditional on ownership, and it must be ATOMIC — a GET '
+                    .'followed by a DEL has the same race one layer down. In Redis that is a small '
+                    .'Lua script comparing the value before deleting. The deeper fix is a fencing '
+                    .'token: the lock hands out a monotonically increasing number, and the resource '
+                    .'being protected rejects any write carrying a token older than the last one it '
+                    .'accepted. That is the only version that stays correct when a process pauses '
+                    .'for longer than the lease.',
+            ],
         ];
     }
 }
