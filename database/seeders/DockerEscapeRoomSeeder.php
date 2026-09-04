@@ -607,6 +607,186 @@ class DockerEscapeRoomSeeder extends Seeder
                     .'failure slower rather than absent, and on most orchestrators is unavailable '
                     .'anyway. restart: always turns a crash into a crash loop.',
             ],
+            [
+                'slug' => 'multi-stage-missing-runtime-dependency',
+                'title' => 'It compiled, so it must run',
+                'description' => 'The build is green. The container exits before it logs anything.',
+                'objective' => 'Find the fault and say what fixes it.',
+                'difficulty' => 'hard',
+                'type' => 'diagnose',
+                'points' => 200,
+                'estimated_minutes' => 9,
+                'tags' => ['docker', 'multi-stage', 'builds'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'symptom' => 'The image builds successfully. Starting it, the container exits '
+                        .'immediately with a shared library error and no application output. The '
+                        .'same code runs under the build stage image.',
+                    'evidence' => [
+                        [
+                            'key' => 'dockerfile',
+                            'label' => 'Dockerfile',
+                            'language' => 'dockerfile',
+                            'content' => implode("\n", [
+                                'FROM php:8.4-cli AS build',
+                                'RUN apt-get update && apt-get install -y libpq-dev',
+                                'RUN docker-php-ext-install pdo_pgsql',
+                                'WORKDIR /app',
+                                'COPY . .',
+                                'RUN composer install --no-dev',
+                                '',
+                                'FROM php:8.4-cli-alpine',
+                                'WORKDIR /app',
+                                'COPY --from=build /app /app',
+                                'CMD ["php", "artisan", "queue:work"]',
+                            ]),
+                        ],
+                        [
+                            'key' => 'logs',
+                            'label' => 'Container logs',
+                            'language' => 'text',
+                            'selectable' => false,
+                            'content' => implode("\n", [
+                                'worker | PHP Warning:  PHP Startup: Unable to load dynamic library',
+                                'worker |   pdo_pgsql: Error loading shared library libpq.so.5',
+                                'worker | could not find driver',
+                                'worker exited with code 255',
+                            ]),
+                        ],
+                        [
+                            'key' => 'compose',
+                            'label' => 'docker-compose.yml',
+                            'language' => 'yaml',
+                            'content' => implode("\n", [
+                                'services:',
+                                '    worker:',
+                                '        build: .',
+                                '        environment:',
+                                '            DB_CONNECTION: pgsql',
+                            ]),
+                        ],
+                    ],
+                    'fixes' => [
+                        ['key' => 'build_ext_in_final', 'text' => 'Install the extension and its runtime library in the final stage as well'],
+                        ['key' => 'single_stage', 'text' => 'Abandon the multi-stage build and ship the build image'],
+                        ['key' => 'copy_so', 'text' => 'Copy the .so file across from the build stage'],
+                        ['key' => 'change_driver', 'text' => 'Switch the application to a different database driver'],
+                    ],
+                ],
+                'solution' => [
+                    'evidence' => 'dockerfile',
+                    'line' => 8,
+                    'fix' => 'build_ext_in_final',
+                    'summary' => 'The final stage is a different base image with none of the build stage extensions.',
+                ],
+                'explanation' => 'The fault is the second FROM. It starts a new stage from a '
+                    .'DIFFERENT base - Alpine rather than Debian - carrying nothing from the first '
+                    ."except what is explicitly copied.\n\n"
+                    .'The COPY brings the application across. It does not bring the compiled '
+                    .'pdo_pgsql extension, and it does not bring libpq, which the extension links '
+                    .'against. The logs say both things in order: the extension fails to load, then '
+                    ."the driver is missing.\n\n"
+                    .'Copying the .so alone is the tempting shortcut and does not work here: it was '
+                    .'built against Debian glibc and the final stage is Alpine musl. Even matching '
+                    .'the base, you would still need the runtime library the extension links '
+                    ."against.\n\n"
+                    .'A multi-stage build gives you a smaller image by throwing the build toolchain '
+                    .'away. The discipline it demands is knowing exactly which artefacts must '
+                    .'survive - and a compiled extension is not one file, it is a file plus '
+                    .'everything it links to.',
+            ],
+            [
+                'slug' => 'dockerignore-lets-the-host-in',
+                'title' => 'Built on Linux, full of macOS',
+                'description' => 'The image works for one developer and nobody else.',
+                'objective' => 'Find the fault and say what fixes it.',
+                'difficulty' => 'medium',
+                'type' => 'diagnose',
+                'points' => 150,
+                'estimated_minutes' => 6,
+                'tags' => ['docker', 'builds', 'dockerignore'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'symptom' => 'The image builds on every machine. On CI it starts and crashes '
+                        .'with an invalid ELF header from a native module. Building on a colleague '
+                        .'Linux laptop produces a working image.',
+                    'evidence' => [
+                        [
+                            'key' => 'dockerfile',
+                            'label' => 'Dockerfile',
+                            'language' => 'dockerfile',
+                            'content' => implode("\n", [
+                                'FROM node:22-alpine',
+                                'WORKDIR /app',
+                                'COPY . .',
+                                'RUN npm ci --omit=dev',
+                                'CMD ["node", "server.js"]',
+                            ]),
+                        ],
+                        [
+                            'key' => 'ignore',
+                            'label' => '.dockerignore',
+                            'language' => 'text',
+                            'content' => implode("\n", [
+                                '.git',
+                                '*.md',
+                            ]),
+                        ],
+                        [
+                            'key' => 'logs',
+                            'label' => 'Container logs',
+                            'language' => 'text',
+                            'selectable' => false,
+                            'content' => implode("\n", [
+                                'api | Error: /app/node_modules/sharp/build/Release/sharp.node:',
+                                'api |   invalid ELF header',
+                                'api exited with code 1',
+                            ]),
+                        ],
+                    ],
+                    'fixes' => [
+                        ['key' => 'ignore_modules', 'text' => 'Add node_modules to .dockerignore so the host copy never enters the build'],
+                        ['key' => 'rebuild_native', 'text' => 'Run npm rebuild after the install'],
+                        ['key' => 'no_cache', 'text' => 'Build with --no-cache'],
+                        ['key' => 'copy_manifest_only', 'text' => 'Copy only package.json before installing, and the source afterwards'],
+                    ],
+                ],
+                'solution' => [
+                    /*
+                     * The Dockerfile's COPY, not the .dockerignore.
+                     *
+                     * The fault is really an ABSENCE - node_modules is not
+                     * excluded - and an absence has no line to point at. Asking
+                     * a player to select `.git`, which is correct and harmless,
+                     * would be asking them to guess. The COPY is where the host
+                     * directory actually enters the image, it is locatable, and
+                     * the .dockerignore panel is the evidence that nothing stops
+                     * it.
+                     */
+                    'evidence' => 'dockerfile',
+                    'line' => 3,
+                    'fix' => 'ignore_modules',
+                    'summary' => 'COPY . . brings the host node_modules in, because nothing excludes it.',
+                ],
+                'explanation' => 'The fault is what the .dockerignore does NOT contain. Without '
+                    .'node_modules in it, COPY . . carries the developer host modules into the '
+                    ."image - including native binaries compiled for the wrong platform.\n\n"
+                    .'npm ci then finds a node_modules directory that already looks satisfied for '
+                    .'the packages it checks, and the mismatched native binary survives into the '
+                    .'running container. Hence the invalid ELF header: an x86-64 macOS or Windows '
+                    ."build being loaded by Alpine Linux.\n\n"
+                    .'It works for the colleague on Linux because their host binaries happen to be '
+                    ."compatible enough to load. That is luck, not correctness.\n\n"
+                    .'Copying the manifest first is genuinely good practice and fixes the caching '
+                    .'problem rather than this one - the host node_modules would still be copied by '
+                    .'the later COPY. The exclusion is what actually keeps the build context clean, '
+                    .'and it is worth remembering that .dockerignore is about what the DAEMON is '
+                    .'sent, not only about what lands in the image.',
+            ],
         ];
     }
 }

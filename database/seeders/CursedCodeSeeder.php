@@ -334,6 +334,99 @@ class CursedCodeSeeder extends Seeder
                     .'far from the reference, and reads as data corruption rather than as a loop '
                     .'problem.',
             ],
+            [
+                'slug' => 'js-map-parseint',
+                'title' => 'Three strings, one survivor',
+                'description' => 'A one-line conversion that works for exactly the first element.',
+                'objective' => 'Predict what this prints.',
+                'difficulty' => 'hard',
+                'type' => 'guess_output',
+                'points' => 200,
+                'estimated_minutes' => 5,
+                'tags' => ['javascript', 'callbacks', 'coercion'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'language' => 'javascript',
+                    'mode' => 'guess_output',
+                    'snippet' => implode("\n", [
+                        'const ids = ["1", "2", "3"];',
+                        '',
+                        'console.log(ids.map(parseInt).join(", "));',
+                    ]),
+                    'prompt' => 'What does this print?',
+                    'options' => [
+                        ['key' => 'a', 'text' => '1, 2, 3'],
+                        ['key' => 'b', 'text' => '1, NaN, NaN'],
+                        ['key' => 'c', 'text' => 'NaN, NaN, NaN'],
+                        ['key' => 'd', 'text' => '1, 2, NaN'],
+                    ],
+                ],
+                'solution' => ['answer' => 'b'],
+                'explanation' => "It prints 1, NaN, NaN. Verified on Node v24.18.0.\n\n"
+                    .'map calls its callback with THREE arguments - the element, the index and the '
+                    .'array - and parseInt takes TWO: the string and a radix. So the index is being '
+                    ."passed as the radix on every call.\n\n"
+                    .'parseInt("1", 0) is 1, because radix 0 means "guess", and it guesses '
+                    ."base 10.\n"
+                    ."parseInt(\"2\", 1) is NaN, because base 1 is not a valid radix.\n"
+                    ."parseInt(\"3\", 2) is NaN, because 3 is not a digit in binary.\n\n"
+                    .'The last one is the giveaway: it fails not because the radix is invalid but '
+                    .'because the DIGIT is. Had the array been ["1", "2", "10"], the '
+                    .'third would have parsed happily as binary and returned 2 - a wrong answer that '
+                    ."looks like a right one.\n\n"
+                    .'This is why passing a named function straight into map is a habit worth '
+                    .'distrusting whenever that function takes optional arguments. '
+                    .'ids.map((id) => parseInt(id, 10)) says what you meant.',
+            ],
+            [
+                'slug' => 'php-string-increment',
+                'title' => 'The letter after z',
+                'description' => 'A counter that was never meant to hold letters, holding letters.',
+                'objective' => 'Predict what this prints.',
+                'difficulty' => 'medium',
+                'type' => 'guess_output',
+                'points' => 150,
+                'estimated_minutes' => 4,
+                'tags' => ['php', 'strings', 'operators'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'language' => 'php',
+                    'mode' => 'guess_output',
+                    'snippet' => implode("\n", [
+                        '<?php',
+                        '',
+                        '$code = \'z\';',
+                        '$code++;',
+                        '',
+                        'echo $code;',
+                    ]),
+                    'prompt' => 'What does this print?',
+                    'options' => [
+                        ['key' => 'a', 'text' => '{'],
+                        ['key' => 'b', 'text' => 'aa'],
+                        ['key' => 'c', 'text' => '1'],
+                        ['key' => 'd', 'text' => 'A TypeError'],
+                    ],
+                ],
+                'solution' => ['answer' => 'b'],
+                'explanation' => "It prints aa. Verified on PHP 8.5.9.\n\n"
+                    ."PHP's increment operator on a string is not arithmetic and it is not the "
+                    ."character's code point. It is Perl-style alphanumeric increment: the last "
+                    .'character advances, and when it wraps past z it carries into the character to '
+                    ."its left - exactly like a spreadsheet column going from Z to AA.\n\n"
+                    ."So 'Az' becomes 'Ba', and 'a9' becomes 'b0'. Case is preserved and the carry "
+                    ."crosses letters and digits separately.\n\n"
+                    .'The trap is asymmetry: there is no matching DECREMENT. $code-- on a string '
+                    .'leaves it untouched, silently, which is how this arrives in production as a '
+                    ."loop that counts up and refuses to count back down.\n\n"
+                    .'It reaches real code through identifiers that look numeric - invoice codes, '
+                    .'seat numbers, SKUs - read from a CSV as strings and incremented as though '
+                    .'they were integers.',
+            ],
         ];
     }
 }

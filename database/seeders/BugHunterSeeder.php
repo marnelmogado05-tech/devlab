@@ -395,6 +395,116 @@ class BugHunterSeeder extends Seeder
                     .'accepted. That is the only version that stays correct when a process pauses '
                     .'for longer than the lease.',
             ],
+            [
+                'slug' => 'money-compared-as-a-float',
+                'title' => 'The refund that never settles',
+                'description' => 'A balance that is zero, according to everybody except the code.',
+                'objective' => 'Find the line containing the defect.',
+                'difficulty' => 'hard',
+                'type' => 'locate',
+                'points' => 200,
+                'estimated_minutes' => 7,
+                'tags' => ['php', 'floating-point', 'money'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'language' => 'php',
+                    'mode' => 'locate',
+                    'context' => 'Amounts are decimal pounds. Refund whatever is left, or nothing if the order is settled.',
+                    'snippet' => implode("\n", [
+                        'public function refundRemaining(int $orderId): void',
+                        '{',
+                        '    $order = $this->orders->find($orderId);',
+                        '',
+                        '    $balance = 0.0;',
+                        '',
+                        '    foreach ($order->lines as $line) {',
+                        '        $balance += $line->price * $line->quantity;',
+                        '    }',
+                        '',
+                        '    foreach ($order->refunds as $refund) {',
+                        '        $balance -= $refund->amount;',
+                        '    }',
+                        '',
+                        '    if ($balance === 0.0) {',
+                        '        return;',
+                        '    }',
+                        '',
+                        '    $this->payments->refund($order, $balance);',
+                        '}',
+                    ]),
+                    'prompt' => 'Which line decides wrongly?',
+                ],
+                'solution' => [
+                    'lines' => [15],
+                    'summary' => 'Exact equality against an accumulated float.',
+                ],
+                'explanation' => "The defect is the exact comparison on line 15.\n\n"
+                    .'A fully refunded order does not leave $balance at exactly 0.0. It leaves it '
+                    .'at something like 1.4e-16, because the line totals and the refunds were each '
+                    .'rounded to the nearest representable double on the way in and those errors do '
+                    .'not cancel. The comparison is false, the guard does not fire, and the '
+                    .'customer is refunded a fraction of a penny - or the payment provider rejects '
+                    ."the request and the job retries forever.\n\n"
+                    .'It is worth being precise about why line 5 is not the answer. Initialising an '
+                    .'accumulator to 0.0 is fine; accumulating in floats is the underlying design '
+                    .'mistake, but the LINE that behaves wrongly is the one asserting an exact '
+                    ."equality that floating point does not promise.\n\n"
+                    .'The immediate fix is a tolerance: abs($balance) < 0.005 for pounds. The real '
+                    .'fix is integers - store pennies, never pounds - which is why every payment '
+                    .'API in the world takes an integer minor unit.',
+            ],
+            [
+                'slug' => 'isset-hides-a-deliberate-null',
+                'title' => 'Retry forever, for about three attempts',
+                'description' => 'The configuration says null. The code has never seen it.',
+                'objective' => 'Find the line containing the defect.',
+                'difficulty' => 'medium',
+                'type' => 'locate',
+                'points' => 150,
+                'estimated_minutes' => 5,
+                'tags' => ['php', 'null-handling', 'configuration'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'language' => 'php',
+                    'mode' => 'locate',
+                    'context' => 'A queue may set retries to null, which means retry forever. Anything unset falls back to the default.',
+                    'snippet' => implode("\n", [
+                        'public function retriesFor(string $queue): int',
+                        '{',
+                        '    $config = $this->config->get("queues.{$queue}");',
+                        '',
+                        '    $retries = isset($config[\'retries\'])',
+                        '        ? $config[\'retries\']',
+                        '        : self::DEFAULT_RETRIES;',
+                        '',
+                        '    return $retries ?? PHP_INT_MAX;',
+                        '}',
+                    ]),
+                    'prompt' => 'Which line stops "retry forever" from ever happening?',
+                ],
+                'solution' => [
+                    'lines' => [5],
+                    'summary' => 'isset() is false for a value that exists and is null.',
+                ],
+                'explanation' => "The defect is isset() on line 5.\n\n"
+                    .'isset() does not ask whether a key exists. It asks whether the key exists AND '
+                    .'its value is not null - which makes it exactly the wrong test when null is a '
+                    ."meaningful value.\n\n"
+                    .'A queue configured with retries set to null takes the else branch and gets '
+                    ."DEFAULT_RETRIES. Line 9's null coalescing, written specifically to turn null "
+                    ."into 'forever', is unreachable for that case: by the time control reaches it, "
+                    ."the null has already been replaced.\n\n"
+                    .'The fix is array_key_exists(), which asks the question actually being asked. '
+                    ."The same distinction bites with ?? and with Laravel's config() default "
+                    ."argument, both of which treat a stored null as absent.\n\n"
+                    .'The deeper lesson is that null carrying meaning is a design smell. A queue '
+                    .'that retries forever is better expressed as a constant - RETRY_FOREVER = -1 - '
+                    .'because then no lookup helper can mistake the value for its own absence.',
+            ],
         ];
     }
 }
