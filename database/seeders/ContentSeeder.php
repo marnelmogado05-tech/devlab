@@ -31,6 +31,7 @@ class ContentSeeder extends Seeder
             SystemDesignLabSeeder::class,
             DockerEscapeRoomSeeder::class,
             GitSimulatorSeeder::class,
+            CodeArenaSeeder::class,
         ]);
     }
 }

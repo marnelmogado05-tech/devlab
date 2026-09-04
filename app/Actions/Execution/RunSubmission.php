@@ -45,7 +45,7 @@ class RunSubmission
         try {
             $this->quota->acquire($user);
         } catch (SandboxUnavailable $e) {
-            $this->recorder->recordUnavailable($user, $request, 'quota');
+            $this->recorder->recordUnavailable($user, $request, $e->reason());
 
             throw $e;
         }
@@ -61,7 +61,7 @@ class RunSubmission
              * returning an outcome at all — there is no ExecutionOutcome that
              * could describe "we did not try".
              */
-            $this->recorder->recordUnavailable($user, $request, 'unavailable');
+            $this->recorder->recordUnavailable($user, $request, $e->reason());
 
             throw $e;
         } finally {

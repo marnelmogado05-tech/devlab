@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Services\Challenge\BugHunter\BugHunterEvaluator;
+use App\Services\Challenge\CodeArena\CodeArenaEvaluator;
 use App\Services\Challenge\CursedCode\CursedCodeEvaluator;
 use App\Services\Challenge\DockerEscapeRoom\DockerEscapeRoomEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
 use App\Services\Challenge\GitSimulator\GitSimulatorEvaluator;
 use App\Services\Challenge\SystemDesignLab\SystemDesignLabEvaluator;
+use App\Services\Execution\ExecutionQuota;
 use App\Services\Execution\HttpOrchestrator;
 use App\Services\Execution\SandboxOrchestrator;
 use App\Services\Execution\UnavailableOrchestrator;
@@ -41,8 +43,10 @@ class AppServiceProvider extends ServiceProvider
          * deployment grade submissions against nothing, which looks like it
          * works and is worse than an outage.
          *
-         * Nothing binds a real orchestrator yet, and law 2 holds until the
-         * checklist in docs/security/sandbox-threat-model.md is done.
+         * Code Arena is what reaches this (ADR 0008), through ExecuteSubmission
+         * and nothing else. Law 2 holds until the checklist in
+         * docs/security/sandbox-threat-model.md is done, which is why `enabled`
+         * defaults to false and the refusing binding is what a fresh clone gets.
          */
         $this->app->bind(
             SandboxOrchestrator::class,
@@ -50,6 +54,13 @@ class AppServiceProvider extends ServiceProvider
                 ? HttpOrchestrator::fromConfig()
                 : new UnavailableOrchestrator,
         );
+
+        /*
+         * S7's counter. Built from config here rather than constructed at the
+         * call site so that every caller charges the same pool — a quota one
+         * component builds with its own numbers is not a quota.
+         */
+        $this->app->bind(ExecutionQuota::class, ExecutionQuota::fromConfig(...));
     }
 
     /**
@@ -78,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
         $registry->register('system-design-lab', SystemDesignLabEvaluator::class);
         $registry->register('docker-escape-room', DockerEscapeRoomEvaluator::class);
         $registry->register('git-simulator', GitSimulatorEvaluator::class);
+        $registry->register('code-arena', CodeArenaEvaluator::class);
     }
 
     /**
@@ -114,6 +126,17 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('submission', fn (Request $request) => Limit::perMinute(
             (int) config('devlab.rate_limits.submission')
         )->by($request->user()?->id ?: $request->ip()));
+
+        /*
+         * Running code creates a container, which is the most expensive thing an
+         * authenticated user can ask for (§41, §42). Keyed by user only: this
+         * route is behind auth, so there is no unauthenticated case to fall back
+         * to, and an IP key would let one account spread its cost across a
+         * network it shares with people it is throttling.
+         */
+        RateLimiter::for('execution', fn (Request $request) => Limit::perMinute(
+            (int) config('devlab.rate_limits.execution')
+        )->by((string) $request->user()?->id));
     }
 
     /**

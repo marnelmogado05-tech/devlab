@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Attempts;
 
 use App\Models\ChallengeAttempt;
+use App\Services\Challenge\AttemptScopedRules;
 use App\Services\Challenge\EvaluatorRegistry;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -31,11 +32,27 @@ class SubmitAttemptRequest extends FormRequest
         $attempt = $this->attempt();
         $attempt->load('challenge.experience');
 
+        $evaluator = $evaluators->for($attempt->challenge);
+
+        /*
+         * Most experiences answer with a value and need only the challenge to
+         * describe it. An experience whose answer NAMES A ROW — Code Arena
+         * submits the id of a run that already happened (ADR 0008) — needs the
+         * attempt as well, or the only rule it could write would accept any
+         * row belonging to anybody.
+         *
+         * An `instanceof` rather than a slug switch: this class must not become
+         * the conditional the evaluator interface exists to avoid, and an
+         * experience opts in by implementing an interface rather than by being
+         * added to a list here.
+         */
+        $rules = $evaluator instanceof AttemptScopedRules
+            ? $evaluator->attemptSubmissionRules($attempt)
+            : $evaluator->submissionRules($attempt->challenge);
+
         return [
             'submission' => ['required', 'array'],
-            ...$this->prefixed(
-                $evaluators->for($attempt->challenge)->submissionRules($attempt->challenge)
-            ),
+            ...$this->prefixed($rules),
         ];
     }
 
