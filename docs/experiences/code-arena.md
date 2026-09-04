@@ -7,16 +7,16 @@
 
 ## 1. Metadata
 
-| Field                | Value                                                  |
-| -------------------- | ------------------------------------------------------ |
-| Slug                 | `code-arena`                                           |
-| Name                 | Code Arena                                             |
-| Blurb                | Write the function. The sandbox will tell you.         |
-| Category             | `coding`                                               |
-| Tags                 | `php`, plus whatever the problem is about              |
-| Default difficulty   | `medium`                                               |
-| Estimated time       | 15 minutes                                             |
-| In the "Bored" pool? | **No** — see below                                     |
+| Field                | Value                                          |
+| -------------------- | ---------------------------------------------- |
+| Slug                 | `code-arena`                                   |
+| Name                 | Code Arena                                     |
+| Blurb                | Write the function. The sandbox will tell you. |
+| Category             | `coding`                                       |
+| Tags                 | `php`, plus whatever the problem is about      |
+| Default difficulty   | `medium`                                       |
+| Estimated time       | 15 minutes                                     |
+| In the "Bored" pool? | **No** — see below                             |
 
 Code Arena is the only experience whose playability depends on the deployment. With
 `devlab.execution.enabled` off, the container binds an orchestrator that refuses, runs come back
@@ -28,29 +28,29 @@ promise is that pressing it gives you something to do.
 
 `challenges.configuration`, sent to the client in full:
 
-| Field       | Type     | Notes                                                              |
-| ----------- | -------- | ------------------------------------------------------------------ |
-| `runtime`   | string   | A sandbox image name. Only `php-8.4` exists.                        |
-| `entry`     | string   | The function every case calls. `[A-Za-z_][A-Za-z0-9_]*`.            |
-| `signature` | string   | Shown to the player. Display only — nothing parses it.              |
-| `brief`     | string   | What the function must do, including what the edges mean.           |
-| `starter`   | string   | Prefilled editor content. Must mention `entry`.                     |
-| `cases`     | array    | 3 to `devlab.execution.max_cases` entries, ordered. Index is identity. |
+| Field       | Type   | Notes                                                                  |
+| ----------- | ------ | ---------------------------------------------------------------------- |
+| `runtime`   | string | A sandbox image name. Only `php-8.4` exists.                           |
+| `entry`     | string | The function every case calls. `[A-Za-z_][A-Za-z0-9_]*`.               |
+| `signature` | string | Shown to the player. Display only — nothing parses it.                 |
+| `brief`     | string | What the function must do, including what the edges mean.              |
+| `starter`   | string | Prefilled editor content. Must mention `entry`.                        |
+| `cases`     | array  | 3 to `devlab.execution.max_cases` entries, ordered. Index is identity. |
 
 Each case:
 
-| Field      | Type    | Notes                                                                   |
-| ---------- | ------- | ----------------------------------------------------------------------- |
-| `args`     | array   | The arguments, in order. Every case must have the same arity.            |
-| `sample`   | bool    | Whether the case is a worked example.                                    |
-| `label`    | string? | What the case is testing, in words.                                      |
-| `expected` | mixed   | **Samples only.** Hidden cases must not carry one — see §3.              |
+| Field      | Type    | Notes                                                         |
+| ---------- | ------- | ------------------------------------------------------------- |
+| `args`     | array   | The arguments, in order. Every case must have the same arity. |
+| `sample`   | bool    | Whether the case is a worked example.                         |
+| `label`    | string? | What the case is testing, in words.                           |
+| `expected` | mixed   | **Samples only.** Hidden cases must not carry one — see §3.   |
 
 `challenges.solution`, never sent anywhere:
 
-| Field       | Type   | Notes                                                                  |
-| ----------- | ------ | ---------------------------------------------------------------------- |
-| `expected`  | array  | One entry per case, positional. The answer key.                         |
+| Field       | Type   | Notes                                                                                             |
+| ----------- | ------ | ------------------------------------------------------------------------------------------------- |
+| `expected`  | array  | One entry per case, positional. The answer key.                                                   |
 | `reference` | string | The author's own solution. Not executed at runtime; it is the evidence the challenge is solvable. |
 
 The validator (`CodeArenaConfiguration`) refuses, beyond shape:
@@ -124,13 +124,13 @@ and does not reach the score.
 
 ## 6. Attempt lifecycle
 
-| Event     | Meaning                                                                     |
-| --------- | --------------------------------------------------------------------------- |
-| Started   | The attempt row exists. No run has happened.                                 |
-| Completed | A submitted run passed every case.                                           |
-| Failed    | A submitted run did not.                                                     |
-| Abandoned | The player walked away. Runs are kept.                                       |
-| Expired   | The scheduler closed it.                                                     |
+| Event     | Meaning                                      |
+| --------- | -------------------------------------------- |
+| Started   | The attempt row exists. No run has happened. |
+| Completed | A submitted run passed every case.           |
+| Failed    | A submitted run did not.                     |
+| Abandoned | The player walked away. Runs are kept.       |
+| Expired   | The scheduler closed it.                     |
 
 Running code does **not** age the attempt. A player may run up to
 `devlab.execution.runs_per_attempt` times and submit none of them. A run that comes back

@@ -106,7 +106,8 @@ describe('CodeArena', () => {
         render(<CodeArena configuration={configuration()} attemptId={1} />);
 
         expect(
-            (screen.getByLabelText('Your solution') as HTMLTextAreaElement).value,
+            (screen.getByLabelText('Your solution') as HTMLTextAreaElement)
+                .value,
         ).toBe(configuration().starter);
     });
 
@@ -126,8 +127,11 @@ describe('CodeArena', () => {
         render(<CodeArena configuration={configuration()} attemptId={1} />);
 
         expect(
-            (screen.getByRole('button', { name: 'Submit this run' }) as HTMLButtonElement)
-                .disabled,
+            (
+                screen.getByRole('button', {
+                    name: 'Submit this run',
+                }) as HTMLButtonElement
+            ).disabled,
         ).toBe(true);
     });
 
@@ -144,9 +148,7 @@ describe('CodeArena', () => {
     it('marks a hidden case as hidden and shows no expectation for it', async () => {
         vi.stubGlobal('fetch', mockRuns([finishedRun]));
 
-        render(
-            <CodeArena configuration={configuration()} attemptId={1} />,
-        );
+        render(<CodeArena configuration={configuration()} attemptId={1} />);
 
         await screen.findByText('1 of 2 cases passed');
 
@@ -160,7 +162,7 @@ describe('CodeArena', () => {
         expect(hidden?.textContent).toContain('got 99');
     });
 
-    it('says a declined run was not the player\'s fault', async () => {
+    it("says a declined run was not the player's fault", async () => {
         /*
          * S7 reaching the person it affects. A run the platform could not
          * complete must not read as a failed answer — the attempt is untouched
@@ -180,20 +182,34 @@ describe('CodeArena', () => {
 
         render(<CodeArena configuration={configuration()} attemptId={1} />);
 
-        expect(await screen.findByText('This run did not happen.')).toBeTruthy();
         expect(
-            screen.getByText(/Your attempt is untouched/),
+            await screen.findByText('This run did not happen.'),
         ).toBeTruthy();
+        expect(screen.getByText(/Your attempt is untouched/)).toBeTruthy();
     });
 
     it('posts the edited source when the player runs it', async () => {
-        const fetchMock = vi.fn().mockImplementation((_url: string, init?: RequestInit) =>
-            Promise.resolve(
-                init?.method === 'POST'
-                    ? { ok: true, json: async () => ({ run: { ...finishedRun, results: null, status: 'queued' } }) }
-                    : { ok: true, json: async () => ({ runs: [], remaining: 24 }) },
-            ),
-        );
+        const fetchMock = vi
+            .fn()
+            .mockImplementation((_url: string, init?: RequestInit) =>
+                Promise.resolve(
+                    init?.method === 'POST'
+                        ? {
+                              ok: true,
+                              json: async () => ({
+                                  run: {
+                                      ...finishedRun,
+                                      results: null,
+                                      status: 'queued',
+                                  },
+                              }),
+                          }
+                        : {
+                              ok: true,
+                              json: async () => ({ runs: [], remaining: 24 }),
+                          },
+                ),
+            );
 
         vi.stubGlobal('fetch', fetchMock);
 
@@ -207,18 +223,27 @@ describe('CodeArena', () => {
 
         await waitFor(() => {
             const post = fetchMock.mock.calls.find(
-                ([, init]) => (init as RequestInit | undefined)?.method === 'POST',
+                ([, init]) =>
+                    (init as RequestInit | undefined)?.method === 'POST',
             );
 
             expect(post).toBeDefined();
-            expect(JSON.parse((post?.[1] as RequestInit).body as string)).toEqual({
+            expect(
+                JSON.parse((post?.[1] as RequestInit).body as string),
+            ).toEqual({
                 source: 'mine',
             });
         });
     });
 
     it('does not offer a Run button on a closed attempt', () => {
-        render(<CodeArena configuration={configuration()} attemptId={1} readOnly />);
+        render(
+            <CodeArena
+                configuration={configuration()}
+                attemptId={1}
+                readOnly
+            />,
+        );
 
         expect(screen.queryByRole('button', { name: 'Run' })).toBeNull();
         expect(

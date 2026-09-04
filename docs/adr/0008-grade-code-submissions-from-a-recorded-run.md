@@ -38,7 +38,7 @@ transaction, and `CodeArenaEvaluator` grades the recorded values. Evaluation sta
 deterministic and free of I/O beyond one row read, so the transaction is as short as every other
 experience's.
 
-**And the expected outputs never enter the sandbox.** The harness is generated from case *inputs*
+**And the expected outputs never enter the sandbox.** The harness is generated from case _inputs_
 only. Each case runs in its own child process, which calls the player's function and writes the
 returned value to a file; the parent harness — which never loads the submission — reads that file
 and prints it. Comparison against the expected value happens in Laravel, in the evaluator.

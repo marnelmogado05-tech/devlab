@@ -160,13 +160,16 @@ export default function CodeArena({
         }
     };
 
-    const current = runs.find((run) => run.id === (submittedRunId ?? selected)) ?? null;
+    const current =
+        runs.find((run) => run.id === (submittedRunId ?? selected)) ?? null;
     const submittable = current !== null && current.status === 'finished';
 
     return (
         <div className="space-y-6">
             <section className="space-y-3">
-                <p className="text-sm whitespace-pre-line">{configuration.brief}</p>
+                <p className="text-sm whitespace-pre-line">
+                    {configuration.brief}
+                </p>
 
                 <p className="bg-muted rounded-md px-3 py-2 font-mono text-xs">
                     {configuration.signature}
@@ -176,7 +179,10 @@ export default function CodeArena({
             </section>
 
             <section className="space-y-2">
-                <label htmlFor={`source-${attemptId}`} className="text-sm font-medium">
+                <label
+                    htmlFor={`source-${attemptId}`}
+                    className="text-sm font-medium"
+                >
                     Your solution
                 </label>
 
@@ -196,12 +202,18 @@ export default function CodeArena({
 
                 {!readOnly && (
                     <div className="flex flex-wrap items-center gap-3">
-                        <Button type="button" variant="secondary" onClick={() => void start()} disabled={starting}>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => void start()}
+                            disabled={starting}
+                        >
                             {starting ? 'Starting…' : 'Run'}
                         </Button>
 
                         <span className="text-muted-foreground text-xs">
-                            Runs in a sandbox with no network. Run it, then submit the run you want graded.
+                            Runs in a sandbox with no network. Run it, then
+                            submit the run you want graded.
                         </span>
                     </div>
                 )}
@@ -227,22 +239,33 @@ export default function CodeArena({
                 <Form action={submit(attemptId)} method="post">
                     {({ processing, errors }) => (
                         <div className="space-y-2">
-                            <input type="hidden" name="submission[run_id]" value={current?.id ?? ''} />
+                            <input
+                                type="hidden"
+                                name="submission[run_id]"
+                                value={current?.id ?? ''}
+                            />
 
                             {errors['submission.run_id'] && (
-                                <p role="alert" className="text-destructive text-sm">
+                                <p
+                                    role="alert"
+                                    className="text-destructive text-sm"
+                                >
                                     Pick a finished run to submit.
                                 </p>
                             )}
 
-                            <Button type="submit" disabled={processing || !submittable}>
+                            <Button
+                                type="submit"
+                                disabled={processing || !submittable}
+                            >
                                 {processing ? 'Submitting…' : 'Submit this run'}
                             </Button>
 
                             {!submittable && (
                                 <p className="text-muted-foreground text-xs">
-                                    Run your code first. Only a finished run can be submitted — a run the
-                                    platform could not complete is never counted against you.
+                                    Run your code first. Only a finished run can
+                                    be submitted — a run the platform could not
+                                    complete is never counted against you.
                                 </p>
                             )}
                         </div>
@@ -266,7 +289,10 @@ function Samples({ cases }: { cases: CodeArenaCase[] }) {
     return (
         <ul className="divide-border overflow-hidden rounded-md border font-mono text-xs">
             {samples.map((sample) => (
-                <li key={sample.index} className="flex flex-wrap gap-2 px-3 py-2">
+                <li
+                    key={sample.index}
+                    className="flex flex-wrap gap-2 px-3 py-2"
+                >
                     <span className="text-muted-foreground">in</span>
                     <code>{JSON.stringify(sample.args)}</code>
                     <span className="text-muted-foreground">out</span>
@@ -346,15 +372,22 @@ function RunDetail({ run }: { run: Run }) {
 
             <ol className="divide-border overflow-hidden rounded-md border text-xs">
                 {run.results.cases.map((result) => (
-                    <li key={result.case} className="space-y-1 border-b px-3 py-2 last:border-0">
+                    <li
+                        key={result.case}
+                        className="space-y-1 border-b px-3 py-2 last:border-0"
+                    >
                         <div className="flex flex-wrap items-center gap-2">
                             <span
                                 className={cn(
                                     'font-mono font-medium',
-                                    result.passed ? 'text-emerald-600' : 'text-destructive',
+                                    result.passed
+                                        ? 'text-emerald-600'
+                                        : 'text-destructive',
                                 )}
                             >
-                                {result.passed ? 'PASS' : caseLabel(result.status)}
+                                {result.passed
+                                    ? 'PASS'
+                                    : caseLabel(result.status)}
                             </span>
                             <span className="text-muted-foreground">
                                 {result.label ?? `Case ${result.case}`}
@@ -367,12 +400,17 @@ function RunDetail({ run }: { run: Run }) {
                             {JSON.stringify(result.args)}
                             {result.sample && (
                                 <>
-                                    <span className="text-muted-foreground"> want </span>
+                                    <span className="text-muted-foreground">
+                                        {' '}
+                                        want{' '}
+                                    </span>
                                     {JSON.stringify(result.expected)}
                                 </>
                             )}
                             <span className="text-muted-foreground"> got </span>
-                            {result.has_value ? JSON.stringify(result.returned) : '—'}
+                            {result.has_value
+                                ? JSON.stringify(result.returned)
+                                : '—'}
                         </div>
 
                         {result.output && (
@@ -397,7 +435,11 @@ function RunDetail({ run }: { run: Run }) {
 }
 
 function statusLabel(status: string): string {
-    return status === 'queued' ? 'queued' : status === 'running' ? 'running' : status;
+    return status === 'queued'
+        ? 'queued'
+        : status === 'running'
+          ? 'running'
+          : status;
 }
 
 function caseLabel(status: string): string {
