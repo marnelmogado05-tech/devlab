@@ -227,12 +227,18 @@ describe('CodeArena', () => {
                     (init as RequestInit | undefined)?.method === 'POST',
             );
 
-            expect(post).toBeDefined();
-            expect(
-                JSON.parse((post?.[1] as RequestInit).body as string),
-            ).toEqual({
-                source: 'mine',
-            });
+            // Narrowed rather than optional-chained: `post?.[1]` short-circuits
+            // to undefined when no POST was made, and the cast then hides that
+            // behind a TypeError instead of the assertion that was meant to fail.
+            if (!post) {
+                throw new Error('No POST was made.');
+            }
+
+            expect(JSON.parse((post[1] as RequestInit).body as string)).toEqual(
+                {
+                    source: 'mine',
+                },
+            );
         });
     });
 
