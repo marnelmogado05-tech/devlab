@@ -17,6 +17,7 @@ const modules: Record<
     'system-design-lab': () => import('@/experiences/SystemDesignLab'),
     'docker-escape-room': () => import('@/experiences/DockerEscapeRoom'),
     'git-simulator': () => import('@/experiences/GitSimulator'),
+    'code-arena': () => import('@/experiences/CodeArena'),
 };
 
 export interface ExperienceModuleProps {

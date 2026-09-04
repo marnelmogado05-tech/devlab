@@ -26,12 +26,12 @@ validator, a registered evaluator, a React module and content.
 | Experience           | Phase             | Doc                                            | Row                         |
 | -------------------- | ----------------- | ---------------------------------------------- | --------------------------- |
 | Dev Roulette         | MVP               | [dev-roulette.md](dev-roulette.md)             | **implemented** as `/bored` |
-| Cursed Code          | MVP               | [cursed-code.md](cursed-code.md)               | **playable**, 6 challenges  |
-| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)                 | **playable**, 6 challenges  |
-| System Design Lab    | 2                 | [system-design-lab.md](system-design-lab.md)   | **playable**, 6 challenges  |
-| Docker Escape Room   | 2                 | [docker-escape-room.md](docker-escape-room.md) | **playable**, 6 challenges  |
-| Git Simulator        | 2                 | [git-simulator.md](git-simulator.md)           | **playable**, 6 challenges  |
-| Code Arena           | 3 (needs sandbox) | _not written_                                  | —                           |
+| Cursed Code          | MVP               | [cursed-code.md](cursed-code.md)               | **playable**, 8 challenges  |
+| Bug Hunter           | MVP               | [bug-hunter.md](bug-hunter.md)                 | **playable**, 9 challenges  |
+| System Design Lab    | 2                 | [system-design-lab.md](system-design-lab.md)   | **playable**, 9 challenges  |
+| Docker Escape Room   | 2                 | [docker-escape-room.md](docker-escape-room.md) | **playable**, 9 challenges  |
+| Git Simulator        | 2                 | [git-simulator.md](git-simulator.md)           | **playable**, 9 challenges  |
+| Code Arena           | 3 (needs sandbox) | [code-arena.md](code-arena.md)                 | **playable**, 6 challenges  |
 | Production Nightmare | 4                 | _not written_                                  | —                           |
 | Debugging Detective  | 4                 | _not written_                                  | —                           |
 

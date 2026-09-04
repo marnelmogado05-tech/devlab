@@ -136,12 +136,24 @@ each. System Design Lab introduced partial credit; Docker Escape Room scores loc
 as independent halves; Git Simulator duplicates its Git model in PHP and TypeScript on purpose
 ([ADR 0006](docs/adr/0006-duplicate-the-git-model-rather-than-trust-the-client.md)).
 
-**Phase 3 has a design and no code.** [ADR 0007](docs/adr/0007-execution-engine-architecture.md)
+**Phase 3 is built and switched off.** [ADR 0007](docs/adr/0007-execution-engine-architecture.md)
 splits privilege three ways — the application never holds container-creation privilege, the
 orchestrator never holds credentials, the sandbox holds nothing — and
 [the sandbox threat model](docs/security/sandbox-threat-model.md) is the dedicated security design
-§25 and §50 require. Nothing executes yet, and law 2 still holds absolutely until the abuse suite
-and the security review in that document's checklist are done.
+§25 and §50 require.
+
+**Code Arena** is the experience that uses it, and the only one whose playability depends on the
+deployment. [ADR 0008](docs/adr/0008-grade-code-submissions-from-a-recorded-run.md) is what makes it
+safe to grade: execution and evaluation are separate steps joined by a recorded `execution_runs`
+row, and **the expected outputs never enter the sandbox** — the harness is built from case inputs,
+each case runs in its own child process, and the comparison happens in Laravel. Code inside the
+container cannot forge a pass because nothing in there knows what one looks like (S8, measured).
+
+`DEVLAB_EXECUTION_ENABLED` is **false** by default, and the container then binds an orchestrator
+that refuses rather than one that fakes a result. Law 2 still holds absolutely: nothing executes in
+the Laravel process, and the remaining checklist items in the threat model — the abuse suite green
+under `runsc`, a `devlab-security` review, a written statement of the deployment's runtime — are
+what stand between "built" and "on".
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,

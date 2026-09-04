@@ -6,6 +6,7 @@ use App\Http\Controllers\ChallengeAttemptController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ChallengeReportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExecutionRunController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\LeaderboardController;
@@ -73,6 +74,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('attempts/{attempt}', [ChallengeAttemptController::class, 'destroy'])
         ->name('attempts.destroy');
+
+    /*
+     * Running code against an attempt (ADR 0008, plan §50).
+     *
+     * Starting a run is the most expensive thing an authenticated user can ask
+     * DevLab to do - it creates a container - so it carries its own limit,
+     * tighter than submission's. That limit bounds the RATE; the per-user
+     * concurrency quota bounds how many exist at once; the per-attempt budget
+     * bounds how many there can ever be. Three different questions, three
+     * different guards.
+     *
+     * Reading them back is polled, and deliberately unthrottled: a player
+     * watching their own run finish must not be rate-limited out of seeing the
+     * result they have already paid for.
+     */
+    Route::get('attempts/{attempt}/runs', [ExecutionRunController::class, 'index'])
+        ->name('attempts.runs.index');
+
+    Route::post('attempts/{attempt}/runs', [ExecutionRunController::class, 'store'])
+        ->middleware('throttle:execution')
+        ->name('attempts.runs.store');
 
     /*
      * Reporting a challenge (ADR 0003). Authenticated: anonymous reporting is an

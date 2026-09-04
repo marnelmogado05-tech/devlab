@@ -14,20 +14,48 @@ use RuntimeException;
  */
 class SandboxUnavailable extends RuntimeException
 {
+    /**
+     * The user was already using their share of the pool.
+     *
+     * Kept distinct from the platform having no room, because they are different
+     * events with different answers: one is the player's own doing and clears
+     * when their other run finishes, the other is ours and does not. A log — or
+     * a run row — that cannot tell them apart cannot tell an abusive account
+     * from a bad afternoon.
+     */
+    public const REASON_QUOTA = 'quota';
+
+    /** The platform could not run it: no orchestrator, no room, or it broke. */
+    public const REASON_UNAVAILABLE = 'unavailable';
+
+    private function __construct(string $message, private readonly string $reason)
+    {
+        parent::__construct($message);
+    }
+
     public static function notConfigured(): self
     {
         return new self(
             'No execution orchestrator is configured. Code execution is disabled.',
+            self::REASON_UNAVAILABLE,
         );
     }
 
     public static function poolExhausted(): self
     {
-        return new self('No sandbox is free to run this submission.');
+        return new self('No sandbox is free to run this submission.', self::REASON_UNAVAILABLE);
     }
 
     public static function quotaReached(int $concurrent): self
     {
-        return new self("You already have {$concurrent} submissions running.");
+        return new self(
+            "You already have {$concurrent} submissions running.",
+            self::REASON_QUOTA,
+        );
+    }
+
+    public function reason(): string
+    {
+        return $this->reason;
     }
 }

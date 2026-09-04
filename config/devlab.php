@@ -114,9 +114,11 @@ return [
     | Architecture: ADR 0007. Controls and their threats: the sandbox threat
     | model, docs/security/sandbox-threat-model.md.
     |
-    | Nothing executes yet. `enabled` is false, and the container binds an
-    | orchestrator that refuses — a default that quietly pretended to work would
-    | be the worst possible failure mode for this subsystem.
+    | `enabled` is false by default, and the container then binds an orchestrator
+    | that REFUSES rather than one that fakes a result — a default that quietly
+    | pretended to work would be the worst possible failure mode here. Code Arena
+    | is the experience that uses this (ADR 0008); with execution off, its runs
+    | come back unavailable and the attempt stays open.
     |
     */
 
@@ -181,6 +183,31 @@ return [
              */
             'slot_ttl_seconds' => (int) env('DEVLAB_EXECUTION_SLOT_TTL', 120),
         ],
+
+        /*
+         * What one attempt may spend on the sandbox (ADR 0008).
+         *
+         * The quota bounds how many runs happen AT ONCE; this bounds how many
+         * happen at all. Without it a single attempt is an unbounded compute
+         * budget held open for as long as the attempt lives, which is the
+         * cheapest way to steal free execution from a platform that gives it
+         * away on purpose.
+         */
+        'runs_per_attempt' => (int) env('DEVLAB_EXECUTION_RUNS_PER_ATTEMPT', 25),
+
+        /*
+         * How much code a submission may be. Enforced in the form request, so
+         * an oversized body is rejected before it reaches a queue, a row or a
+         * container.
+         */
+        'max_source_bytes' => (int) env('DEVLAB_EXECUTION_MAX_SOURCE_BYTES', 20_000),
+
+        /*
+         * How many cases one challenge may declare. Each is a forked process
+         * inside the sandbox, so this is bounded by the PID limit above and not
+         * by taste.
+         */
+        'max_cases' => (int) env('DEVLAB_EXECUTION_MAX_CASES', 12),
     ],
 
     /*
@@ -272,6 +299,12 @@ return [
         'auth' => (int) env('DEVLAB_RATELIMIT_AUTH', 5),
         'attempt_start' => (int) env('DEVLAB_RATELIMIT_ATTEMPT_START', 20),
         'submission' => (int) env('DEVLAB_RATELIMIT_SUBMISSION', 30),
+        /*
+         * Tighter than submission, because a run costs a container rather than
+         * an evaluator call (§41, §42). The per-user concurrency quota is the
+         * other half of this: one limits the rate, the other the depth.
+         */
+        'execution' => (int) env('DEVLAB_RATELIMIT_EXECUTION', 12),
         'bored' => (int) env('DEVLAB_RATELIMIT_BORED', 30),
         'report' => (int) env('DEVLAB_RATELIMIT_REPORT', 5),
         'ai' => (int) env('DEVLAB_RATELIMIT_AI', 10),

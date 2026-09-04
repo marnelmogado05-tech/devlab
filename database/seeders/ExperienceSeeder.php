@@ -115,6 +115,36 @@ class ExperienceSeeder extends Seeder
             ],
             [
                 /*
+                 * The first experience that runs what a player wrote (plan §9.9,
+                 * §50). It is published like any other, but it is the only one
+                 * whose playability depends on deployment: with
+                 * `devlab.execution.enabled` off, the orchestrator binding
+                 * refuses, runs come back unavailable and the attempt stays open.
+                 *
+                 * Kept out of the "I'm Bored" pool for exactly that reason. The
+                 * button's promise is that pressing it gives you something to do,
+                 * and handing somebody a challenge that cannot run on this
+                 * deployment breaks that promise in the one place DevLab cannot
+                 * afford to.
+                 */
+                'slug' => 'code-arena',
+                'name' => 'Code Arena',
+                'tagline' => 'Write the function. The sandbox will tell you.',
+                'description' => 'A signature, a handful of worked examples, and hidden cases you '
+                    .'cannot see the answers to. Write the implementation, run it in a sandbox with '
+                    .'no network and no way out, and submit the run you want graded. The first '
+                    .'experience here that executes your code rather than reading it.',
+                'icon' => 'Terminal',
+                'category' => 'coding',
+                'status' => Experience::STATUS_PUBLISHED,
+                'default_difficulty' => 'medium',
+                'estimated_minutes' => 15,
+                'available_in_bored' => false,
+                'sort_order' => 60,
+                'config' => ['requires_execution' => true],
+            ],
+            [
+                /*
                  * Dev Roulette is the "I'm Bored" dispatcher (plan §9.1, §10) — it
                  * assigns you something rather than holding challenges of its own.
                  *

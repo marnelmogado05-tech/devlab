@@ -179,6 +179,36 @@ how _fast_ someone submits; this bounds how much of the pool they hold at any in
 
 **Test.** Documented and tested behaviour when the pool is exhausted or the orchestrator is down.
 
+### S8 — Forging a verdict from inside the sandbox
+
+**Attack.** A submission does not solve the problem; it convinces the grader that it did. Print
+the marker the harness prints. Overwrite the result file. Exit zero before the tests run. Read the
+expectations out of the payload and return them.
+
+**Why the usual defences do not work.** Every mitigation that keeps the verdict inside the sandbox
+fails to the same objection: whatever the harness is given, code sharing its process can read —
+its memory, its `argv`, its `/proc`, its file descriptors. A nonce is readable. A separate stream
+is writable. A framed protocol is forgeable. A verdict computed next to an adversary is a verdict
+the adversary can write.
+
+**Built.** The expectations never enter the sandbox at all
+([ADR 0008](../adr/0008-grade-code-submissions-from-a-recorded-run.md)).
+`CodeArenaConfiguration::harness()` builds the payload from case **inputs**, the sandbox reports
+the value each case returned, and the comparison happens in `CodeArenaEvaluator`, in Laravel,
+against a key that never crossed the boundary. Each case runs in its own child process, so the
+parent harness — which never loads the submission — attributes every value to exactly the case
+that produced it.
+
+The residual is honest and worth stating: a submission can still **claim** a value it did not
+compute. That is indistinguishable from returning the wrong answer, because it is the same act.
+Nothing in the container knows which value would be right.
+
+**Test.** Measured rather than argued, on PHP 8.4 through the real generated harness. A submission
+that forges a result line for every case, pre-writes the result file and exits before the entry
+function is called scores **2 of 4** against a key containing its guess and **0 of 4** against a
+key that does not. A correct solution scores 4 of 4; one that hangs on a single case scores 3 of 4,
+because a hang is a failed case rather than a lost run.
+
 ## Before this subsystem ships
 
 - [x] ADR 0007 accepted
