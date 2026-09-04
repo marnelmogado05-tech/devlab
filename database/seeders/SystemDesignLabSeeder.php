@@ -646,6 +646,176 @@ class SystemDesignLabSeeder extends Seeder
                     .'right and still fail, because the retry reads from a replica that has not '
                     .'caught up, concludes no payment exists, and starts one.',
             ],
+            [
+                'slug' => 'rate-limit-that-allows-double',
+                'title' => 'A hundred a minute, two hundred in one second',
+                'description' => 'The limit is enforced. The limit is also exceeded.',
+                'objective' => 'Design a system that meets every requirement.',
+                'difficulty' => 'hard',
+                'type' => 'design',
+                'points' => 200,
+                'estimated_minutes' => 8,
+                'tags' => ['rate-limiting', 'distributed-systems', 'algorithms'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'scenario' => 'A public API allowing 100 requests per minute per key. It runs '
+                        .'on six application servers behind a load balancer. A customer reports '
+                        .'being limited unfairly; an engineer reports seeing 200 requests land in a '
+                        .'single second from a key that was never throttled.',
+                    'requirements' => [
+                        ['key' => 'no_boundary_burst', 'text' => 'Never allow twice the limit across a window boundary'],
+                        ['key' => 'shared_across_servers', 'text' => 'Count a key once, not once per server'],
+                        ['key' => 'survives_restart', 'text' => 'A deploy must not reset everyone allowance'],
+                    ],
+                    'slots' => [
+                        [
+                            'key' => 'algorithm',
+                            'label' => 'Counting strategy',
+                            'hint' => 'Consider a client that sends its whole allowance at 11:59:59.',
+                            'options' => [
+                                ['key' => 'fixed_window', 'text' => 'Fixed window: a counter that resets on the minute'],
+                                ['key' => 'sliding_log', 'text' => 'Sliding window: count requests in the last 60 seconds'],
+                                ['key' => 'token_bucket', 'text' => 'Token bucket: refill at a steady rate, spend on request'],
+                            ],
+                        ],
+                        [
+                            'key' => 'store',
+                            'label' => 'Where the count lives',
+                            'options' => [
+                                ['key' => 'in_process', 'text' => 'In each application server memory'],
+                                ['key' => 'shared_redis', 'text' => 'A shared Redis instance'],
+                                ['key' => 'database', 'text' => 'A row per key in the primary database'],
+                            ],
+                        ],
+                        [
+                            'key' => 'durability',
+                            'label' => 'Surviving a restart',
+                            'options' => [
+                                ['key' => 'ephemeral', 'text' => 'Counts vanish when the process restarts'],
+                                ['key' => 'outlives_process', 'text' => 'Counts live outside any application process'],
+                            ],
+                        ],
+                    ],
+                ],
+                'solution' => [
+                    'rubric' => [
+                        [
+                            'requirement' => 'no_boundary_burst',
+                            'none_of' => ['algorithm=fixed_window'],
+                            'explanation' => 'A fixed window resets on the minute, so 100 requests '
+                                .'at 11:59:59 and 100 more at 12:00:00 are both legal and land one '
+                                .'second apart. Both a sliding window and a token bucket bound the '
+                                .'rate rather than the calendar.',
+                        ],
+                        [
+                            'requirement' => 'shared_across_servers',
+                            'none_of' => ['store=in_process'],
+                            'explanation' => 'Six servers each counting to 100 enforce a limit of '
+                                .'600. Per-process counters are a limit on a server, not on a key.',
+                        ],
+                        [
+                            'requirement' => 'survives_restart',
+                            'all_of' => ['durability=outlives_process'],
+                            'explanation' => 'A deploy that clears every counter hands every client '
+                                .'a fresh allowance, which makes the limit weakest exactly when '
+                                .'traffic is being shifted around.',
+                        ],
+                    ],
+                    'reference' => ['algorithm' => 'token_bucket', 'store' => 'shared_redis', 'durability' => 'outlives_process'],
+                    'pass_mark' => 1.0,
+                ],
+                'explanation' => 'The boundary burst is the classic failure of a fixed window, and '
+                    ."it is invisible in testing because it needs the clock to cooperate.\n\n"
+                    .'A sliding log is exact and expensive - it keeps a timestamp per request. A '
+                    .'token bucket is approximate in the friendliest direction: it bounds the '
+                    .'sustained rate, allows a deliberate, configurable burst, and costs two '
+                    ."numbers per key.\n\n"
+                    .'Putting the count in the database also works and is the wrong tool: this is a '
+                    .'write on every single request, of a value nobody needs after the minute is '
+                    .'over.',
+            ],
+            [
+                'slug' => 'uploads-on-the-wrong-disk',
+                'title' => 'The avatar that only loads sometimes',
+                'description' => 'It works on one server. There are three.',
+                'objective' => 'Design a system that meets every requirement.',
+                'difficulty' => 'medium',
+                'type' => 'design',
+                'points' => 150,
+                'estimated_minutes' => 6,
+                'tags' => ['storage', 'scaling', 'uploads'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'scenario' => 'Users upload profile photos. The application runs on three '
+                        .'servers behind a load balancer, and servers are replaced on every deploy. '
+                        .'A photo must still be there next year, and the page must not wait on the '
+                        .'application server to serve it.',
+                    'requirements' => [
+                        ['key' => 'any_server_serves', 'text' => 'Any server can serve any upload'],
+                        ['key' => 'survives_replacement', 'text' => 'An upload outlives the server that received it'],
+                        ['key' => 'not_served_by_php', 'text' => 'Serving an image does not occupy an application worker'],
+                    ],
+                    'slots' => [
+                        [
+                            'key' => 'location',
+                            'label' => 'Where the file goes',
+                            'options' => [
+                                ['key' => 'local_disk', 'text' => 'The local disk of whichever server handled the upload'],
+                                ['key' => 'shared_nfs', 'text' => 'A shared network filesystem mounted on all three'],
+                                ['key' => 'object_store', 'text' => 'An object store such as S3'],
+                            ],
+                        ],
+                        [
+                            'key' => 'delivery',
+                            'label' => 'How it reaches the browser',
+                            'options' => [
+                                ['key' => 'through_app', 'text' => 'The application reads the file and streams it'],
+                                ['key' => 'cdn', 'text' => 'A CDN in front of the store, serving directly'],
+                            ],
+                        ],
+                    ],
+                ],
+                'solution' => [
+                    'rubric' => [
+                        [
+                            'requirement' => 'any_server_serves',
+                            'none_of' => ['location=local_disk'],
+                            'explanation' => 'A file on one server exists for one third of requests. '
+                                .'This is the bug that presents as "it works when I refresh".',
+                        ],
+                        [
+                            'requirement' => 'survives_replacement',
+                            'all_of' => ['location=object_store'],
+                            'explanation' => 'Servers are cattle. Anything that must outlive a '
+                                .'deploy cannot live on one, and a shared filesystem moves the '
+                                .'problem to a machine somebody still has to keep alive.',
+                        ],
+                        [
+                            'requirement' => 'not_served_by_php',
+                            'all_of' => ['delivery=cdn'],
+                            'explanation' => 'Streaming a two-megabyte photo through an application '
+                                .'worker occupies that worker for the whole download, on a '
+                                .'connection whose speed the client controls.',
+                        ],
+                    ],
+                    'reference' => ['location' => 'object_store', 'delivery' => 'cdn'],
+                    'pass_mark' => 1.0,
+                ],
+                'explanation' => 'The tell in the report is "sometimes". A file on local disk is '
+                    .'served correctly by exactly the server that received it, so the failure rate '
+                    .'is one minus one over the number of servers - and it gets WORSE as you scale '
+                    ."out.\n\n"
+                    .'A shared filesystem passes the first requirement and fails the second in a '
+                    .'quieter way: it is a single machine that everything now depends on, and it is '
+                    ."usually nobody's job.\n\n"
+                    .'The delivery half matters more than it looks. An application worker streaming '
+                    .'a large file is held for the duration by a slow client, which is a denial of '
+                    .'service anybody can perform by throttling their own connection.',
+            ],
         ];
     }
 }

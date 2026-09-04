@@ -333,6 +333,98 @@ class GitSimulatorSeeder extends Seeder
                     .'code is absent because the revert removed it. The fix is the same one: revert '
                     .'the revert, then continue.',
             ],
+            [
+                'slug' => 'two-branches-one-linear-release',
+                'title' => 'Two features, one straight line',
+                'description' => 'Both branches are ready. The release notes must read in order.',
+                'objective' => 'Get both branches onto main with no merge commits.',
+                'difficulty' => 'hard',
+                'type' => 'repository',
+                'points' => 200,
+                'estimated_minutes' => 10,
+                'tags' => ['git', 'rebase', 'branching'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'goal' => 'main must contain the work from both search and export, in that '
+                        .'order, with no merge commit anywhere in the history. Both branches forked '
+                        .'from the same commit.',
+                    'repository' => [
+                        'commits' => [
+                            ['id' => 'a1', 'message' => 'Initial commit', 'parents' => []],
+                            ['id' => 'a2', 'message' => 'Set up the project', 'parents' => ['a1']],
+                            ['id' => 's1', 'message' => 'Add search', 'parents' => ['a2']],
+                            ['id' => 'e1', 'message' => 'Add export', 'parents' => ['a2']],
+                        ],
+                        'branches' => ['main' => 'a2', 'search' => 's1', 'export' => 'e1'],
+                        'head' => 'main',
+                    ],
+                    'allowed' => ['checkout', 'switch', 'merge', 'rebase'],
+                ],
+                'solution' => [
+                    'commands' => [
+                        'git merge search',
+                        'git checkout export',
+                        'git rebase main',
+                        'git checkout main',
+                        'git merge export',
+                    ],
+                    'summary' => 'Fast-forward the first, rebase the second onto it, fast-forward again.',
+                ],
+                'explanation' => 'The first branch is easy: main has not moved since search forked, '
+                    ."so merging it fast-forwards and creates nothing.\n\n"
+                    .'The second is the whole exercise. Once main has search on it, export has '
+                    .'diverged - it still points at a commit whose parent is a2 - so merging it now '
+                    .'would create exactly the merge commit the goal forbids. Rebasing export onto '
+                    .'main first replays its work on the new tip, which makes main an ancestor of '
+                    ."export again, and the second merge fast-forwards too.\n\n"
+                    .'The order in the goal is not decoration. Rebasing export first and then '
+                    .'merging search would produce the same commits in the other order, which is a '
+                    ."different history and a different answer.\n\n"
+                    .'This is the everyday shape of keeping a linear main: rebase before you merge, '
+                    .'and merge only when it can fast-forward.',
+            ],
+            [
+                'slug' => 'tidy-up-after-the-merge',
+                'title' => 'Leave nothing behind',
+                'description' => 'The feature is in. The branch should not be.',
+                'objective' => 'Merge the work and remove the branch.',
+                'difficulty' => 'medium',
+                'type' => 'repository',
+                'points' => 150,
+                'estimated_minutes' => 5,
+                'tags' => ['git', 'merge', 'branching'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'goal' => 'The work on cleanup must be part of main, and no branch called '
+                        .'cleanup may remain. You are currently on cleanup.',
+                    'repository' => [
+                        'commits' => [
+                            ['id' => 'a1', 'message' => 'Initial commit', 'parents' => []],
+                            ['id' => 'a2', 'message' => 'Add the importer', 'parents' => ['a1']],
+                            ['id' => 'c1', 'message' => 'Remove the dead importer branch', 'parents' => ['a2']],
+                        ],
+                        'branches' => ['main' => 'a2', 'cleanup' => 'c1'],
+                        'head' => 'cleanup',
+                    ],
+                    'allowed' => ['checkout', 'switch', 'merge', 'branch'],
+                ],
+                'solution' => [
+                    'commands' => ['git checkout main', 'git merge cleanup', 'git branch -d cleanup'],
+                    'summary' => 'Move off the branch, merge it, then delete it.',
+                ],
+                'explanation' => 'The order is forced, and that is the lesson. Git refuses to delete '
+                    ."the branch you are standing on, so you must move to main first.\n\n"
+                    .'The merge fast-forwards, because main has not moved since cleanup forked - '
+                    ."main simply catches up to c1 and no merge commit is created.\n\n"
+                    .'Deleting the branch afterwards removes only the POINTER. The commit is still '
+                    .'there and still reachable, now through main. That is the difference between '
+                    .'the safe lower-case -d, which refuses if the work is not merged anywhere, and '
+                    .'-D, which deletes regardless and is how work actually goes missing.',
+            ],
         ];
     }
 }
