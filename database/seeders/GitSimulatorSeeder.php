@@ -285,6 +285,54 @@ class GitSimulatorSeeder extends Seeder
                     .'branch is the usual mistake here: running `git merge main` while still on '
                     .'feature reports that everything is already up to date, because it is.',
             ],
+            [
+                'slug' => 'revert-the-revert',
+                'title' => 'Somebody reverted your feature',
+                'description' => 'The revert was right at the time. It is not right now.',
+                'objective' => 'Get the change back without removing anything.',
+                'difficulty' => 'expert',
+                'type' => 'repository',
+                'points' => 500,
+                'estimated_minutes' => 12,
+                'tags' => ['git', 'revert', 'history'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'goal' => 'The export feature must be part of main again. Every commit already '
+                        .'in the history must stay exactly where it is - this branch is shared, and '
+                        .'the revert is part of the record of what happened.',
+                    'repository' => [
+                        'commits' => [
+                            ['id' => 'a1', 'message' => 'Initial commit', 'parents' => []],
+                            ['id' => 'a2', 'message' => 'Add the export feature', 'parents' => ['a1']],
+                            ['id' => 'a3', 'message' => 'Revert \"Add the export feature\"', 'parents' => ['a2']],
+                            ['id' => 'a4', 'message' => 'Fix the invoice total', 'parents' => ['a3']],
+                        ],
+                        'branches' => ['main' => 'a4'],
+                        'head' => 'main',
+                    ],
+                    'allowed' => ['revert', 'checkout', 'switch'],
+                ],
+                'solution' => [
+                    'commands' => ['git revert a3'],
+                    'summary' => 'Revert the revert. The original commit is not the one to undo.',
+                ],
+                'explanation' => 'Revert the REVERT, not the original.'
+                    ."\n\n"
+                    .'The instinct is to reach for a2, the commit that added the feature - but a2 is '
+                    .'already in the history and already applied. What removed the feature was a3, '
+                    ."so a3 is what has to be undone.\n\n"
+                    .'Reverting a2 would produce a commit undoing a change that is not currently in '
+                    .'effect, which in real Git fails to apply and in this model is simply the wrong '
+                    ."history.\n\n"
+                    .'The reason this matters beyond the puzzle is what happens on merges. Git '
+                    .'compares content, not intent, so once a feature branch has been merged and the '
+                    .'merge reverted, re-merging that branch brings across NOTHING - Git sees the '
+                    .'commits are already ancestors and concludes there is nothing to do, while the '
+                    .'code is absent because the revert removed it. The fix is the same one: revert '
+                    .'the revert, then continue.',
+            ],
         ];
     }
 }

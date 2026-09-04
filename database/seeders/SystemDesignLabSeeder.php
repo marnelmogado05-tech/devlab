@@ -548,6 +548,104 @@ class SystemDesignLabSeeder extends Seeder
                     .'during office hours — a load a single small server would not notice. The '
                     .'skill being tested is reading the numbers before reaching for the pattern.',
             ],
+            [
+                'slug' => 'payments-that-must-not-charge-twice',
+                'title' => 'The retry that costs a customer twice',
+                'description' => 'A client times out, retries, and the card is charged again.',
+                'objective' => 'Design a system that meets every requirement.',
+                'difficulty' => 'expert',
+                'type' => 'design',
+                'points' => 500,
+                'estimated_minutes' => 14,
+                'tags' => ['distributed-systems', 'idempotency', 'consistency', 'payments'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'scenario' => 'A payment API. Mobile clients on poor connections time out and '
+                        .'retry automatically - the request often succeeded, and the client has no '
+                        .'way to know. A customer must never be charged twice, a retry must return '
+                        .'the ORIGINAL outcome rather than starting a new payment, and a client that '
+                        .'reads the payment back immediately must see it.',
+                    'requirements' => [
+                        ['key' => 'no_double_charge', 'text' => 'Never charge a customer twice for one payment'],
+                        ['key' => 'retry_returns_original', 'text' => 'A retry returns the original outcome, not a new one'],
+                        ['key' => 'read_your_writes', 'text' => 'A client reading the payment back immediately sees it'],
+                        ['key' => 'no_guessing', 'text' => 'Do not rely on guesses about timing or clocks'],
+                    ],
+                    'slots' => [
+                        [
+                            'key' => 'dedupe',
+                            'label' => 'Duplicate detection',
+                            'hint' => 'The client cannot tell a lost response from a failed request.',
+                            'options' => [
+                                ['key' => 'none', 'text' => 'None: treat every request as new'],
+                                ['key' => 'timestamp_window', 'text' => 'Reject a charge identical to one seen in the last 60 seconds'],
+                                ['key' => 'idempotency_key', 'text' => 'The client sends a key; the outcome is stored against it and replayed'],
+                            ],
+                        ],
+                        [
+                            'key' => 'read_path',
+                            'label' => 'Reading a payment back',
+                            'options' => [
+                                ['key' => 'replica', 'text' => 'From a read replica'],
+                                ['key' => 'primary', 'text' => 'From the primary'],
+                            ],
+                        ],
+                        [
+                            'key' => 'settlement',
+                            'label' => 'When the card is charged',
+                            'options' => [
+                                ['key' => 'synchronous', 'text' => 'During the request, before responding'],
+                                ['key' => 'queued_no_key', 'text' => 'Queued, with the job carrying no client key'],
+                            ],
+                        ],
+                    ],
+                ],
+                'solution' => [
+                    'rubric' => [
+                        [
+                            'requirement' => 'no_double_charge',
+                            'all_of' => ['dedupe=idempotency_key'],
+                            'explanation' => 'Only a key the CLIENT chooses survives its own retry. '
+                                .'Anything the server derives is derived again on the second request.',
+                        ],
+                        [
+                            'requirement' => 'retry_returns_original',
+                            'none_of' => ['settlement=queued_no_key'],
+                            'explanation' => 'A job carrying no key cannot be matched to the retry, '
+                                .'so the retry enqueues a second charge and the client is told '
+                                .'nothing about the first.',
+                        ],
+                        [
+                            'requirement' => 'read_your_writes',
+                            'all_of' => ['read_path=primary'],
+                            'explanation' => 'Replication lag is measured in milliseconds and a '
+                                .'retry arrives in milliseconds. Reading a just-written payment '
+                                .'from a replica is the one read guaranteed to race.',
+                        ],
+                        [
+                            'requirement' => 'no_guessing',
+                            'none_of' => ['dedupe=timestamp_window', 'dedupe=none'],
+                            'explanation' => 'A time window encodes a guess about clock skew, retry '
+                                .'delay and queue depth. It fails silently when any of the three '
+                                .'changes, and it fails towards charging twice.',
+                        ],
+                    ],
+                    'reference' => ['dedupe' => 'idempotency_key', 'read_path' => 'primary', 'settlement' => 'synchronous'],
+                    'pass_mark' => 1.0,
+                ],
+                'explanation' => 'Exactly-once delivery does not exist. What exists is at-least-once '
+                    .'delivery plus an idempotent receiver, and the idempotency key is how the '
+                    ."receiver recognises the repeat.\n\n"
+                    .'The key has to come from the client, because the client is the only party that '
+                    .'knows its retry is a retry. A server-side fingerprint - amount, customer, '
+                    .'timestamp - is recomputed identically for a genuine second purchase of the '
+                    ."same thing, and refusing that is its own bug.\n\n"
+                    .'The read path is the half people miss. You can get deduplication perfectly '
+                    .'right and still fail, because the retry reads from a replica that has not '
+                    .'caught up, concludes no payment exists, and starts one.',
+            ],
         ];
     }
 }

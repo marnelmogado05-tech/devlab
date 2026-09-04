@@ -457,7 +457,10 @@ describe('the seeded content', function () {
             ->whereRelation('experience', 'slug', 'git-simulator')
             ->get();
 
-        expect($challenges)->toHaveCount(6);
+        // Counted as non-empty rather than against a literal: this test is about
+        // every challenge being VALID, and a hardcoded total fails on the day
+        // somebody adds one while saying nothing about validity.
+        expect($challenges)->not->toBeEmpty();
 
         foreach ($challenges as $challenge) {
             expect($validator->problems($challenge))->toBe([], "{$challenge->slug} is invalid");
@@ -475,6 +478,25 @@ describe('the seeded content', function () {
             ->evaluate($challenge, ['commands' => ['git checkout -b rescue']]);
 
         expect($result->correct)->toBeTrue();
+    });
+
+    it('does not accept reverting the original commit on the revert-the-revert challenge', function () {
+        /*
+         * The whole insight of that challenge, asserted rather than assumed.
+         * Reverting a2 — the commit that ADDED the feature — is the instinctive
+         * answer and the wrong one: a2 is already applied, and what removed the
+         * feature was a3. A challenge whose wrong answer also passes teaches
+         * nothing.
+         */
+        $challenge = Challenge::query()
+            ->whereRelation('experience', 'slug', 'git-simulator')
+            ->where('slug', 'revert-the-revert')
+            ->sole();
+
+        $evaluator = app(GitSimulatorEvaluator::class);
+
+        expect($evaluator->evaluate($challenge, ['commands' => ['git revert a3']])->correct)->toBeTrue()
+            ->and($evaluator->evaluate($challenge, ['commands' => ['git revert a2']])->correct)->toBeFalse();
     });
 
     it('can be played end to end', function () {

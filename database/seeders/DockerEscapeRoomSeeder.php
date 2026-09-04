@@ -511,6 +511,102 @@ class DockerEscapeRoomSeeder extends Seeder
                     .'dependencies, and is reused until they actually change. A cache mount makes '
                     .'the reinstall faster without making it unnecessary.',
             ],
+            [
+                'slug' => 'runtime-that-cannot-see-its-cgroup',
+                'title' => 'Killed at 512 megabytes it never knew about',
+                'description' => 'Exit 137, no stack trace, and a machine with 64GB of RAM.',
+                'objective' => 'Find the fault and say what fixes it.',
+                'difficulty' => 'expert',
+                'type' => 'diagnose',
+                'points' => 500,
+                'estimated_minutes' => 13,
+                'tags' => ['docker', 'cgroups', 'memory', 'runtime'],
+                'status' => Challenge::STATUS_PUBLISHED,
+                'published_at' => now(),
+                'version' => 1,
+                'configuration' => [
+                    'symptom' => 'The worker container dies after a few minutes with exit code 137 '
+                        .'and no application error. It processes the same jobs fine outside Docker '
+                        .'on the same host, which has 64GB of RAM and is nowhere near full.',
+                    'evidence' => [
+                        [
+                            'key' => 'dockerfile',
+                            'label' => 'Dockerfile',
+                            'language' => 'dockerfile',
+                            'content' => implode("\n", [
+                                'FROM php:8.4-cli-alpine',
+                                'WORKDIR /app',
+                                'COPY . .',
+                                'RUN composer install --no-dev',
+                                'CMD ["php", "-d", "memory_limit=-1", "worker.php"]',
+                            ]),
+                        ],
+                        [
+                            'key' => 'compose',
+                            'label' => 'docker-compose.yml',
+                            'language' => 'yaml',
+                            'content' => implode("\n", [
+                                'services:',
+                                '    worker:',
+                                '        build: .',
+                                '        deploy:',
+                                '            resources:',
+                                '                limits:',
+                                '                    memory: 512M',
+                            ]),
+                        ],
+                        [
+                            'key' => 'inspect',
+                            'label' => 'docker inspect (excerpt)',
+                            'language' => 'json',
+                            'selectable' => false,
+                            'content' => implode("\n", [
+                                '"State": {',
+                                '    "OOMKilled": true,',
+                                '    "ExitCode": 137,',
+                                '    "Error": ""',
+                                '}',
+                            ]),
+                        ],
+                        [
+                            'key' => 'logs',
+                            'label' => 'Container logs',
+                            'language' => 'text',
+                            'selectable' => false,
+                            'content' => implode("\n", [
+                                'worker | processing batch 41',
+                                'worker | processing batch 42',
+                                'worker exited with code 137',
+                            ]),
+                        ],
+                    ],
+                    'fixes' => [
+                        ['key' => 'runtime_limit', 'text' => 'Give the runtime its own memory limit, set below the container limit'],
+                        ['key' => 'raise_container', 'text' => 'Raise the container memory limit until it stops'],
+                        ['key' => 'restart_always', 'text' => 'Add restart: always so the worker comes back'],
+                        ['key' => 'allow_swap', 'text' => 'Allow swap so the process is not killed outright'],
+                    ],
+                ],
+                'solution' => [
+                    'evidence' => 'dockerfile',
+                    'line' => 5,
+                    'fix' => 'runtime_limit',
+                    'summary' => 'memory_limit=-1 lets the process grow past a cgroup limit it never checks.',
+                ],
+                'explanation' => 'Exit 137 is 128 + 9 - SIGKILL - and OOMKilled: true says who sent '
+                    ."it. Not the application: the kernel, on behalf of the cgroup.\n\n"
+                    .'memory_limit=-1 tells PHP it may use everything. PHP then asks the operating '
+                    .'system how much that is, and on a container without cgroup-aware reporting the '
+                    .'answer is the HOST total - 64GB. So the process happily grows past 512MB, the '
+                    ."cgroup enforces the limit it was never told about, and the kernel kills it.\n\n"
+                    .'This is the same failure the JVM had for years before UseContainerSupport, '
+                    .'and it is why every runtime now ships a container-aware default. The rule is '
+                    .'that a runtime must be given a ceiling BELOW the container ceiling, so the '
+                    ."runtime fails first - with a stack trace you can read.\n\n"
+                    .'Raising the container limit moves the wall without removing it. Swap makes the '
+                    .'failure slower rather than absent, and on most orchestrators is unavailable '
+                    .'anyway. restart: always turns a crash into a crash loop.',
+            ],
         ];
     }
 }
