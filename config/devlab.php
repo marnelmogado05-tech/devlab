@@ -140,6 +140,14 @@ return [
         'orchestrator_overhead_seconds' => (int) env('DEVLAB_EXECUTION_OVERHEAD', 60),
 
         /*
+         * Where per-execution telemetry goes (§42, threat model S3). A named
+         * channel rather than the default stack, so an operator can route cost
+         * and abuse signal somewhere it will actually be read without taking
+         * every application log with it.
+         */
+        'log_channel' => (string) env('DEVLAB_EXECUTION_LOG_CHANNEL', 'stack'),
+
+        /*
          * S3. Enforced by the sandbox; the orchestrator holds a second, longer
          * deadline and destroys a container that ignores its own (ADR 0007).
          */

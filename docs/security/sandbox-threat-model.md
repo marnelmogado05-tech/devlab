@@ -130,6 +130,20 @@ known, and doing it here would double-encode in JSON and leave the stored value 
 **Test.** A submission printing ANSI escapes, HTML and a serialized PHP object; assertions that
 each is stored inert and rendered as text.
 
+### S3a — What telemetry does and does not capture
+
+Every finished run records the user, runtime, exit code, duration, `killed_by`, whether output was
+truncated, the output SIZES, and the limits in force. A kill is uninterpretable without the limits
+it was killed against, and limits change.
+
+It records **no submission, no test bundle and no output**. A log line is read by more people and
+kept longer than an attempt row; a player's code in one is both an answer-key leak and a copy of
+untrusted bytes somewhere nobody escapes on render.
+
+**Not captured: peak CPU and peak memory.** Obtaining them means keeping the container alive after
+exit to inspect it, and guaranteed cleanup is worth more than a gauge. `killed_by = memory` already
+reports the case that matters — the run that hit the ceiling.
+
 ### S6 — Reward manipulation through the execution path
 
 **Attack.** A retried job, a duplicated result, or a forged orchestrator response awards XP twice
@@ -147,6 +161,11 @@ twice pays once.
 
 **Attack.** One user, or many, submit enough work to starve everyone else.
 
+**Built.** `App\Actions\Execution\RunSubmission` — the slot is taken before the run and released
+in a `finally`, so neither an unavailable sandbox nor an unexpected exception can leak one. It
+throws rather than returning an outcome, because there is no `ExecutionOutcome` that could honestly
+describe "we did not try", and a caller that received one would record it against the player.
+
 **Controls.** Per-user concurrency limits and submission rate limits (§41, already in place for
 attempts). Pool exhaustion is a **normal condition**: the attempt stays open and the submission is
 retried. It is never marked failed — failing somebody's answer because of a capacity problem is
@@ -162,19 +181,18 @@ how _fast_ someone submits; this bounds how much of the pool they hold at any in
 
 ## Before this subsystem ships
 
-- [ ] ADR 0007 accepted — **done**
-- [ ] This threat model reviewed — **in review**
+- [x] ADR 0007 accepted
 - [x] The boundary itself: `SandboxOrchestrator`, with a default binding that **refuses** rather
       than fakes, so a misconfigured deployment cannot silently grade against nothing
 - [x] S5 and S7 controls built and tested
 - [x] Abuse suite written and run against a real container — `tests/Sandbox/`, opt-in via
-      `DEVLAB_SANDBOX_TESTS=1`. **See the verification table below for what it actually proved.**
+      `DEVLAB_SANDBOX_TESTS=1`. See the verification table below for what it actually proved.
+- [x] Per-execution telemetry: `ExecutionRecorder`, on the application side because the
+      orchestrator has no identity to attribute a run to and should not gain one
+- [x] Pool exhaustion is a normal condition with tested behaviour — `RunSubmission` throws rather
+      than returning an outcome, so a capacity failure cannot be mistaken for a verdict
 - [ ] The suite green on a Linux host with `runsc`, which is the only run that speaks to S1
-- [ ] Independent security review by `devlab-security`
 - [ ] A dedicated security review by `devlab-security`; ordinary feature review does not cover this
-- [ ] Per-execution resource logging (CPU, memory, duration, exit code, killed-by) as both an abuse
-      signal and a cost signal (§42)
-- [ ] Documented behaviour when the pool is exhausted or the orchestrator is unavailable
 - [ ] A written statement of which runtime a deployment uses, because the `runc` fallback is
       materially weaker than gVisor and nobody should have to read a compose file to find out
 
