@@ -131,7 +131,7 @@ function OptionRow({
         <div
             className={cn(
                 'has-[:checked]:border-ring has-[:checked]:bg-muted/50 flex items-start gap-3 rounded-md border p-3 transition-colors motion-reduce:transition-none',
-                !readOnly && 'hover:border-ring/50',
+                !readOnly && 'hover:border-foreground/30',
             )}
         >
             <input

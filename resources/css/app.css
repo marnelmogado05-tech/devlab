@@ -102,6 +102,7 @@
      */
     --color-go: var(--go);
     --color-go-foreground: var(--go-foreground);
+    --color-go-hover: var(--go-hover);
 
     /*
      * The rack's own tokens. `raised` is a cell inside a plate; `face` is the
@@ -155,39 +156,50 @@
     --primary-foreground: #f5f7fa;
     --go: #f2e14c;
     --go-foreground: #171d26;
+    --go-hover: #e3d132;
     --secondary: #e2e7ee;
     --secondary-foreground: #1a212b;
     --muted: #e2e7ee;
     --muted-foreground: #55606f;
     --accent: #e2e7ee;
     --accent-foreground: #1a212b;
-    --destructive: #c4383b;
+    /*
+     * `destructive` is the colour itself — it has to read as TEXT on the page
+     * (five components use `text-destructive` for field errors) and as a FILL
+     * behind `destructive-foreground`. Splitting those two jobs across the pair
+     * is what broke `Alert variant="destructive"`, which sets
+     * `text-destructive-foreground` with no fill behind it.
+     */
+    --destructive: #b32f32;
     --destructive-foreground: #ffffff;
     --border: #d3dae3;
     --input: #d3dae3;
     --ring: #8a7a00;
 
-    --pass: #0f7a55;
-    --fail: #c4383b;
-    --warn: #a35700;
-    --info: #1f6fb8;
+    --pass: #0d6b4a;
+    --fail: #b32f32;
+    --warn: #8f4c00;
+    --info: #1a5f9e;
     --xp: #6d3fc4;
 
-    --chart-1: #1f6fb8;
-    --chart-2: #0f7a55;
-    --chart-3: #a35700;
+    --chart-1: #1a5f9e;
+    --chart-2: #0d6b4a;
+    --chart-3: #8f4c00;
     --chart-4: #6d3fc4;
-    --chart-5: #c4383b;
+    --chart-5: #b32f32;
 }
 
 /* -----------------------------------------------------------------------------
  * Dark — the designed theme.
  *
- * Measured against the #171D26 ground: text 13.9:1, dim 5.7:1, go 12.6:1,
- * pass 9.3:1, fail 5.7:1, warn 8.0:1, info 7.6:1, xp 6.7:1. Every semantic also
- * clears 4.5:1 against the LIGHTER plate, which is where dark themes usually
- * fail — dim grey on near-black is the standard bug, and the plate is dimmer
- * still.
+ * Measured against the #171D26 ground: text 13.9:1, dim 6.4:1, go 12.6:1,
+ * pass 9.3:1, fail 5.7:1, warn 8.0:1, info 7.6:1, xp 6.7:1.
+ *
+ * Every pair the system can produce is checked, not just text-on-page: each
+ * foreground against the plate, the recessed window, the raised cell and the
+ * muted track as well. That last one is why `--muted-foreground` is #94A1B1
+ * rather than #8A97A8 — the dimmer value cleared every other surface and came
+ * to 4.19:1 on the muted track the segmented controls sit on.
  * -------------------------------------------------------------------------- */
 .dark {
     --background: #171d26;
@@ -205,10 +217,11 @@
     --primary-foreground: #171d26;
     --go: #f2e14c;
     --go-foreground: #171d26;
+    --go-hover: #fff06a;
     --secondary: #2a3543;
     --secondary-foreground: #e4e9f0;
     --muted: #2a3543;
-    --muted-foreground: #8a97a8;
+    --muted-foreground: #94a1b1;
     --accent: #2a3543;
     --accent-foreground: #e4e9f0;
     --destructive: #f4696c;

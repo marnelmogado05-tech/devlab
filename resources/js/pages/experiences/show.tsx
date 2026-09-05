@@ -70,7 +70,7 @@ export default function ExperienceShow({
 
 function ChallengeRow({ challenge }: { challenge: ChallengeSummary }) {
     return (
-        <Card className="hover:border-ring/50 relative transition-colors motion-reduce:transition-none">
+        <Card className="hover:border-foreground/30 relative transition-colors motion-reduce:transition-none">
             <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <div className="min-w-0 space-y-1">
                     <Link

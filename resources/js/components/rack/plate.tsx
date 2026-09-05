@@ -35,7 +35,7 @@ export function Plate({
     children: ReactNode;
 }) {
     return (
-        <article className="bg-card border-border border-t-bevel hover:border-ring/40 relative flex h-full flex-col gap-3 rounded-[3px] border p-4 transition-colors">
+        <article className="bg-card border-border border-t-bevel hover:border-foreground/30 relative flex h-full flex-col gap-3 rounded-[3px] border p-4 transition-colors">
             <div className="flex items-baseline gap-3">
                 <h2 className="flex-1 text-base font-semibold">
                     {/*

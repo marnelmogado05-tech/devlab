@@ -24,9 +24,20 @@ export function BoredButton({ className }: { className?: string }) {
                 // `go`, not `primary`. Every other button in the application is
                 // primary; this is the only thing that gets the accent.
                 'bg-go text-go-foreground rounded-full px-5 font-semibold',
+                /*
+                 * The hover pair is stated explicitly, both halves of it.
+                 * `Button`'s default variant carries `hover:bg-primary/90`, and
+                 * tailwind-merge does NOT drop it when the base `bg-primary` is
+                 * overridden — a `hover:` utility is not a conflict with a base
+                 * one. Left alone it repainted the pill to `--primary` on
+                 * hover, which in the light theme is near-black behind
+                 * near-black text. Naming the hover background and re-asserting
+                 * the text colour is what makes the override total.
+                 */
+                'hover:bg-go-hover hover:text-go-foreground',
                 // Presses move; nothing else in the system does. Reduced motion
                 // is handled globally in app.css.
-                'transition-[filter,transform] hover:brightness-108 active:translate-y-px',
+                'transition-[background-color,transform] active:translate-y-px',
                 className,
             )}
         >

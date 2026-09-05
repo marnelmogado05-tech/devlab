@@ -146,7 +146,7 @@ function Experiences({ experiences }: { experiences: ExperienceTeaser[] }) {
                     <li key={experience.slug}>
                         <Link
                             href={experienceShow(experience.slug)}
-                            className="hover:border-ring/50 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
+                            className="hover:border-foreground/30 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
                         >
                             <p className="font-medium">{experience.name}</p>
                             {experience.tagline && (
