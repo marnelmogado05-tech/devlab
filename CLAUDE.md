@@ -41,6 +41,7 @@ These are non-negotiable. They come from §32, §39–41, §25, §27, §66–67 
 | Validation                    | `app/Http/Requests/`                                                          |
 | Authorization                 | `app/Policies/`                                                               |
 | Experience UI modules         | `resources/js/experiences/<ExperienceName>/`                                  |
+| The rack (catalogue chassis)  | `resources/js/components/rack/`                                               |
 | Shared UI                     | `resources/js/components/{ui,challenge,game,leaderboard,profile}/`            |
 | Inertia pages                 | `resources/js/pages/`                                                         |
 
@@ -48,6 +49,35 @@ Controllers stay thin. Repositories only when they earn their keep — plain Elo
 require one. Do not add a layer to have a layer.
 
 ---
+
+## The design language, as built
+
+The interface is an **instrument rack**: every experience gets an identical faceplate and a
+different instrument behind it, which is what §46's "each experience should look like a different
+toy, sharing a chassis" asks for literally. Three rules are encoded in `resources/css/app.css`
+rather than left to each component, and breaking one is a bug:
+
+1. **A plate is lighter than the ground.** `--card` sits above `--background`, inverting the usual
+   dark-mode habit of darker cards. The one exception is `--face`, the recessed window a plate
+   previews itself through.
+2. **Radius is hierarchy.** 3px on plates, 0 on the data cells inside them, and a full pill on the
+   one "go" control. One radius on everything flattens every level into the same level.
+3. **No drop shadows.** Separation is a value step plus a lighter top edge.
+
+Two more rules live in the components. **`--go` is not `--primary`** — every `<Button>` reads
+`primary`, so an accent living there would put yellow on every submit and sign-in button; yellow
+belongs to `BoredButton` alone, and a second yellow control on a screen means one of them is wrong.
+And **monospace means a machine said it** — code, identifiers, counts, durations, exit codes, never
+a section label or a button, which is the line between terminal-inspired and terminal cosplay.
+
+Type is **Archivo** for anything a human wrote and **JetBrains Mono** for anything the machine
+produced, self-hosted through Bunny (`vite.config.ts`), not linked from Google.
+
+Dark is the designed theme and light is a port of the same hues onto paper. The `.dark` class is
+still the mechanism and the visitor's system preference is still honoured.
+
+Navigation is the **top rail** (`components/rail.tsx`), not a sidebar — §46 rules out looking like a
+generic admin dashboard, and a fixed left rail of grouped links is the strongest signal of one.
 
 ## Working agreement
 

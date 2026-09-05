@@ -60,8 +60,10 @@ export default function Welcome({
 function TopBar({ signedIn }: { signedIn: boolean }) {
     return (
         <header className="flex items-center justify-between px-6 py-5">
-            <span className="font-mono text-sm font-semibold tracking-tight">
-                DevLab
+            {/* The same wordmark the rail wears, so the landing page and the
+                application are recognisably one product. */}
+            <span className="font-mono text-sm font-bold tracking-tight">
+                dev<span className="text-primary">/</span>lab
             </span>
 
             <nav className="flex items-center gap-2 text-sm">
@@ -144,7 +146,7 @@ function Experiences({ experiences }: { experiences: ExperienceTeaser[] }) {
                     <li key={experience.slug}>
                         <Link
                             href={experienceShow(experience.slug)}
-                            className="hover:border-ring/50 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
+                            className="hover:border-foreground/30 focus-visible:ring-ring block h-full rounded-lg border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none"
                         >
                             <p className="font-medium">{experience.name}</p>
                             {experience.tagline && (
