@@ -159,10 +159,14 @@ what stand between "built" and "on".
 [ADR 0009](docs/adr/0009-experiences-declare-themselves.md) is §55's trigger being answered from six
 implementations rather than guessed: each experience will declare itself in one
 `ExperienceDefinition` — slug, evaluator, configuration validator, and the platform capabilities it
-requires — and every per-experience lookup resolves through it. Until that lands, three things it
-names are still true: the configuration validators have no production caller, the same slug is a key
-in four unrelated maps, and `POST /attempts/{attempt}/runs` is not scoped to an experience that
-executes anything.
+requires — and every per-experience lookup resolves through it.
+
+The **capability** quarter of that definition has landed on its own, because the hole it closed was a
+spending one: `ExperienceCapabilities` declares that Code Arena — and only Code Arena — may reach the
+execution engine, and `ExecutionRunPolicy` refuses a run against anything else. It denies by default,
+so an experience seeded without a declaration gets nothing. Two things ADR 0009 names are still true:
+the configuration validators have no production caller, and the same slug is a key in four unrelated
+maps.
 
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,

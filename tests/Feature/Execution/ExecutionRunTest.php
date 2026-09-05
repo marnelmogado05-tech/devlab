@@ -356,6 +356,55 @@ describe('the endpoints', function () {
             ->assertForbidden();
     });
 
+    it('refuses to run against an experience that does not execute anything', function () {
+        /*
+         * The route is generic: it takes any attempt the caller owns, and five
+         * of the six playable experiences have nothing to run. Before the
+         * capability check this was accepted — a container was started and a
+         * run was charged against a challenge with no cases, out of a budget
+         * belonging to Code Arena (ADR 0009).
+         *
+         * Nothing escaped even then. This is a spending hole, not a sandbox
+         * one, which is why it is asserted on the ROW COUNT and the queue
+         * rather than on anything about isolation.
+         */
+        Queue::fake();
+
+        $elsewhere = Experience::factory()->published()->create(['slug' => 'cursed-code']);
+
+        $attempt = ChallengeAttempt::factory()
+            ->for(Challenge::factory()->published()->for($elsewhere))
+            ->for($this->user)
+            ->create(['status' => ChallengeAttempt::STATUS_STARTED]);
+
+        $this->actingAs($this->user)
+            ->postJson(route('attempts.runs.store', $attempt), ['source' => '<?php'])
+            ->assertForbidden();
+
+        expect(ExecutionRun::query()->count())->toBe(0);
+        Queue::assertNothingPushed();
+    });
+
+    it('refuses an experience nobody registered, rather than defaulting to yes', function () {
+        // Default-deny. An experience seeded without a capability declaration
+        // is a deployment mistake, and the safe reading of a mistake on a gate
+        // over compute spend is "no".
+        Queue::fake();
+
+        $unknown = Experience::factory()->published()->create(['slug' => 'production-nightmare']);
+
+        $attempt = ChallengeAttempt::factory()
+            ->for(Challenge::factory()->published()->for($unknown))
+            ->for($this->user)
+            ->create(['status' => ChallengeAttempt::STATUS_STARTED]);
+
+        $this->actingAs($this->user)
+            ->postJson(route('attempts.runs.store', $attempt), ['source' => '<?php'])
+            ->assertForbidden();
+
+        expect(ExecutionRun::query()->count())->toBe(0);
+    });
+
     it('rejects a submission larger than the cap before anything is spent', function () {
         Queue::fake();
         config()->set('devlab.execution.max_source_bytes', 64);
