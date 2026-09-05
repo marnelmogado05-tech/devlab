@@ -43,7 +43,6 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
 
             /*
              * The report reason list, shared from config so the form, the
@@ -53,7 +52,7 @@ class HandleInertiaRequests extends Middleware
             'reportReasonsNeedingDetails' => ChallengeReport::reasonsRequiringDetails(),
 
             /*
-             * The experiences the sidebar lists, read rather than hardcoded.
+             * The experiences the rail lists, read rather than hardcoded.
              * Publishing an experience puts it in the navigation without a
              * frontend change, and un-publishing takes it out — which is what
              * makes this list safe to render for a guest.

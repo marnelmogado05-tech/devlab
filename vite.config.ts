@@ -26,9 +26,20 @@ export default defineConfig({
                   laravel({
                       input: ['resources/css/app.css', 'resources/js/app.tsx'],
                       refresh: true,
+                      /*
+                       * Two families, split by who wrote the words. Archivo — a
+                       * grotesque — carries everything a human wrote; JetBrains
+                       * Mono carries everything the machine produced. Self
+                       * hosted through Bunny rather than linked from Google, so
+                       * a visitor's first paint does not depend on a third
+                       * party and no request leaves for one.
+                       */
                       fonts: [
-                          bunny('Instrument Sans', {
-                              weights: [400, 500, 600],
+                          bunny('Archivo', {
+                              weights: [400, 500, 600, 700, 800],
+                          }),
+                          bunny('JetBrains Mono', {
+                              weights: [400, 500, 700],
                           }),
                       ],
                   }),

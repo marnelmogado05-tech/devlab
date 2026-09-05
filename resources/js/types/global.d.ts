@@ -14,7 +14,6 @@ declare module '@inertiajs/core' {
             auth: Auth;
             reportReasons: string[];
             reportReasonsNeedingDetails: string[];
-            sidebarOpen: boolean;
             navExperiences: NavExperience[];
             [key: string]: unknown;
         };
