@@ -155,6 +155,15 @@ the Laravel process, and the remaining checklist items in the threat model — t
 under `runsc`, a `devlab-security` review, a written statement of the deployment's runtime — are
 what stand between "built" and "on".
 
+**The experience model is decided, not yet refactored.**
+[ADR 0009](docs/adr/0009-experiences-declare-themselves.md) is §55's trigger being answered from six
+implementations rather than guessed: each experience will declare itself in one
+`ExperienceDefinition` — slug, evaluator, configuration validator, and the platform capabilities it
+requires — and every per-experience lookup resolves through it. Until that lands, three things it
+names are still true: the configuration validators have no production caller, the same slug is a key
+in four unrelated maps, and `POST /attempts/{attempt}/runs` is not scoped to an experience that
+executes anything.
+
 MVP scope (§48): auth, profiles,
 experience catalog, challenges, attempts, scoring, XP, achievements, basic leaderboard,
 "I'm Bored", plus Dev Roulette, Cursed Code, Bug Hunter — and `challenge_reports`, pulled forward
