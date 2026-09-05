@@ -7,6 +7,7 @@ use App\Services\Challenge\CodeArena\CodeArenaEvaluator;
 use App\Services\Challenge\CursedCode\CursedCodeEvaluator;
 use App\Services\Challenge\DockerEscapeRoom\DockerEscapeRoomEvaluator;
 use App\Services\Challenge\EvaluatorRegistry;
+use App\Services\Challenge\ExperienceCapabilities;
 use App\Services\Challenge\GitSimulator\GitSimulatorEvaluator;
 use App\Services\Challenge\SystemDesignLab\SystemDesignLabEvaluator;
 use App\Services\Execution\ExecutionQuota;
@@ -36,6 +37,15 @@ class AppServiceProvider extends ServiceProvider
          * resolves — a fresh instance per resolution would know about nothing.
          */
         $this->app->singleton(EvaluatorRegistry::class);
+
+        /*
+         * Same reason, same lifetime: what an experience is allowed to reach
+         * for is declared at boot, and a fresh instance per resolution would
+         * declare nothing — which, for a registry that denies by default, means
+         * refusing everything rather than allowing everything. Safe, but only
+         * by accident, and nothing would work.
+         */
+        $this->app->singleton(ExperienceCapabilities::class);
 
         /*
          * Phase 3's boundary (ADR 0007). The default REFUSES rather than fakes:
@@ -72,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
         $this->passContainerConnectionVariablesToServe();
         $this->configureRateLimiting();
         $this->registerExperienceEvaluators();
+        $this->registerExperienceCapabilities();
     }
 
     /**
@@ -90,6 +101,21 @@ class AppServiceProvider extends ServiceProvider
         $registry->register('docker-escape-room', DockerEscapeRoomEvaluator::class);
         $registry->register('git-simulator', GitSimulatorEvaluator::class);
         $registry->register('code-arena', CodeArenaEvaluator::class);
+    }
+
+    /**
+     * What each experience may ask the platform for, beyond being evaluated.
+     *
+     * Only the experiences that need something appear here. The five that grade
+     * a value the client already sent need nothing, and their absence is what
+     * stops an open Cursed Code attempt from queueing containers against a
+     * budget belonging to Code Arena (ADR 0009).
+     */
+    protected function registerExperienceCapabilities(): void
+    {
+        $capabilities = $this->app->make(ExperienceCapabilities::class);
+
+        $capabilities->register('code-arena', [ExperienceCapabilities::EXECUTION]);
     }
 
     /**
