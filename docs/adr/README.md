@@ -20,12 +20,13 @@ whatever number is next when they are actually made.
 | [0006](0006-duplicate-the-git-model-rather-than-trust-the-client.md) | Duplicate the Git model rather than trust the client           | Accepted | 2026-09-03 |
 | [0007](0007-execution-engine-architecture.md)                        | Split privilege three ways for the execution engine            | Accepted | 2026-09-03 |
 | [0008](0008-grade-code-submissions-from-a-recorded-run.md)           | Grade code submissions from a recorded run                     | Accepted | 2026-09-04 |
+| [0009](0009-experiences-declare-themselves.md)                       | Make each experience declare itself                            | Accepted | 2026-09-05 |
 
 ## Decisions still to be made
 
-| Decision                                | Needed by                                         | Note                                                                         |
-| --------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Experience architecture                 | **Trigger passed** — seven experiences shipped    | The plugin boundary can now be drawn from evidence rather than guessed (§55) |
-| AI provider                             | Phase 5                                           | Provider abstraction and selection (§29)                                     |
-| Embedding provider and vector dimension | **Before** any pgvector schema                    | A wrong dimension means re-embedding the whole corpus (§28)                  |
-| Content licensing                       | If a standalone challenge corpus becomes valuable | See [0002](0002-mit-license.md) follow-up                                    |
+| Decision                                | Needed by                                         | Note                                                                                                  |
+| --------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Plugin packaging and trust              | Phase 8                                           | What a pack is allowed to do. The design half is [0009](0009-experiences-declare-themselves.md) (§55) |
+| AI provider                             | Phase 5                                           | Provider abstraction and selection (§29)                                                              |
+| Embedding provider and vector dimension | **Before** any pgvector schema                    | A wrong dimension means re-embedding the whole corpus (§28)                                           |
+| Content licensing                       | If a standalone challenge corpus becomes valuable | See [0002](0002-mit-license.md) follow-up                                                             |
