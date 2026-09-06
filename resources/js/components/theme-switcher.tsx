@@ -40,8 +40,16 @@ export function ThemeSwitcher({ className }: { className?: string }) {
         <div
             role="group"
             aria-label="Theme"
+            /*
+             * 9px outside, 7px inside. Rounder than anything else in the
+             * system on purpose — but not a pill, because a pill here means
+             * "press me" and only "I'm Bored" gets to say that. The two
+             * radii differ by exactly the 2px of padding between them, which
+             * is what keeps the curves concentric instead of the inner ones
+             * looking pinched inside the outer.
+             */
             className={cn(
-                'border-border inline-flex items-center gap-0.5 rounded-sm border p-0.5',
+                'border-border inline-flex items-center gap-0.5 rounded-[9px] border p-0.5',
                 className,
             )}
         >
@@ -56,7 +64,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
                         aria-pressed={active}
                         title={label}
                         className={cn(
-                            'focus-visible:ring-ring flex size-8 items-center justify-center rounded-[2px] focus-visible:ring-2 focus-visible:outline-none',
+                            'focus-visible:ring-ring flex size-8 items-center justify-center rounded-[7px] focus-visible:ring-2 focus-visible:outline-none',
                             /*
                              * Active borrows rule 1 of the rack — a plate is
                              * lighter than the ground — so the pressed button
@@ -103,7 +111,7 @@ export function ThemeCycleButton({ className }: { className?: string }) {
             onClick={() => updateAppearance(next.value)}
             aria-label={`Theme: ${current.label}. Switch to ${next.label}.`}
             className={cn(
-                'hover:bg-accent focus-visible:ring-ring flex size-11 items-center justify-center rounded-sm focus-visible:ring-2 focus-visible:outline-none',
+                'hover:bg-accent focus-visible:ring-ring flex size-11 items-center justify-center rounded-[9px] focus-visible:ring-2 focus-visible:outline-none',
                 className,
             )}
         >
