@@ -45,10 +45,41 @@
         <env name="DB_CONNECTION" value="pgsql"/>
         <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="5433"/>
-        <env name="DB_DATABASE" value="devlab_testing"/>
+        <!--
+             force, because PHPUnit leaves an <env> alone when the variable
+             already exists in the real environment. The Docker containers set
+             DB_DATABASE=devlab, so without this the suite silently connects to
+             the DEVELOPMENT database and RefreshDatabase wipes it.
+
+             Host and port are deliberately NOT forced: the suite runs both on
+             the host (127.0.0.1:5433, the published port) and inside the app
+             container (postgres:5432), and those defaults adapt. The database
+             NAME is the one value that must never be inherited.
+        -->
+        <env name="DB_DATABASE" value="devlab_testing" force="true"/>
+        <!--
+             And again as a <server>, because Laravel's Env reads $_SERVER
+             BEFORE $_ENV and getenv(), and PHPUnit's <env force> does not
+             touch $_SERVER. PHP's variables_order copies the container's
+             DB_DATABASE=devlab into $_SERVER, so the <env> above wins in
+             getenv() and loses in config() — which is precisely how the suite
+             managed to wipe the development database while reporting a pass.
+        -->
+        <server name="DB_DATABASE" value="devlab_testing" force="true"/>
         <env name="DB_USERNAME" value="devlab"/>
         <env name="DB_PASSWORD" value="change_me"/>
         <env name="DB_URL" value=""/>
+        <!--
+             Redis has the same hazard and the same shape of fix. The leaderboard
+             integration tests run against a real Redis, and inheriting the
+             development REDIS_DB put their sorted sets in the same keyspace the
+             application reads. Nothing there is destroyed the way a truncated
+             table is, but a rank written by a test is still a wrong rank.
+        -->
+        <env name="REDIS_DB" value="15" force="true"/>
+        <server name="REDIS_DB" value="15" force="true"/>
+        <env name="REDIS_CACHE_DB" value="14" force="true"/>
+        <server name="REDIS_CACHE_DB" value="14" force="true"/>
         <env name="REDIS_HOST" value="127.0.0.1"/>
         <env name="REDIS_PORT" value="6380"/>
         <env name="MAIL_MAILER" value="array"/>
