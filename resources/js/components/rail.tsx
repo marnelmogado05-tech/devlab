@@ -1,5 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, Menu } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import {
+    ChevronDown,
+    Gauge,
+    LayoutGrid,
+    ListOrdered,
+    Menu,
+    Trophy,
+} from 'lucide-react';
 import { useState } from 'react';
 import { BoredButton } from '@/components/challenge/bored-button';
 import {
@@ -16,6 +24,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeCycleButton, ThemeSwitcher } from '@/components/theme-switcher';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
@@ -52,33 +61,64 @@ export function Rail() {
 
     const signedIn = auth.user !== null;
 
-    const links = [
-        { title: 'Experiences', href: experiencesIndex().url },
-        { title: 'Achievements', href: achievementsIndex().url },
-        { title: 'Leaderboards', href: leaderboardsIndex().url },
-        ...(signedIn ? [{ title: 'Dashboard', href: dashboard().url }] : []),
+    /*
+     * The icons are chosen against the rack metaphor, not from the usual
+     * admin-panel set — `LayoutDashboard` in particular is the exact thing §46
+     * rules out, so Dashboard gets a gauge: an instrument, which is what the
+     * page actually is. Each one is decorative; the text beside it is the
+     * accessible name, so they are `aria-hidden` throughout.
+     */
+    const links: { title: string; href: string; icon: LucideIcon }[] = [
+        {
+            title: 'Experiences',
+            href: experiencesIndex().url,
+            icon: LayoutGrid,
+        },
+        { title: 'Achievements', href: achievementsIndex().url, icon: Trophy },
+        {
+            title: 'Leaderboards',
+            href: leaderboardsIndex().url,
+            icon: ListOrdered,
+        },
+        ...(signedIn
+            ? [{ title: 'Dashboard', href: dashboard().url, icon: Gauge }]
+            : []),
     ];
 
     return (
         <header className="bg-background/92 border-border sticky top-0 z-40 border-b backdrop-blur-md">
-            <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-4 sm:px-6">
+            {/*
+             * A three-column grid rather than a flex row with `ml-auto`.
+             *
+             * `1fr auto 1fr` centres the navigation on the RAIL, not in
+             * whatever space the wordmark and the controls happen to leave —
+             * so the links do not drift sideways when the account control
+             * appears at sign-in or the theme switcher collapses at `md`.
+             *
+             * Every child names its own column. Below `md` the nav is
+             * `display:none`, and a hidden item does not occupy a grid cell —
+             * so under automatic placement the controls slid into the middle
+             * column and sat with 135px of dead rail to their right.
+             */}
+            <div className="mx-auto grid h-14 max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
                 <Link
                     href={signedIn ? dashboard() : home()}
                     prefetch
-                    className="focus-visible:ring-ring rounded-sm font-mono text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
+                    className="focus-visible:ring-ring col-start-1 justify-self-start rounded-sm font-mono text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
                 >
                     dev<span className="text-primary">/</span>lab
                 </Link>
 
                 <nav
                     aria-label="Main"
-                    className="hidden items-center gap-5 md:flex"
+                    className="col-start-2 hidden items-center justify-center gap-5 md:flex"
                 >
                     {links.map((link) => (
                         <RailLink
                             key={link.href}
                             href={link.href}
                             active={isActive(page.url, link.href)}
+                            icon={link.icon}
                         >
                             {link.title}
                         </RailLink>
@@ -86,7 +126,16 @@ export function Rail() {
 
                     {navExperiences.length > 0 && (
                         <DropdownMenu>
-                            <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-1 rounded-sm border-b border-transparent py-0.5 text-sm focus-visible:ring-2 focus-visible:outline-none">
+                            {/*
+                             * The shortcut waits for `lg`. Signed in, the rail
+                             * carries four labelled links, an avatar and the
+                             * accent button, and adding icons pushed that 24px
+                             * past a 838px viewport. "Jump to" is the right
+                             * thing to drop: it is a shortcut to the catalogue,
+                             * and the Experiences link beside it already goes
+                             * there.
+                             */}
+                            <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground focus-visible:ring-ring hidden items-center gap-1 rounded-sm border-b border-transparent py-0.5 text-sm focus-visible:ring-2 focus-visible:outline-none lg:flex">
                                 Jump to
                                 <ChevronDown className="size-3.5" aria-hidden />
                             </DropdownMenuTrigger>
@@ -110,11 +159,25 @@ export function Rail() {
                     )}
                 </nav>
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="col-start-3 flex items-center gap-2 justify-self-end">
+                    {/*
+                     * Theme first, then the account, then the accent — the
+                     * button stays the last thing in the rail because it is
+                     * the last thing the eye should land on.
+                     *
+                     * The three-button group waits for `lg`, not `md`. Between
+                     * them a signed-out rail carries "Log in" and "Sign up" as
+                     * well, and the group's extra ~66px over the cycle button
+                     * was enough to wrap them onto two lines. The cycle button
+                     * covers that range instead.
+                     */}
+                    <ThemeSwitcher className="hidden lg:inline-flex" />
+                    <ThemeCycleButton className="lg:hidden" />
+
                     {signedIn ? (
                         <UserButton />
                     ) : (
-                        <div className="hidden items-center gap-4 pr-1 sm:flex">
+                        <div className="hidden items-center gap-4 pr-1 whitespace-nowrap sm:flex">
                             <RailLink href={login().url} active={false}>
                                 Log in
                             </RailLink>
@@ -144,10 +207,12 @@ export function Rail() {
 function RailLink({
     href,
     active,
+    icon: Icon,
     children,
 }: {
     href: string;
     active: boolean;
+    icon?: LucideIcon;
     children: React.ReactNode;
 }) {
     return (
@@ -155,12 +220,13 @@ function RailLink({
             href={href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-                'focus-visible:ring-ring rounded-sm border-b py-0.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                'focus-visible:ring-ring flex items-center gap-1.5 rounded-sm border-b py-0.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 active
                     ? 'text-foreground border-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:border-border border-transparent',
             )}
         >
+            {Icon && <Icon className="size-4 shrink-0" aria-hidden />}
             {children}
         </Link>
     );
@@ -214,7 +280,7 @@ function MobileMenu({
     links,
     signedIn,
 }: {
-    links: { title: string; href: string }[];
+    links: { title: string; href: string; icon: LucideIcon }[];
     signedIn: boolean;
 }) {
     const [open, setOpen] = useState(false);
@@ -243,8 +309,12 @@ function MobileMenu({
                             key={link.href}
                             href={link.href}
                             onClick={() => setOpen(false)}
-                            className="hover:bg-accent focus-visible:ring-ring flex min-h-11 items-center rounded-sm px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
+                            className="hover:bg-accent focus-visible:ring-ring flex min-h-11 items-center gap-2.5 rounded-sm px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
                         >
+                            <link.icon
+                                className="size-4 shrink-0"
+                                aria-hidden
+                            />
                             {link.title}
                         </Link>
                     ))}

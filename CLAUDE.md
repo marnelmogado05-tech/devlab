@@ -60,8 +60,11 @@ rather than left to each component, and breaking one is a bug:
 1. **A plate is lighter than the ground.** `--card` sits above `--background`, inverting the usual
    dark-mode habit of darker cards. The one exception is `--face`, the recessed window a plate
    previews itself through.
-2. **Radius is hierarchy.** 3px on plates, 0 on the data cells inside them, and a full pill on the
-   one "go" control. One radius on everything flattens every level into the same level.
+2. **Radius is hierarchy.** 0 on the data cells inside a plate, 3px on the plate, 9px on the theme
+   switcher in the rail (7px on the buttons inside it, so the curves stay concentric across its
+   2px of padding), and a full pill on the one "go" control. One radius on everything flattens
+   every level into the same level; the pill stays reserved, because a pill here means "press me"
+   and only `BoredButton` gets to say that.
 3. **No drop shadows.** Separation is a value step plus a lighter top edge.
 
 Two more rules live in the components. **`--go` is not `--primary`** — every `<Button>` reads

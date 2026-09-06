@@ -288,3 +288,20 @@
         scroll-behavior: auto !important;
     }
 }
+
+/* -----------------------------------------------------------------------------
+ * Switching theme is not motion either.
+ *
+ * `useAppearance` sets this attribute on <html>, flips the theme, forces a
+ * style read, and removes it — all synchronously, so this rule is live for a
+ * single frame. Without it every element carrying `transition-colors` eases
+ * from the old theme to the new one at its own pace and the page visibly washes
+ * over. With it the repaint is one instantaneous step, and hover transitions
+ * are unaffected because the attribute is gone before the pointer can move.
+ * -------------------------------------------------------------------------- */
+[data-theme-switching],
+[data-theme-switching] *,
+[data-theme-switching] *::before,
+[data-theme-switching] *::after {
+    transition: none !important;
+}
