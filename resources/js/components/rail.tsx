@@ -16,6 +16,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeCycleButton, ThemeSwitcher } from '@/components/theme-switcher';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
@@ -61,18 +62,31 @@ export function Rail() {
 
     return (
         <header className="bg-background/92 border-border sticky top-0 z-40 border-b backdrop-blur-md">
-            <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-4 sm:px-6">
+            {/*
+             * A three-column grid rather than a flex row with `ml-auto`.
+             *
+             * `1fr auto 1fr` centres the navigation on the RAIL, not in
+             * whatever space the wordmark and the controls happen to leave —
+             * so the links do not drift sideways when the account control
+             * appears at sign-in or the theme switcher collapses at `md`.
+             *
+             * Every child names its own column. Below `md` the nav is
+             * `display:none`, and a hidden item does not occupy a grid cell —
+             * so under automatic placement the controls slid into the middle
+             * column and sat with 135px of dead rail to their right.
+             */}
+            <div className="mx-auto grid h-14 max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6">
                 <Link
                     href={signedIn ? dashboard() : home()}
                     prefetch
-                    className="focus-visible:ring-ring rounded-sm font-mono text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
+                    className="focus-visible:ring-ring col-start-1 justify-self-start rounded-sm font-mono text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
                 >
                     dev<span className="text-primary">/</span>lab
                 </Link>
 
                 <nav
                     aria-label="Main"
-                    className="hidden items-center gap-5 md:flex"
+                    className="col-start-2 hidden items-center justify-center gap-5 md:flex"
                 >
                     {links.map((link) => (
                         <RailLink
@@ -110,11 +124,25 @@ export function Rail() {
                     )}
                 </nav>
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="col-start-3 flex items-center gap-2 justify-self-end">
+                    {/*
+                     * Theme first, then the account, then the accent — the
+                     * button stays the last thing in the rail because it is
+                     * the last thing the eye should land on.
+                     *
+                     * The three-button group waits for `lg`, not `md`. Between
+                     * them a signed-out rail carries "Log in" and "Sign up" as
+                     * well, and the group's extra ~66px over the cycle button
+                     * was enough to wrap them onto two lines. The cycle button
+                     * covers that range instead.
+                     */}
+                    <ThemeSwitcher className="hidden lg:inline-flex" />
+                    <ThemeCycleButton className="lg:hidden" />
+
                     {signedIn ? (
                         <UserButton />
                     ) : (
-                        <div className="hidden items-center gap-4 pr-1 sm:flex">
+                        <div className="hidden items-center gap-4 pr-1 whitespace-nowrap sm:flex">
                             <RailLink href={login().url} active={false}>
                                 Log in
                             </RailLink>

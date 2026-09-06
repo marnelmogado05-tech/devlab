@@ -41,15 +41,36 @@ const isDarkMode = (appearance: Appearance): boolean => {
     return appearance === 'dark' || (appearance === 'system' && prefersDark());
 };
 
+/*
+ * Repainting the document is not an animation.
+ *
+ * Most of the interface eases its colours so that hover and focus feel like
+ * responses to the pointer. Flipping the theme changes every one of those
+ * colours at once, and those same easings then run together — the page washes
+ * from one theme to the other over ~150ms, in whatever order the compositor
+ * happens to reach the elements. It reads as the page struggling.
+ *
+ * So transitions are switched off for exactly one frame: mark the root, flip
+ * the class, read `offsetWidth` to force the new colours to be committed while
+ * transitions are still off, then unmark. Hover easings elsewhere survive
+ * untouched, because they are only suppressed during that synchronous read.
+ */
 const applyTheme = (appearance: Appearance): void => {
     if (typeof document === 'undefined') {
         return;
     }
 
     const isDark = isDarkMode(appearance);
+    const root = document.documentElement;
 
-    document.documentElement.classList.toggle('dark', isDark);
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    root.setAttribute('data-theme-switching', '');
+
+    root.classList.toggle('dark', isDark);
+    root.style.colorScheme = isDark ? 'dark' : 'light';
+
+    void root.offsetWidth;
+
+    root.removeAttribute('data-theme-switching');
 };
 
 const subscribe = (callback: () => void) => {
