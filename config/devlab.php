@@ -21,10 +21,23 @@ declare(strict_types=1);
  * `*` trusts every upstream and is only safe when nothing can reach the
  * application except the proxy.
  */
-$proxies = trim((string) env(
-    'TRUSTED_PROXIES',
-    '127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7',
-));
+$defaultProxies = '127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7';
+
+/*
+ * `TRUSTED_PROXIES=` with nothing after it is EMPTY, not absent, and `env()`
+ * returns the default only when a key is missing entirely. Reading it naively
+ * therefore turned a blank line in .env.example into "trust nothing" — which is
+ * precisely the misconfiguration this setting exists to prevent, reintroduced by
+ * the file that documents it. Empty means the default here, and `none` is the
+ * explicit way to trust nothing.
+ */
+$configured = trim((string) env('TRUSTED_PROXIES', ''));
+
+$proxies = match ($configured) {
+    '' => $defaultProxies,
+    'none' => '',
+    default => $configured,
+};
 
 return [
 
