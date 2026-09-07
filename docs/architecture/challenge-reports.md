@@ -66,11 +66,25 @@ Player hits "Something's wrong with this challenge"
   challenge_reports row (status: open)
         │
         ▼
+  maintainer is emailed     ← if DEVLAB_MAINTAINER_EMAIL is set; queued
+        │                      `[urgent]` for wrong_answer and security
+        ▼
   maintainer reads          ← MVP: `php artisan devlab:reports`
         │                      Phase 7: moderation UI (§69)
-        ├── confirmed → fix content, bump version (§71), resolve with a note
-        └── not a defect → dismiss with a note
+        ├── confirmed → fix content, bump version (§71),
+        │               `devlab:reports:resolve <id> --note="..."`
+        └── not a defect → `devlab:reports:dismiss <id> --note="..."`
 ```
+
+The announcement fires only on a genuine create. A repeat report from the same person is handed
+back by the partial unique index rather than inserted, so a double-clicked submit does not send a
+second email. Unconfigured is a valid state and means the only read path is `devlab:reports` —
+which is fine on a laptop and is not fine on a deployment, where a `security` report would sit
+unread.
+
+`resolved_by` stays null: there is no maintainer identity to record, because there is no maintainer
+role. Server access is the only maintainer check DevLab has, and `--note` is where the "who and
+why" goes until that changes.
 
 `wrong_answer` reports carry the version played, because fixing the key means bumping the version
 and the affected attempts are the ones on the old version.
@@ -84,7 +98,8 @@ and the affected attempts are the ones on the old version.
   the author.
 - The reporter sees only that their report was received. No status feed in the MVP.
 - Policy-gated: a user may create a report and see their own; only a maintainer may list, resolve
-  or dismiss. Fail closed.
+  or dismiss. Fail closed — and since no maintainer role exists, `viewAny` and `resolve` return
+  false for everyone and the console is the only way in.
 - `security` reports are never rendered in any shared view — route them the way `SECURITY.md`
   describes.
 - Submitting a report **never** affects the reporter's score, XP or attempt. It must not become a
@@ -92,9 +107,12 @@ and the affected attempts are the ones on the old version.
 
 ## What is explicitly not in the MVP
 
-Moderation queue UI · reviewer assignment · report states beyond open/resolved/dismissed ·
-reputation weighting · automated action on report volume · public report counts · reporter
-notifications. All Phase 7 (§69).
+Moderation queue UI · reviewer assignment · a maintainer role · report states beyond
+open/resolved/dismissed · reputation weighting · automated action on report volume · public report
+counts · reporter notifications. All Phase 7 (§69).
+
+A role system becomes necessary the moment a second person has to triage without a shell. When it
+arrives the branch belongs in `ChallengeReportPolicy` and nowhere else, and it needs an ADR first.
 
 ## Relationship to `content-curator`
 

@@ -63,6 +63,7 @@ already correct for production.
 | `MAIL_MAILER`               | a real transport      | See [mail](#2-mail-is-log-until-you-change-it)                                                      |
 | `TRUSTED_PROXIES`           | usually leave empty   | See [trusted proxies](#1-trusted-proxies)                                                           |
 | `DEVLAB_EXECUTION_ENABLED`  | `false`               | Leave it. [Why](#not-deployed-on-purpose)                                                           |
+| `DEVLAB_MAINTAINER_EMAIL`   | your address          | Where a new challenge report is announced. Empty means nobody is told                               |
 
 `APP_KEY` is the one value that cannot be regenerated later without consequence: change it and every
 session and every encrypted cookie in the wild becomes undecryptable.
@@ -145,6 +146,26 @@ What the scheduler actually drives, from [`routes/console.php`](../../routes/con
   attempts stay open forever and block a user from restarting that challenge.
 - `devlab:rebuild-leaderboards` — hourly. Without it the Redis sorted sets drift from PostgreSQL and
   the rankings slowly go stale rather than visibly break.
+
+---
+
+## Challenge reports
+
+There is no admin account and no moderation UI — by design
+([ADR 0003](../adr/0003-challenge-reports-in-mvp.md)). Server access is the maintainer check.
+
+Set `DEVLAB_MAINTAINER_EMAIL` or nobody is told a report exists, and a `security` report will sit
+unread. Announcements are queued, so they need the worker above and a working mailer.
+
+```bash
+php artisan devlab:reports                                  # open, wrong keys first
+php artisan devlab:reports:resolve 42 --note="fixed in v3"   # content was changed
+php artisan devlab:reports:dismiss 43 --note="not a defect"  # nothing to do
+```
+
+A wrong answer key is the one report class that is a blocker: it corrupts every score derived from
+it. Fix it, bump the challenge version so attempts scored against the old key stay identifiable
+(§71), then resolve.
 
 ---
 
