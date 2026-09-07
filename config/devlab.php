@@ -408,6 +408,19 @@ return [
          * Reasons that require `details` to be filled in.
          */
         'details_required_for' => ['other', 'security'],
+
+        /*
+         * Where a new report is announced.
+         *
+         * ADR 0003's whole argument is that a wrong answer key is silent, and
+         * that only holds if someone is told. Empty means nobody is told and the
+         * only read path is `devlab:reports`, which is fine on a laptop and is
+         * not fine on a deployment — a `security` report would sit unread.
+         *
+         * There is no maintainer account to send this to; DevLab has no roles by
+         * design (ADR 0003), so it goes to an address.
+         */
+        'notify_email' => env('DEVLAB_MAINTAINER_EMAIL'),
     ],
 
     /*

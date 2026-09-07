@@ -6,8 +6,10 @@ use App\Models\Challenge;
 use App\Models\ChallengeAttempt;
 use App\Models\ChallengeReport;
 use App\Models\User;
+use App\Notifications\ChallengeReportFiled;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * File a report against a challenge.
@@ -36,7 +38,7 @@ class ReportChallenge
              * aborts the whole transaction after a failed statement, and a caller
              * may already have one open.
              */
-            return DB::transaction(fn () => ChallengeReport::query()->create([
+            $report = DB::transaction(fn () => ChallengeReport::query()->create([
                 'challenge_id' => $challenge->id,
                 /*
                  * The version played, not the current one. Fixing a wrong key
@@ -50,6 +52,16 @@ class ReportChallenge
                 'details' => $details,
                 'status' => ChallengeReport::STATUS_OPEN,
             ]));
+
+            /*
+             * Announced only on a genuine create, and only after the transaction
+             * has committed. The duplicate branch below hands back an EXISTING
+             * report, so notifying from there would email a maintainer every time
+             * somebody double-clicked submit.
+             */
+            $this->announce($report);
+
+            return $report;
         } catch (QueryException $e) {
             if (! $this->isDuplicate($e)) {
                 throw $e;
@@ -68,6 +80,26 @@ class ReportChallenge
                 ->where('reason', $reason)
                 ->sole();
         }
+    }
+
+    /**
+     * Tell a maintainer, if there is an address to tell.
+     *
+     * On-demand rather than to a User: DevLab has no maintainer role (ADR 0003),
+     * so there is no account to notify. Unconfigured is a valid state — it is the
+     * default for a local clone — and means the only read path is
+     * `devlab:reports`.
+     */
+    private function announce(ChallengeReport $report): void
+    {
+        $address = config('devlab.reports.notify_email');
+
+        if (blank($address)) {
+            return;
+        }
+
+        Notification::route('mail', $address)
+            ->notify(new ChallengeReportFiled($report));
     }
 
     private function isDuplicate(QueryException $e): bool
