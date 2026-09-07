@@ -8,7 +8,6 @@ import {
 import { StatGrid } from '@/components/profile/stat-grid';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { dashboard } from '@/routes';
 import { show as attemptShow } from '@/routes/attempts';
 import { show as challengeShow } from '@/routes/challenges';
 import { show as profileShow } from '@/routes/profiles';
@@ -298,7 +297,3 @@ function LatestUnlocks({ achievements }: { achievements: Unlock[] }) {
         </section>
     );
 }
-
-Dashboard.layout = {
-    breadcrumbs: [{ title: 'Dashboard', href: dashboard() }],
-};

@@ -2,7 +2,10 @@ import { Head, Link } from '@inertiajs/react';
 import { DifficultyBadge } from '@/components/challenge/difficulty-badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { show as challengeShow } from '@/routes/challenges';
-import { index as experiencesIndex } from '@/routes/experiences';
+import {
+    index as experiencesIndex,
+    show as experienceShow,
+} from '@/routes/experiences';
 import type { ChallengeSummary, ExperienceDetail, Paginated } from '@/types';
 
 export default function ExperienceShow({
@@ -152,6 +155,14 @@ function Pagination({
     );
 }
 
-ExperienceShow.layout = {
-    breadcrumbs: [{ title: 'Experiences', href: experiencesIndex() }],
-};
+/*
+ * A trail, not a label. `.layout` is an arrow function so Inertia calls it with
+ * the page's own props — the crumbs are derived per page with no shared store
+ * to leak between navigations.
+ */
+ExperienceShow.layout = ({ experience }: { experience: ExperienceDetail }) => ({
+    breadcrumbs: [
+        { title: 'Experiences', href: experiencesIndex() },
+        { title: experience.name, href: experienceShow(experience.slug) },
+    ],
+});

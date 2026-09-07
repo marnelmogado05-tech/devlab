@@ -14,6 +14,18 @@ import type { AppLayoutProps } from '@/types';
  * them. The starter kit reserved a fixed 4rem header for breadcrumbs on every
  * page including the ones with none, which is 4rem of nothing above most of the
  * application.
+ *
+ * ONLY PAGES WITH AN ANCESTOR SUPPLY THEM. A one-item trail is not a trail: the
+ * component renders the last crumb as `BreadcrumbPage`, so a lone entry comes
+ * out as unlinked text that names the page you are already on — which the rail
+ * has already marked `aria-current` and the page has already put in its `h1`.
+ * Every index page used to do exactly that, and `/experiences` said the word
+ * "Experiences" three times in a row down the screen.
+ *
+ * The pages that do supply them build the trail from their own props, by
+ * declaring `layout` as a function rather than an object: Inertia calls it with
+ * the page's props and merges the result, so `/challenges/{slug}` can name its
+ * experience and itself without a shared store to leak between navigations.
  */
 export default function AppRailLayout({
     children,

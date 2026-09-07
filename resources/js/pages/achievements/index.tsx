@@ -1,7 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { index as achievementsIndex } from '@/routes/achievements';
 
 interface AchievementCard {
     key: string | null;
@@ -113,7 +112,3 @@ function AchievementTile({ achievement }: { achievement: AchievementCard }) {
         </Card>
     );
 }
-
-AchievementsIndex.layout = {
-    breadcrumbs: [{ title: 'Achievements', href: achievementsIndex() }],
-};

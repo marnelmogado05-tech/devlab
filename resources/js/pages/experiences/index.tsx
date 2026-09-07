@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Plate } from '@/components/rack/plate';
 import { Preview } from '@/components/rack/previews';
-import { index as experiencesIndex, show } from '@/routes/experiences';
+import { show } from '@/routes/experiences';
 import type { ExperienceCard } from '@/types';
 
 /**
@@ -76,7 +76,3 @@ function EmptyRack() {
         </div>
     );
 }
-
-ExperiencesIndex.layout = {
-    breadcrumbs: [{ title: 'Experiences', href: experiencesIndex() }],
-};
