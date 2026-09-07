@@ -64,7 +64,7 @@ function TopBar({ signedIn }: { signedIn: boolean }) {
             {/* The same wordmark the rail wears, so the landing page and the
                 application are recognisably one product. */}
             <span className="font-mono text-sm font-bold tracking-tight">
-                dev<span className="text-primary">/</span>lab
+                dev<span className="text-go-ink">/</span>lab
             </span>
 
             <nav className="flex items-center gap-2 text-sm">

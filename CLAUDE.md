@@ -69,7 +69,14 @@ rather than left to each component, and breaking one is a bug:
 
 Two more rules live in the components. **`--go` is not `--primary`** — every `<Button>` reads
 `primary`, so an accent living there would put yellow on every submit and sign-in button; yellow
-belongs to `BoredButton` alone, and a second yellow control on a screen means one of them is wrong.
+belongs to `BoredButton` alone, and a second yellow **control** on a screen means one of them is
+wrong. The wordmark's slash is the one exception, and it holds because a mark is not a control:
+`dev/lab` reads as a path and the slash is the character the name turns on, so it wears
+`--go-ink` — the accent as ink rather than as a fill. Those are different tokens on purpose.
+`--go` is #F2E14C in both themes because it is only ever a background; as text on paper it is
+1.3:1, so `--go-ink` darkens to a deep gold there, the same way `--ring` does. Anything that wants
+the accent as text uses `--go-ink` and is guarded by `contrast.test.ts`; nothing you can press
+wears the accent except the pill.
 And **monospace means a machine said it** — code, identifiers, counts, durations, exit codes, never
 a section label or a button, which is the line between terminal-inspired and terminal cosplay.
 
