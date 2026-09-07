@@ -54,7 +54,7 @@ assignment and no state. Starting is a separate `POST`.
 
 ## Browsing the catalogue
 
-```
+```text
 GET /experiences              ExperienceController@index    the rack of plates
 GET /experiences/{slug}       ExperienceController@show     one experience + its challenges
 GET /challenges/{slug}        ChallengeController@show      one challenge, pre-attempt
@@ -138,7 +138,7 @@ Owner-only, via `ChallengeAttemptPolicy`.
 
 Only Code Arena reaches this, and only when it is switched on.
 
-```
+```text
 POST /attempts/{attempt}/runs   ExecutionRunController@store
       → QueueSubmissionRun          writes execution_runs row, dispatches afterCommit
       → ExecuteSubmission (queue)   job carries only the row id
@@ -198,10 +198,10 @@ happens **inside one transaction**:
 7. **Achievements** — `AchievementUnlocker` evaluates against those fresh statistics. If anything
    unlocked, statistics are refreshed again, because an unlock grants XP.
 
-Then, **after commit**:
+Then, **after the transaction commits**:
 
-8. `LeaderboardService::sync()` updates the Redis sorted sets.
-9. `ChallengeCompleted` is dispatched.
+- `LeaderboardService::sync()` updates the Redis sorted sets.
+- `ChallengeCompleted` is dispatched.
 
 **Why XP is not in a queued listener.** [ADR 0005](../adr/0005-redis-for-cache-session-queue-and-ranking.md)
 is binding: a dropped job must never mean lost XP. That is precisely what makes the Redis queue's
@@ -224,7 +224,7 @@ from a completion without being a reward.
 
 ## Abandoning and expiry
 
-```
+```text
 DELETE /attempts/{attempt}    AbandonAttempt        the user walked away
 devlab:expire-attempts        ExpireStaleAttempts   every ten minutes
 ```
@@ -310,7 +310,7 @@ The `preferences` written here are what the recommender reads.
 
 ## Settings
 
-```
+```text
 GET   /settings/profile          ProfileController@edit
 PATCH /settings/profile          ProfileController@update
 PUT   /settings/public-profile   PublicProfileController@update    privacy toggle
