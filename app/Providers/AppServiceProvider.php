@@ -17,6 +17,7 @@ use App\Services\Execution\UnavailableOrchestrator;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Console\ServeCommand;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -199,6 +200,22 @@ class AppServiceProvider extends ServiceProvider
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
+
+        /*
+         * Trusted proxies cannot be configured in bootstrap/app.php: the
+         * `withMiddleware` closure runs before the container has a config
+         * repository, and `config()` there throws. `TrustProxies::at()` is the
+         * supported seam for deciding this from configuration instead, and a
+         * provider is the first place config is available.
+         *
+         * Why it matters is in config/devlab.php. Short version: untrusted, every
+         * signed-out visitor shares one rate-limit bucket and TLS is invisible.
+         */
+        $proxies = config('devlab.trusted_proxies');
+
+        if ($proxies !== [] && $proxies !== null) {
+            TrustProxies::at($proxies);
+        }
 
         Password::defaults(fn (): ?Password => app()->isProduction()
             ? Password::min(12)

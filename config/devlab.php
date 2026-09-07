@@ -2,7 +2,45 @@
 
 declare(strict_types=1);
 
+/*
+ * Which upstream addresses may speak for their client.
+ *
+ * Behind a proxy, `$request->ip()` is the PROXY unless the proxy is trusted —
+ * and almost every rate limiter in AppServiceProvider falls back to
+ * `$request->ip()` for signed-out visitors. Untrusted, one bucket is shared by
+ * the entire internet: `bored` at 30/min becomes 30 presses per minute for
+ * everybody, which looks like a bug nobody can reproduce. `X-Forwarded-Proto`
+ * is ignored too, so the app builds http:// URLs behind TLS.
+ *
+ * The default trusts loopback and the private ranges, which covers nginx on the
+ * same host and a load balancer inside a private network. It CANNOT be abused
+ * from the public internet: spoofing `X-Forwarded-For` requires the connection
+ * itself to come from a trusted address, and no public address is on this list.
+ *
+ * A proxy on a public address — Cloudflare, say — must be named explicitly.
+ * `*` trusts every upstream and is only safe when nothing can reach the
+ * application except the proxy.
+ */
+$proxies = trim((string) env(
+    'TRUSTED_PROXIES',
+    '127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7',
+));
+
 return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Trusted proxies
+    |--------------------------------------------------------------------------
+    |
+    | Read by AppServiceProvider, which hands it to Laravel's TrustProxies
+    | middleware. See the note above before widening it.
+    |
+    */
+
+    'trusted_proxies' => $proxies === '*'
+        ? '*'
+        : array_values(array_filter(array_map('trim', explode(',', $proxies)))),
 
     /*
     |--------------------------------------------------------------------------
