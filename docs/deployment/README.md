@@ -30,13 +30,13 @@ environment, seeding and the queue still applies; only the provisioning changes.
 
 ## Before you start
 
-| | |
-| --- | --- |
-| PHP | 8.4 with `pdo_pgsql`, `intl`, `zip`, `bcmath`, `opcache`, `redis` |
-| PostgreSQL | 17 — the schema uses `jsonb`, GIN and partial unique indexes |
-| Redis | 8 — cache, sessions, queue and the leaderboard sorted sets |
-| Node | only at build time, for `npm run build` |
-| A domain | with DNS pointed at the server before you request a certificate |
+|            |                                                                   |
+| ---------- | ----------------------------------------------------------------- |
+| PHP        | 8.4 with `pdo_pgsql`, `intl`, `zip`, `bcmath`, `opcache`, `redis` |
+| PostgreSQL | 17 — the schema uses `jsonb`, GIN and partial unique indexes      |
+| Redis      | 8 — cache, sessions, queue and the leaderboard sorted sets        |
+| Node       | only at build time, for `npm run build`                           |
+| A domain   | with DNS pointed at the server before you request a certificate   |
 
 Redis is **not** optional and not only a cache: sessions live there, the queue lives there, and the
 leaderboards are Redis sorted sets over PostgreSQL. Losing Redis logs everyone out and drops queued
@@ -49,20 +49,20 @@ work; it does not lose XP, attempts or achievements, which are PostgreSQL rows.
 Start from [`.env.example`](../../.env.example) and change exactly these. Everything not listed is
 already correct for production.
 
-| Key | Value | Why |
-| --- | --- | --- |
-| `APP_ENV` | `production` | Turns on `Password::min(12)->uncompromised()` and `DB::prohibitDestructiveCommands` |
-| `APP_DEBUG` | `false` | Stack traces are a disclosure bug on a public host |
-| `APP_KEY` | generated | `php artisan key:generate` once, then never rotate it — sessions and encrypted cookies depend on it |
-| `APP_URL` | `https://your.domain` | Absolute links, signed URLs and email links all read this |
-| `LOG_LEVEL` | `warning` | `debug` on a public site is noise plus disclosure |
-| `DB_HOST` / `DB_PORT` | `127.0.0.1` / `5432` | The compose ports (5433/6380) exist to dodge local collisions and are wrong here |
-| `DB_PASSWORD` | something long | `change_me` is a placeholder, not a password |
-| `REDIS_HOST` / `REDIS_PORT` | `127.0.0.1` / `6379` | as above |
-| `REDIS_PASSWORD` | set it | Redis on a shared host with no password is an open database |
-| `MAIL_MAILER` | a real transport | See [mail](#2-mail-is-log-until-you-change-it) |
-| `TRUSTED_PROXIES` | usually leave empty | See [trusted proxies](#1-trusted-proxies) |
-| `DEVLAB_EXECUTION_ENABLED` | `false` | Leave it. [Why](#not-deployed-on-purpose) |
+| Key                         | Value                 | Why                                                                                                 |
+| --------------------------- | --------------------- | --------------------------------------------------------------------------------------------------- |
+| `APP_ENV`                   | `production`          | Turns on `Password::min(12)->uncompromised()` and `DB::prohibitDestructiveCommands`                 |
+| `APP_DEBUG`                 | `false`               | Stack traces are a disclosure bug on a public host                                                  |
+| `APP_KEY`                   | generated             | `php artisan key:generate` once, then never rotate it — sessions and encrypted cookies depend on it |
+| `APP_URL`                   | `https://your.domain` | Absolute links, signed URLs and email links all read this                                           |
+| `LOG_LEVEL`                 | `warning`             | `debug` on a public site is noise plus disclosure                                                   |
+| `DB_HOST` / `DB_PORT`       | `127.0.0.1` / `5432`  | The compose ports (5433/6380) exist to dodge local collisions and are wrong here                    |
+| `DB_PASSWORD`               | something long        | `change_me` is a placeholder, not a password                                                        |
+| `REDIS_HOST` / `REDIS_PORT` | `127.0.0.1` / `6379`  | as above                                                                                            |
+| `REDIS_PASSWORD`            | set it                | Redis on a shared host with no password is an open database                                         |
+| `MAIL_MAILER`               | a real transport      | See [mail](#2-mail-is-log-until-you-change-it)                                                      |
+| `TRUSTED_PROXIES`           | usually leave empty   | See [trusted proxies](#1-trusted-proxies)                                                           |
+| `DEVLAB_EXECUTION_ENABLED`  | `false`               | Leave it. [Why](#not-deployed-on-purpose)                                                           |
 
 `APP_KEY` is the one value that cannot be regenerated later without consequence: change it and every
 session and every encrypted cookie in the wild becomes undecryptable.
@@ -241,9 +241,9 @@ The execution engine — [ADR 0007](../adr/0007-execution-engine-architecture.md
 [ADR 0008](../adr/0008-grade-code-submissions-from-a-recorded-run.md) — stays off.
 
 [The sandbox threat model](../security/sandbox-threat-model.md) has three unticked items, and one of
-them cannot be ticked from a developer's machine: *"The suite green on a Linux host with `runsc`,
-which is the only run that speaks to S1"*, and *"S1 remains unverified, and no run on Docker Desktop
-can change that."* Turning it on also means operating a host that holds container-creation privilege,
+them cannot be ticked from a developer's machine: _"The suite green on a Linux host with `runsc`,
+which is the only run that speaks to S1"_, and _"S1 remains unverified, and no run on Docker Desktop
+can change that."_ Turning it on also means operating a host that holds container-creation privilege,
 which is a different security and operations problem from the one this runbook covers.
 
 With `DEVLAB_EXECUTION_ENABLED=false` the container binds an orchestrator that refuses rather than
