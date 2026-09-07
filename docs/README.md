@@ -9,7 +9,7 @@
 | [`experiences/`](experiences/)                     | One document per experience: metadata, configuration schema, evaluation, scoring.             |
 | [`ai/`](ai/)                                       | AI architecture, provider abstraction, prompt and safety rules, cost control, RAG.            |
 | [`security/`](security/)                           | Threat model, trust boundaries, sandbox design, security review checklists.                   |
-| [`deployment/`](deployment/)                       | Docker, environments, CI/CD, operations, observability.                                       |
+| [`deployment/`](deployment/)                       | The runbook for going live: target, environment, deploy script, queue, backups, rollback.     |
 | [`contributing/`](contributing/)                   | Deeper contributor guides. Entry point is [`../CONTRIBUTING.md`](../CONTRIBUTING.md).         |
 
 ## Reading order for a new contributor
