@@ -82,6 +82,14 @@ still the mechanism and the visitor's system preference is still honoured.
 Navigation is the **top rail** (`components/rail.tsx`), not a sidebar — §46 rules out looking like a
 generic admin dashboard, and a fixed left rail of grouped links is the strongest signal of one.
 
+Auth pages get **the same chassis, fewer instruments** (`layouts/auth/auth-rail-layout.tsx`). Same
+header height, same measure, same wordmark in the same position; the main navigation and
+`BoredButton` are left off, because an auth page has one job and the accent control would out-shout
+the submit button on it. The form sits on a plate, and beside it — above `lg` only — is the same
+recessed `Face` the experience plates preview themselves through. The layout takes a `variant`:
+`guest` pitches an account, `secure` (confirm password, two-factor, email verification) does not,
+because everyone on those pages already has one. The starter kit's three auth layouts are gone.
+
 ## Working agreement
 
 Before implementing, follow the §59 workflow: understand → inspect repo → find existing
