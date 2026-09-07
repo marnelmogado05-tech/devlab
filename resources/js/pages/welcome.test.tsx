@@ -56,4 +56,21 @@ describe('the landing page', () => {
         expect(screen.getByRole('link', { name: /sign up/i })).toBeTruthy();
         expect(screen.queryByRole('link', { name: /dashboard/i })).toBeNull();
     });
+
+    it('carries a theme control, because this page has no rail', () => {
+        /*
+         * Every other screen reaches the theme through the rail, and this is
+         * the one page that does not wear it — which made the first screen a
+         * visitor sees also the only one with no way out of the wrong theme.
+         *
+         * Both controls are asserted: the three-button group is `hidden` below
+         * `sm` and the cycling toggle takes over, and a media query does not
+         * apply in jsdom, so a test that only looked for one of them would pass
+         * with the other deleted.
+         */
+        render(<Welcome experiences={experiences} challengeCount={12} />);
+
+        expect(screen.getByRole('group', { name: /theme/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /^theme:/i })).toBeTruthy();
+    });
 });

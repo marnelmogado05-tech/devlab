@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { BoredButton } from '@/components/challenge/bored-button';
+import { ThemeCycleButton, ThemeSwitcher } from '@/components/theme-switcher';
 import { Button } from '@/components/ui/button';
 import { dashboard, login, register } from '@/routes';
 import {
@@ -59,7 +60,7 @@ export default function Welcome({
 
 function TopBar({ signedIn }: { signedIn: boolean }) {
     return (
-        <header className="flex items-center justify-between px-6 py-5">
+        <header className="flex items-center justify-between px-4 py-5 sm:px-6">
             {/* The same wordmark the rail wears, so the landing page and the
                 application are recognisably one product. */}
             <span className="font-mono text-sm font-bold tracking-tight">
@@ -67,7 +68,36 @@ function TopBar({ signedIn }: { signedIn: boolean }) {
             </span>
 
             <nav className="flex items-center gap-2 text-sm">
-                <Button asChild variant="ghost" size="sm">
+                {/*
+                 * Theme first, the way the rail orders its right-hand cluster.
+                 * The landing page is the one screen in the application that
+                 * does not wear the rail, so without this it was also the one
+                 * screen with no way to change the theme — and it is the first
+                 * screen a visitor sees, which makes it the worst place to
+                 * leave someone stuck in the wrong one.
+                 *
+                 * The three-button group waits for `sm`. Below that the bar
+                 * already carries Browse, Log in and Sign up, and the group's
+                 * extra ~66px over the cycle button is enough to wrap them.
+                 */}
+                <ThemeSwitcher className="hidden sm:inline-flex" />
+                <ThemeCycleButton className="sm:hidden" />
+
+                {/*
+                 * Browse steps aside below `sm`. The theme control needs its
+                 * 44px touch target, and at 320px the bar cannot hold the
+                 * wordmark, a theme control, Browse, Log in and Sign up — it
+                 * overflowed by 51px, measured. Browse is the right one to
+                 * drop: "What you might get" is the catalogue, one scroll
+                 * down, and every card in it links into the same place. Log in,
+                 * Sign up and the theme control have no second route.
+                 */}
+                <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="hidden sm:inline-flex"
+                >
                     <Link href={experiencesIndex()}>Browse</Link>
                 </Button>
 
