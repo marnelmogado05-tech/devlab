@@ -1,5 +1,9 @@
 # Architecture Overview
 
+> The structural view: subsystems, the domain model, where data lives. For what happens when
+> somebody presses a button — the end-to-end path of each feature — see
+> [`feature-flows.md`](feature-flows.md).
+
 > **Status:** foundation laid and verified. The Laravel application, MVP schema, Docker
 > environment and configuration exist; migrations apply and roll back cleanly against
 > PostgreSQL 17, the integrity constraints below are pinned by tests, and the suite passes 67/67.
@@ -94,7 +98,7 @@ Tables arrive with the feature that needs them, not in advance.
 
 ## Subsystems
 
-### Experience engine _(built; one experience implemented)_
+### Experience engine _(built; six experiences implemented)_
 
 Experiences share the challenge/attempt/scoring plumbing and own their own configuration schema,
 interaction and evaluation. See the `experience-contract` skill and `docs/experiences/`.
@@ -112,7 +116,7 @@ to send.
 content. Content waits on each experience's contract document, which defines the shape of
 `challenges.configuration` that the validator then enforces.
 
-### Attempt lifecycle _(built; per-experience evaluators not)_
+### Attempt lifecycle _(built)_
 
 `started → completed | failed | abandoned | expired` (§12). Built: opening an attempt, the play
 page, submitting, scoring, abandoning, and scheduled expiry.
@@ -135,7 +139,7 @@ Expiry (`devlab:expire-attempts`, every ten minutes) closes attempts left open p
 `devlab.attempts.expire_after_minutes`. It protects elapsed time from meaning nothing, and frees
 the one-open-attempt slot so a user who walked away is not locked out of that challenge.
 
-### Evaluation and scoring _(engine built; no evaluator registered yet)_
+### Evaluation and scoring _(built; six evaluators registered)_
 
 Three pieces, deliberately separate:
 
@@ -345,7 +349,7 @@ the distribution tests assert the shape of 200 draws rather than the luck of one
 Provider-abstracted, output treated as untrusted, async and cost-capped. See the `ai-integration`
 skill.
 
-### Sandbox _(Phase 3, not built)_
+### Sandbox _(built; switched off by default)_
 
 Ephemeral, resource-limited, network-isolated containers behind a queue and orchestrator. Never
 in the application process. See the `sandbox-execution` skill.
