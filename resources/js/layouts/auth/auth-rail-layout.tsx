@@ -100,7 +100,7 @@ function AuthRail() {
                     prefetch
                     className="focus-visible:ring-ring rounded-sm font-mono text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
                 >
-                    dev<span className="text-primary">/</span>lab
+                    dev<span className="text-go-ink">/</span>lab
                 </Link>
 
                 <div className="flex items-center gap-2">

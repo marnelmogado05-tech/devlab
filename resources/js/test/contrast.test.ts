@@ -69,6 +69,15 @@ const pairs: [string, string, string, number][] = [
     ['--muted-foreground', '--muted', 'secondary text on a muted track', 4.5],
     ['--go-foreground', '--go', 'the pill at rest', 4.5],
     ['--go-foreground', '--go-hover', 'the pill under the cursor', 4.5],
+    /*
+     * The wordmark's slash, which is the only thing that wears the accent as
+     * ink. `--go` itself cannot do this job: #F2E14C on the light ground is
+     * 1.3:1, so a naive `text-go` would give a yellow slash in the dark theme
+     * and an invisible one on paper — the wordmark would read "dev lab" to half
+     * the audience. `--go-ink` is the same hue darkened until it clears, the
+     * way `--ring` already is.
+     */
+    ['--go-ink', '--background', 'the wordmark slash on the page', 4.5],
     ['--primary-foreground', '--primary', 'a primary button', 4.5],
     ['--secondary-foreground', '--secondary', 'a secondary button', 4.5],
     ['--accent-foreground', '--accent', 'a ghost button being hovered', 4.5],

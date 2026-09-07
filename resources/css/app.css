@@ -105,6 +105,22 @@
     --color-go-hover: var(--go-hover);
 
     /*
+     * The accent as INK rather than as a fill.
+     *
+     * `--go` is a background colour and only ever a background colour: #F2E14C
+     * against the light ground is 1.3:1, which is why `--ring` is a deep gold
+     * on paper rather than the signal yellow. Anything that wants the accent as
+     * text needs the same treatment — the same hue, darkened until it clears
+     * 4.5:1 on the surface it sits on.
+     *
+     * The wordmark's slash is what this exists for, and at present it is the
+     * only thing entitled to it. It is a mark, not a control, which is the line
+     * that keeps rule "--go is not --primary" intact: nothing you can press
+     * wears the accent except the pill.
+     */
+    --color-go-ink: var(--go-ink);
+
+    /*
      * The rack's own tokens. `raised` is a cell inside a plate; `face` is the
      * recessed window a plate previews its experience through — the one surface
      * that IS darker than what surrounds it, because it is a window rather than
@@ -157,6 +173,7 @@
     --go: #f2e14c;
     --go-foreground: #171d26;
     --go-hover: #e3d132;
+    --go-ink: #7a6b00;
     --secondary: #e2e7ee;
     --secondary-foreground: #1a212b;
     --muted: #e2e7ee;
@@ -218,6 +235,7 @@
     --go: #f2e14c;
     --go-foreground: #171d26;
     --go-hover: #fff06a;
+    --go-ink: #f2e14c;
     --secondary: #2a3543;
     --secondary-foreground: #e4e9f0;
     --muted: #2a3543;

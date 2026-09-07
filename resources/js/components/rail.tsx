@@ -106,7 +106,7 @@ export function Rail() {
                     prefetch
                     className="focus-visible:ring-ring col-start-1 justify-self-start rounded-sm font-mono text-sm font-bold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
                 >
-                    dev<span className="text-primary">/</span>lab
+                    dev<span className="text-go-ink">/</span>lab
                 </Link>
 
                 <nav
