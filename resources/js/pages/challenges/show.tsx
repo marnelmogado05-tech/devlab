@@ -4,6 +4,7 @@ import { ReportChallenge } from '@/components/challenge/report-challenge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { store } from '@/routes/attempts';
+import { show as challengeShow } from '@/routes/challenges';
 import {
     index as experiencesIndex,
     show as experienceShow,
@@ -159,6 +160,16 @@ function Section({
     );
 }
 
-ChallengeShow.layout = {
-    breadcrumbs: [{ title: 'Experiences', href: experiencesIndex() }],
-};
+ChallengeShow.layout = ({
+    challenge,
+    experience,
+}: {
+    challenge: ChallengeDetail;
+    experience: { slug: string; name: string };
+}) => ({
+    breadcrumbs: [
+        { title: 'Experiences', href: experiencesIndex() },
+        { title: experience.name, href: experienceShow(experience.slug) },
+        { title: challenge.title, href: challengeShow(challenge.slug) },
+    ],
+});

@@ -140,7 +140,3 @@ export default function LeaderboardsIndex({
         </>
     );
 }
-
-LeaderboardsIndex.layout = {
-    breadcrumbs: [{ title: 'Leaderboards', href: leaderboardsIndex() }],
-};

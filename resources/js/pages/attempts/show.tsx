@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { destroy, submit } from '@/routes/attempts';
+import { destroy, show as attemptShow, submit } from '@/routes/attempts';
+import { show as challengeShow } from '@/routes/challenges';
 import {
     index as experiencesIndex,
     show as experienceShow,
@@ -363,6 +364,19 @@ function ElapsedClock({ seconds, live }: { seconds: number; live: boolean }) {
     );
 }
 
-AttemptShow.layout = {
-    breadcrumbs: [{ title: 'Experiences', href: experiencesIndex() }],
-};
+AttemptShow.layout = ({
+    attempt,
+    challenge,
+    experience,
+}: {
+    attempt: Attempt;
+    challenge: PlayableChallenge;
+    experience: { slug: string; name: string };
+}) => ({
+    breadcrumbs: [
+        { title: 'Experiences', href: experiencesIndex() },
+        { title: experience.name, href: experienceShow(experience.slug) },
+        { title: challenge.title, href: challengeShow(challenge.slug) },
+        { title: 'Attempt', href: attemptShow(attempt.id) },
+    ],
+});
