@@ -59,15 +59,21 @@ export default function PasskeyVerify({
                 )}
             </div>
 
-            <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background text-muted-foreground px-2">
-                        {separator ?? 'Or continue with email'}
-                    </span>
-                </div>
+            {/*
+             * Two rules and a label between them, rather than one rule with a
+             * label painted over it. The overlay version hard-coded
+             * `bg-background` on the chip to hide the line behind the text,
+             * which is a bet on what surface this component is standing on —
+             * and on the auth plate (`--card`, deliberately lighter than the
+             * ground) that bet is wrong and shows as a mismatched patch. This
+             * version has no background of its own and works on any surface.
+             */}
+            <div className="my-6 flex items-center gap-3">
+                <Separator className="flex-1" />
+                <span className="text-muted-foreground text-xs uppercase">
+                    {separator ?? 'Or continue with email'}
+                </span>
+                <Separator className="flex-1" />
             </div>
         </>
     );

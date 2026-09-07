@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { minimumPasswordLength } from '@/lib/password-rules';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
@@ -13,10 +14,24 @@ type Props = {
     passwordRules: string;
 };
 
+/**
+ * Register.
+ *
+ * The minimum length is stated before anyone types it, rather than after they
+ * guess wrong — and it is read from the same rules string the server sends, so
+ * it cannot disagree with the validator that will judge it. The `aria-describedby`
+ * on the password field points at whichever of the two is showing: the hint
+ * while the field is clean, the error once there is one, because a field that
+ * describes itself with a hint AND a contradiction is worse than one that does
+ * neither.
+ */
 export default function Register({ passwordRules }: Props) {
+    const minimum = minimumPasswordLength(passwordRules);
+
     return (
         <>
-            <Head title="Register" />
+            <Head title="Create an account" />
+
             <Form
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -25,22 +40,25 @@ export default function Register({ passwordRules }: Props) {
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="grid gap-5">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
                                 <Input
                                     id="name"
                                     type="text"
+                                    name="name"
                                     required
                                     autoFocus
-                                    tabIndex={1}
                                     autoComplete="name"
-                                    name="name"
-                                    placeholder="Full name"
+                                    placeholder="How you want to be listed"
+                                    aria-invalid={Boolean(errors.name)}
+                                    aria-describedby={
+                                        errors.name ? 'name-error' : undefined
+                                    }
                                 />
                                 <InputError
+                                    id="name-error"
                                     message={errors.name}
-                                    className="mt-2"
                                 />
                             </div>
 
@@ -49,27 +67,54 @@ export default function Register({ passwordRules }: Props) {
                                 <Input
                                     id="email"
                                     type="email"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="email"
                                     name="email"
+                                    required
+                                    autoComplete="email"
                                     placeholder="email@example.com"
+                                    aria-invalid={Boolean(errors.email)}
+                                    aria-describedby={
+                                        errors.email ? 'email-error' : undefined
+                                    }
                                 />
-                                <InputError message={errors.email} />
+                                <InputError
+                                    id="email-error"
+                                    message={errors.email}
+                                />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password">Password</Label>
                                 <PasswordInput
                                     id="password"
-                                    required
-                                    tabIndex={3}
-                                    autoComplete="new-password"
                                     name="password"
+                                    required
+                                    autoComplete="new-password"
                                     placeholder="Password"
                                     passwordrules={passwordRules}
+                                    aria-invalid={Boolean(errors.password)}
+                                    aria-describedby={
+                                        errors.password
+                                            ? 'password-error'
+                                            : minimum
+                                              ? 'password-hint'
+                                              : undefined
+                                    }
                                 />
-                                <InputError message={errors.password} />
+                                {errors.password ? (
+                                    <InputError
+                                        id="password-error"
+                                        message={errors.password}
+                                    />
+                                ) : (
+                                    minimum && (
+                                        <p
+                                            id="password-hint"
+                                            className="text-muted-foreground text-xs"
+                                        >
+                                            At least {minimum} characters.
+                                        </p>
+                                    )
+                                )}
                             </div>
 
                             <div className="grid gap-2">
@@ -78,22 +123,29 @@ export default function Register({ passwordRules }: Props) {
                                 </Label>
                                 <PasswordInput
                                     id="password_confirmation"
-                                    required
-                                    tabIndex={4}
-                                    autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    required
+                                    autoComplete="new-password"
+                                    placeholder="The same password again"
                                     passwordrules={passwordRules}
+                                    aria-invalid={Boolean(
+                                        errors.password_confirmation,
+                                    )}
+                                    aria-describedby={
+                                        errors.password_confirmation
+                                            ? 'password-confirmation-error'
+                                            : undefined
+                                    }
                                 />
                                 <InputError
+                                    id="password-confirmation-error"
                                     message={errors.password_confirmation}
                                 />
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
-                                tabIndex={5}
+                                className="w-full"
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
@@ -101,12 +153,10 @@ export default function Register({ passwordRules }: Props) {
                             </Button>
                         </div>
 
-                        <div className="text-muted-foreground text-center text-sm">
-                            Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
-                                Log in
-                            </TextLink>
-                        </div>
+                        <p className="text-muted-foreground text-center text-sm">
+                            Already have one?{' '}
+                            <TextLink href={login()}>Log in</TextLink>
+                        </p>
                     </>
                 )}
             </Form>
@@ -116,5 +166,6 @@ export default function Register({ passwordRules }: Props) {
 
 Register.layout = {
     title: 'Create an account',
-    description: 'Enter your details below to create your account',
+    description: 'It takes a name, an email and a password.',
+    variant: 'guest',
 };

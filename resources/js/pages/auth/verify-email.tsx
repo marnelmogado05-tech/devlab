@@ -1,5 +1,5 @@
-// Components
 import { Form, Head } from '@inertiajs/react';
+import AuthStatus from '@/components/auth-status';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -9,29 +9,38 @@ import { send } from '@/routes/verification';
 export default function VerifyEmail({ status }: { status?: string }) {
     return (
         <>
-            <Head title="Email verification" />
+            <Head title="Verify your email" />
 
             {status === 'verification-link-sent' && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
-                </div>
+                <AuthStatus className="mb-6">
+                    A new link is on its way to the address you registered with.
+                </AuthStatus>
             )}
 
-            <Form {...send.form()} className="space-y-6 text-center">
+            <Form {...send.form()} className="flex flex-col gap-6">
                 {({ processing }) => (
                     <>
-                        <Button disabled={processing} variant="secondary">
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={processing}
+                        >
                             {processing && <Spinner />}
-                            Resend verification email
+                            Send it again
                         </Button>
 
-                        <TextLink
-                            href={logout()}
-                            className="mx-auto block text-sm"
-                        >
-                            Log out
-                        </TextLink>
+                        {/*
+                         * The way out, and deliberately quiet. Logging out is
+                         * not the thing to do here — it is the thing to do if
+                         * you signed up with the wrong address — so it reads as
+                         * a sentence rather than competing with the button.
+                         */}
+                        <p className="text-muted-foreground text-center text-sm">
+                            Wrong address?{' '}
+                            <TextLink href={logout()}>
+                                Log out and start again
+                            </TextLink>
+                        </p>
                     </>
                 )}
             </Form>
@@ -40,7 +49,8 @@ export default function VerifyEmail({ status }: { status?: string }) {
 }
 
 VerifyEmail.layout = {
-    title: 'Email verification',
+    title: 'Verify your email',
     description:
-        'Please verify your email address by clicking on the link we just emailed to you.',
+        'We sent a link to the address you registered with. Open it and you are done.',
+    variant: 'secure',
 };
