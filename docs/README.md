@@ -1,24 +1,26 @@
 # DevLab Documentation
 
-| Directory                                          | Contains                                                                                      |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| [`DevLab_Project_Plan.md`](DevLab_Project_Plan.md) | **The specification.** Vision, product, architecture, phases. The source of truth for intent. |
-| [`architecture/`](architecture/)                   | How the system is actually built — overview, domain model, data flow, subsystems.             |
-| [`adr/`](adr/)                                     | Architecture Decision Records. Why things are the way they are.                               |
-| [`development/`](development/)                     | Local setup, workflow, conventions, testing, troubleshooting.                                 |
-| [`experiences/`](experiences/)                     | One document per experience: metadata, configuration schema, evaluation, scoring.             |
-| [`ai/`](ai/)                                       | AI architecture, provider abstraction, prompt and safety rules, cost control, RAG.            |
-| [`security/`](security/)                           | Threat model, trust boundaries, sandbox design, security review checklists.                   |
-| [`deployment/`](deployment/)                       | The runbook for going live: target, environment, deploy script, queue, backups, rollback.     |
-| [`contributing/`](contributing/)                   | Deeper contributor guides. Entry point is [`../CONTRIBUTING.md`](../CONTRIBUTING.md).         |
+| Directory                                          | Contains                                                                                             |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [`DevLab_Project_Plan.md`](DevLab_Project_Plan.md) | **The specification.** Vision, product, architecture, phases. The source of truth for intent.        |
+| [`architecture/`](architecture/)                   | How the system is actually built — overview, domain model, and the end-to-end flow of every feature. |
+| [`adr/`](adr/)                                     | Architecture Decision Records. Why things are the way they are.                                      |
+| [`development/`](development/)                     | Local setup, workflow, conventions, testing, troubleshooting.                                        |
+| [`experiences/`](experiences/)                     | One document per experience: metadata, configuration schema, evaluation, scoring.                    |
+| [`ai/`](ai/)                                       | AI architecture, provider abstraction, prompt and safety rules, cost control, RAG.                   |
+| [`security/`](security/)                           | Threat model, trust boundaries, sandbox design, security review checklists.                          |
+| [`deployment/`](deployment/)                       | The runbook for going live: target, environment, deploy script, queue, backups, rollback.            |
+| [`contributing/`](contributing/)                   | Deeper contributor guides. Entry point is [`../CONTRIBUTING.md`](../CONTRIBUTING.md).                |
 
 ## Reading order for a new contributor
 
 1. [`../README.md`](../README.md) — what DevLab is
 2. [`development/getting-started.md`](development/getting-started.md) — get it running
 3. [`architecture/overview.md`](architecture/overview.md) — how it fits together
-4. [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — how to make a change
-5. The plan section relevant to what you are building
+4. [`architecture/feature-flows.md`](architecture/feature-flows.md) — what happens when somebody
+   presses a button, feature by feature
+5. [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — how to make a change
+6. The plan section relevant to what you are building
 
 ## Reading order for an AI agent
 
