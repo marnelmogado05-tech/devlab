@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Challenge;
+use App\Services\Challenge\ContentFingerprint;
 use App\Services\Leaderboard\LeaderboardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Redis;
@@ -98,4 +100,22 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * An unsaved challenge carrying just enough to be fingerprinted.
+ *
+ * Not persisted: {@see ContentFingerprint} reads
+ * attributes, so a database round trip would test Eloquent rather than the hash.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function challengeWith(array $attributes): Challenge
+{
+    return new Challenge([
+        'type' => 'guess_output',
+        'configuration' => [],
+        'solution' => [],
+        ...$attributes,
+    ]);
 }

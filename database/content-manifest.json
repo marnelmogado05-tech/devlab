@@ -1,0 +1,202 @@
+{
+    "analytics-pipeline-lossy": {
+        "version": 1,
+        "fingerprint": "d8951677922bfd06a41d7e6bf3bf1d589ef09d607ca4db7ae22a650286139583"
+    },
+    "anonymous-volume-shadows-build": {
+        "version": 1,
+        "fingerprint": "fe8741c262e6fee183af5293da2a75aa4ae739e0f9a570a959e99f96aa787e09"
+    },
+    "bound-to-loopback": {
+        "version": 1,
+        "fingerprint": "80ff372df6842194d24a821c5d94f585049b544a2a51c71da56eb74409915b99"
+    },
+    "capped-exponential-backoff": {
+        "version": 1,
+        "fingerprint": "cd873498e42953cb0c07430d713112ffd911dcd5e97f8d2336940ae2cd2a58a5"
+    },
+    "checkout-under-black-friday": {
+        "version": 1,
+        "fingerprint": "5ef12cef1174161dc5177555cf7f8ed285aac717cad36cf63963c9727c640a86"
+    },
+    "cherry-pick-one-commit": {
+        "version": 1,
+        "fingerprint": "7fd289eaf89e79ff6c4665993d22199f2a82321dea2bb99da5931b4234be7ec4"
+    },
+    "copy-before-install-cache": {
+        "version": 1,
+        "fingerprint": "6d3b619fc74f8b77328caf7fd82ee7df97308ff2af3d97c9083b47cdaecdb7c5"
+    },
+    "depends-on-is-not-ready": {
+        "version": 1,
+        "fingerprint": "30720dc1e5f63f421e6f930505b247581b8ef2ef2f081ebdafdc2a80b963d224"
+    },
+    "detached-head-rescue": {
+        "version": 1,
+        "fingerprint": "80cceff0c3a0879aa3079dc45d5c7bf4c713b8bb6701535be9b7e6c7a1af7162"
+    },
+    "distributed-lock-released-by-a-stranger": {
+        "version": 1,
+        "fingerprint": "3463ad17503dee4df0c13e148b7babf5ea8b5796963228be9eb8b2eba2b8de38"
+    },
+    "dockerignore-lets-the-host-in": {
+        "version": 1,
+        "fingerprint": "69587c45256d32a12a1a552e02b81a1b1dd09b62667299cf692bf3e3ba4888ae"
+    },
+    "env-set-at-build-time": {
+        "version": 1,
+        "fingerprint": "6bae17da2a16c0b29ecd22d46ec6251d38b9260c39f7c332047e5c74d373add3"
+    },
+    "install-in-dependency-order": {
+        "version": 1,
+        "fingerprint": "ad5b7b11c231df354291ee09bc64243c6f09a18ab4f726924fe201d1b9c90717"
+    },
+    "internal-tool-overengineered": {
+        "version": 1,
+        "fingerprint": "6f625ebe152c86f140a31f5d9a35ae888bbf62c1c58d6ccbcaf563a930bc9242"
+    },
+    "isset-hides-a-deliberate-null": {
+        "version": 1,
+        "fingerprint": "c4b25283ebbc7acbbddcea173ab49473580f55ca480917aa93bb10e9fb088082"
+    },
+    "js-async-foreach": {
+        "version": 1,
+        "fingerprint": "65125ce5b5cde685569aa3190334daa678ca89651874983c83d26b23d0023079"
+    },
+    "js-default-sort": {
+        "version": 1,
+        "fingerprint": "bb6990715a0e96f3972d543251bd9581a8e62112ac0d89400e2c19d1b34a1930"
+    },
+    "js-map-parseint": {
+        "version": 1,
+        "fingerprint": "2d58fa3edbe8517ed0b550897f333960dbd4e6074d558975407189cf15bf4781"
+    },
+    "js-math-max-empty": {
+        "version": 1,
+        "fingerprint": "dd35c37a47f3844e433f608daf2d361429f3e5e9a6a9a0b5688290893235bea9"
+    },
+    "js-typeof-nan": {
+        "version": 1,
+        "fingerprint": "527fc72476d465b84323122ebf3a4232640c7a7a8a0cfa1a8e8b9f795af0db99"
+    },
+    "js-var-closure-loop": {
+        "version": 1,
+        "fingerprint": "64985849f92536adcb4fa65664cd3d6bb5d4c9937492a89c3255785435c2ab48"
+    },
+    "merge-overlapping-intervals": {
+        "version": 1,
+        "fingerprint": "db6f8e93898c23e3ca5e8e5ec5ae2f9dc0042b52045b4fdd83e77d3a4d4026f1"
+    },
+    "merge-that-should-fast-forward": {
+        "version": 1,
+        "fingerprint": "86876e1889af75f5022cb76a2c8a54621f3cf91f01b6bd8908055382b7955462"
+    },
+    "money-compared-as-a-float": {
+        "version": 1,
+        "fingerprint": "b42a5f48acedb78a2daa8ffd170fcee933ee0f5bdf80430adee0ce9531fe8cbb"
+    },
+    "multi-stage-missing-runtime-dependency": {
+        "version": 1,
+        "fingerprint": "0d3d852f25439907a0adba25022c6128bbd3ce0c4ac0309b9b1329c94f32fbcb"
+    },
+    "normalise-a-slug": {
+        "version": 1,
+        "fingerprint": "eb7453be3ed1a6163eaa1bb596fb242f5f78c99ab9ff96add2b9ed30797adae7"
+    },
+    "notification-fanout": {
+        "version": 1,
+        "fingerprint": "86da226e16acd1a6889b8c3b321f059e426a295d892f8659aedf0f130bc91324"
+    },
+    "parse-a-semver": {
+        "version": 1,
+        "fingerprint": "87057f241f57beb9f35bf0f562f1218b31f725d84965f3214d36f802eeb2c79e"
+    },
+    "payments-that-must-not-charge-twice": {
+        "version": 1,
+        "fingerprint": "ada865d588552e9b77e8d84f7fd1344cefb8f8487207827ebee5af38cd8584d1"
+    },
+    "php-array-splice-mutates": {
+        "version": 1,
+        "fingerprint": "46ba3179488c2eff25dc1e22eeb2129cdda7976a7c003697d75447ddc0694fab"
+    },
+    "php-average-off-by-one": {
+        "version": 1,
+        "fingerprint": "970854bcbdc4e87c2482727d7efb392d78bf7f2b13db3d679250311fad2a6768"
+    },
+    "php-balance-race": {
+        "version": 1,
+        "fingerprint": "e810cdc2b7d6ed0913734d48c4be5b0efc36e2ed8afe603ead39a926010c5836"
+    },
+    "php-dangling-foreach-reference": {
+        "version": 1,
+        "fingerprint": "9c9a9fbb43e0bbd64b2d3487fa066c76dc667d41423a755f297493db029eb49b"
+    },
+    "php-float-equality": {
+        "version": 1,
+        "fingerprint": "23b9d5c9d2ce163ac7ed9ba87da5c9f3805ec01a9653d521e50b2d9e4d627f7a"
+    },
+    "php-pagination-offset": {
+        "version": 1,
+        "fingerprint": "1ecccefc8c33bcc90b90ca5e4baaea490f3b7a5951ae83a2592e52e902e84d82"
+    },
+    "php-string-increment": {
+        "version": 1,
+        "fingerprint": "3ad63cbe14467b146615bf9d272f821e407e04f68c1f9303ab0373e732e85db5"
+    },
+    "php-string-to-zero": {
+        "version": 1,
+        "fingerprint": "95821650172afa2d8437a560d5deff8d3ad6ee879599ce76886eb8f0c5f780a0"
+    },
+    "rate-limit-that-allows-double": {
+        "version": 1,
+        "fingerprint": "89927ae6dcbd5761969c02d79b1413fc2aabe10bc57c2a653aebba4df624a2e3"
+    },
+    "rebase-instead-of-merge": {
+        "version": 1,
+        "fingerprint": "900a98ab501beb0cfd138839d00b1a53c15d4e8c5cc6f4eba3ad83196ac967de"
+    },
+    "reset-the-accidental-commit": {
+        "version": 1,
+        "fingerprint": "3d7b054c7387dfbce780c4b30586837253357efb43bd7dc1e34208ad608d06d8"
+    },
+    "revert-not-reset": {
+        "version": 1,
+        "fingerprint": "c6f7d23593151130c77bbf70d0c75ae4d9c80e0f3f5d2438a8d94ca987168825"
+    },
+    "revert-the-revert": {
+        "version": 1,
+        "fingerprint": "3123fa6348f506cad78bba35e05ba9c9ff093bd0c088ef98ed7ab2f7ca01e59e"
+    },
+    "runtime-that-cannot-see-its-cgroup": {
+        "version": 1,
+        "fingerprint": "2d6eb3ca7ffc92d3079560e175e72d812b29a177e2bbf52fbe4b168bdf096b7d"
+    },
+    "session-store-across-regions": {
+        "version": 1,
+        "fingerprint": "6eb128b3a07467411f1c2b779dc931ef06a12b4bf04677f6d99aeb0a526407c2"
+    },
+    "shell-form-ignores-signals": {
+        "version": 1,
+        "fingerprint": "d0bc7d026572493dcf9da2da18459615b32318eb5eea5286225cc721a95bc0af"
+    },
+    "sliding-window-rate-limit": {
+        "version": 1,
+        "fingerprint": "ae78b786c4592a53ae8b6406fd9c39380692d04412fc3efd512aac39f3bb9fdf"
+    },
+    "tidy-up-after-the-merge": {
+        "version": 1,
+        "fingerprint": "39f7fb6f5527ab574b511c2d6499aed16747c4f35a40d63ba62b91fc2c440b51"
+    },
+    "two-branches-one-linear-release": {
+        "version": 1,
+        "fingerprint": "88eccd7cd9db1febd23cec809e948142f5756cff6af3e5665cd1d8078c09cc80"
+    },
+    "uploads-on-the-wrong-disk": {
+        "version": 1,
+        "fingerprint": "0cb9e79f8b45d5be56251549263d6fe721f8b42df850add55e81aea1b052dfe9"
+    },
+    "url-shortener-read-heavy": {
+        "version": 1,
+        "fingerprint": "b10eb32b355ae26b85ff61467cf24e4825abc628cc97b18e4406a0148b135541"
+    }
+}
