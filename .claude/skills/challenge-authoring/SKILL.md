@@ -51,6 +51,23 @@ Published challenges are versioned. Historical attempts must stay interpretable.
 - Never silently change logic in a way that invalidates existing scores. Old attempts reference
   the version they were played against.
 
+### This is enforced, not trusted
+
+`ContentVersioningTest` fingerprints the deciding fields of every seeded challenge — `type`,
+`configuration` and `solution` — and compares them to `database/content-manifest.json`. Change what
+a challenge asks or accepts without bumping its `version` and **CI fails**, naming the slug.
+
+Prose is deliberately not fingerprinted. A version bump declares past attempts incomparable, so it
+is not free, and a guard that fired on a typo fix would train people to bump reflexively.
+
+After any intentional change to content:
+
+```bash
+php artisan db:seed --class=ContentSeeder --force
+php artisan devlab:content-fingerprint          # check; names anything that drifted
+php artisan devlab:content-fingerprint --write  # record it, then commit the manifest
+```
+
 ## Difficulty calibration
 
 Difficulty is a claim about the median user, not about the author. After a challenge has real
