@@ -17,7 +17,11 @@
 #   docker build -f docker/production/Dockerfile -t devlab .
 
 # ── Stage 1: PHP dependencies ────────────────────────────────────────────────
-FROM composer:2 AS vendor
+#
+# Pinned to the BUILD platform, never the target. Composer output is PHP — it is
+# identical whatever the image will eventually run on — so emulating this stage
+# for an arm64 target buys nothing and costs a great deal.
+FROM --platform=$BUILDPLATFORM composer:2 AS vendor
 
 WORKDIR /app
 COPY . .
@@ -39,7 +43,17 @@ RUN composer install \
 # until artisan has written them — and that is PHP work that has to happen before
 # Vite runs. `--with-form` is required because vite.config.ts sets formVariants;
 # without it the `.form` helpers are missing and the build fails.
-FROM php:8.4-cli-alpine AS assets
+# BUILD platform again, and here it is not an optimisation but a correctness
+# fix. Rolldown ships native binaries, and under QEMU arm64 emulation they die
+# on an instruction it cannot emulate:
+#
+#   process "/bin/sh -c npm ci && npm run build" did not complete successfully:
+#   exit code: 132        (132 = 128 + SIGILL)
+#
+# The output is JavaScript and CSS, which no architecture cares about, so the
+# stage runs natively and the compiled assets are copied into whichever runtime
+# is being produced.
+FROM --platform=$BUILDPLATFORM php:8.4-cli-alpine AS assets
 
 RUN apk add --no-cache nodejs npm
 
@@ -57,6 +71,10 @@ RUN cp .env.example .env \
 RUN npm ci && npm run build
 
 # ── Stage 3: runtime ─────────────────────────────────────────────────────────
+#
+# The ONLY stage that is target-platform specific, because it is the only one
+# holding native code: the PHP extensions are compiled here, and they must match
+# the architecture that will run them.
 FROM dunglas/frankenphp:php8.4-alpine AS production
 
 # The same extension set the development image installs, for the same reasons:
