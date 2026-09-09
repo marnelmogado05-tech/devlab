@@ -1,0 +1,72 @@
+# What never belongs in a build context.
+#
+# This is not only an optimisation. Without it, `COPY . .` streams
+# `node_modules`, `vendor` and `.git` into the daemon and bakes them into the
+# image — and on a bind-mounted Windows checkout it does not merely take a long
+# time, it fails: the production build died with
+# `DeadlineExceeded: session healthcheck failed fatally` while still loading
+# context, having transferred over 100MB.
+#
+# The three big directories are all REGENERATED inside the build:
+# `vendor` by the composer stage, `node_modules` and `public/build` by the asset
+# stage. Copying a host copy in would at best waste a layer and at worst ship
+# a platform-specific binary — the host is Windows, the image is Alpine.
+
+# Dependencies — rebuilt in their own stages
+node_modules
+vendor
+
+# Compiled assets — rebuilt by the asset stage
+public/build
+public/hot
+
+# Version control and its tooling
+.git
+.gitignore
+.gitattributes
+.github
+
+# Secrets. `.env.example` is deliberately NOT excluded: the asset stage copies
+# it to boot artisan for `wayfinder:generate`.
+.env
+.env.*
+!.env.example
+
+# Laravel's package-discovery manifest and compiled container.
+#
+# These are build artifacts OF A SPECIFIC DEPENDENCY SET, and the host's set
+# includes dev dependencies. Copying the host copy over a `--no-dev` vendor tree
+# makes the image boot a provider that is not installed:
+#
+#   Class "Laravel\Pail\PailServiceProvider" not found
+#
+# Excluded so the image discovers packages against its own vendor directory.
+bootstrap/cache/*.php
+
+# Local state
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+*.sqlite
+*.sqlite-journal
+
+# Developer tooling that has no bearing on a running application
+.idea
+.vscode
+.fleet
+.phpunit.cache
+.phpunit.result.cache
+.pest
+.claude
+
+# Generated Wayfinder output — the asset stage writes these itself, and a stale
+# host copy would be copied in and then overwritten.
+resources/js/actions
+resources/js/routes
+resources/js/wayfinder
+
+# Docker's own files
+docker-compose*.yml
+Dockerfile*
+.dockerignore

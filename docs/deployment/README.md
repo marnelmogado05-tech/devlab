@@ -19,8 +19,14 @@ engine is ever turned on there is somewhere gVisor can be installed.
 
 **Do not deploy [`docker/app/Dockerfile`](../../docker/app/Dockerfile).** Its first three lines say
 it is the development image, and its `CMD` is `php artisan serve` — Laravel's single-threaded
-development server. A production image (multi-stage, no dev dependencies, assets baked in, opcache
-preloading) does not exist yet, and the Forge route means you do not need one today.
+development server. The production image is
+[`docker/production/Dockerfile`](../../docker/production/Dockerfile); see
+[the self-hosted path](#self-hosted-on-one-free-vm) below.
+
+**If the budget is zero**, skip Forge entirely and read
+[Self-hosted on one free VM](#self-hosted-on-one-free-vm). It runs the same application on an
+always-free instance with no domain purchase, and everything in this document about environment,
+seeding, the queue and backups still applies.
 
 **If you would rather run no server at all**, Laravel Cloud is the alternative: managed Postgres and
 Redis, deploy from git, more money in exchange for fewer decisions. Everything below about
@@ -166,6 +172,77 @@ php artisan devlab:reports:dismiss 43 --note="not a defect"  # nothing to do
 A wrong answer key is the one report class that is a blocker: it corrupts every score derived from
 it. Fix it, bump the challenge version so attempts scored against the old key stay identifiable
 (§71), then resolve.
+
+---
+
+## Self-hosted on one free VM
+
+The zero-budget path. Everything on a single always-free instance — Oracle Cloud's Ampere tier is
+the most generous, Google Cloud's `e2-micro` the most reliably available. Verify their current terms
+yourself; free tiers move.
+
+**You do not need a domain.** Leave `APP_DOMAIN` unset and the app serves plain HTTP on `:80`, which
+is enough to be live. Set it to any hostname you control — including a free dynamic-DNS subdomain —
+and Caddy fetches a Let's Encrypt certificate on the first request. Nothing else changes.
+
+### The server never builds the image
+
+[`docker/production/Dockerfile`](../../docker/production/Dockerfile) compiles its PHP extensions
+from source, because Alpine ships no prebuilt `pdo_pgsql`, `intl` or `redis`. That takes roughly
+twenty minutes and a gcc toolchain on a developer machine; on a 1-vCPU instance it would take far
+longer and would probably be killed for memory.
+
+So [`.github/workflows/image.yml`](../../.github/workflows/image.yml) builds it — amd64 and arm64,
+because the most generous free tier is ARM — and pushes it to GitHub Container Registry. The server
+only ever pulls.
+
+### Deploy
+
+```bash
+git clone https://github.com/marnelmogado05-tech/devlab.git && cd devlab
+cp .env.example .env
+```
+
+Edit `.env` per [Environment](#environment) above, then set `APP_DOMAIN` and `TLS_EMAIL` if you have
+a hostname. Generate the key without a running app:
+
+```bash
+docker run --rm ghcr.io/marnelmogado05-tech/devlab:latest php artisan key:generate --show
+```
+
+Then:
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+That is the whole deploy, and every later one:
+
+```bash
+docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
+```
+
+Five containers: `app` (FrankenPHP — Caddy and PHP in one process, so there is no nginx to
+configure and no FastCGI path to get wrong), `worker`, `scheduler`, `postgres`, `redis`. Postgres
+publishes no port; it is reachable only from the compose network.
+
+### What the container does on boot
+
+Migrations and `ContentSeeder` run automatically, then the framework caches are rebuilt. Seeding is
+content only and idempotent — never `DatabaseSeeder`, which would create `test@example.com` with the
+password `password`. Set `DEVLAB_SKIP_MIGRATIONS=true` before running more than one `app` replica;
+`DEVLAB_SEED_CONTENT=false` turns off publishing content on boot.
+
+### What this route costs instead of money
+
+You patch the operating system, you watch the disk, and you take the backups. That is real work, and
+it is the whole difference between this and the Forge route above.
+
+> [!NOTE]
+> Building the image locally needs outbound network to `fonts.bunny.net` — the Vite plugin downloads
+> the fonts at build time so they can be self-hosted. A build on an offline or locked-down runner
+> fails with `getaddrinfo EAI_AGAIN fonts.bunny.net`.
 
 ---
 

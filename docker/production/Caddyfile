@@ -1,0 +1,37 @@
+{
+	# FrankenPHP serves the application in classic mode: one PHP process per
+	# request, exactly as php-fpm would. Worker mode is faster and is a
+	# different set of correctness questions (state leaking between requests),
+	# so it is deliberately not enabled here.
+	frankenphp
+	# Automatic HTTPS needs an address to answer certificate challenges from.
+	email {$TLS_EMAIL:admin@localhost}
+	# Deployments behind Cloudflare or a load balancer should NOT let Caddy
+	# fetch its own certificate; set CADDY_GLOBAL_OPTIONS=auto_https off there.
+	{$CADDY_GLOBAL_OPTIONS}
+}
+
+# APP_DOMAIN decides everything. A real hostname gets a real Let's Encrypt
+# certificate automatically; `:80` — the default — serves plain HTTP, which is
+# what you want behind another proxy and on a first boot before DNS resolves.
+{$APP_DOMAIN::80} {
+	root * /var/www/html/public
+
+	encode zstd gzip
+
+	# Laravel already sets the application's own headers; these are the ones a
+	# web server is responsible for.
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	# Never serve the things a misconfigured root would expose.
+	@forbidden path /.env* /storage/logs/* /.git/*
+	respond @forbidden 404
+
+	php_server
+}
