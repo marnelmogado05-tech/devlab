@@ -234,6 +234,35 @@ content only and idempotent — never `DatabaseSeeder`, which would create `test
 password `password`. Set `DEVLAB_SKIP_MIGRATIONS=true` before running more than one `app` replica;
 `DEVLAB_SEED_CONTENT=false` turns off publishing content on boot.
 
+### On Oracle Cloud specifically
+
+The Always Free Ampere (ARM) shape is the one worth asking for; the image is built for `arm64` as
+well as `amd64` precisely for it. Capacity is frequently unavailable in popular regions — an
+"Out of host capacity" error is the norm rather than a fault, and the usual answer is to retry or
+pick a different availability domain.
+
+> [!IMPORTANT]
+> **Oracle blocks ports in two places, and only one of them is obvious.** Opening 80 and 443 in the
+> instance's Security List or NSG is not enough: the Ubuntu images ship a restrictive host firewall
+> as well, and a deployment that looks completely healthy will refuse every connection until both
+> are open.
+>
+> ```bash
+> sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+> sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+> sudo netfilter-persistent save
+> ```
+
+Docker and the compose plugin are not preinstalled:
+
+```bash
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker "$USER" && newgrp docker
+```
+
+The whole stack idles at about **185 MiB** across all five containers — measured, not estimated — so
+it fits the smallest shape on offer with room to spare.
+
 ### What this route costs instead of money
 
 You patch the operating system, you watch the disk, and you take the backups. That is real work, and

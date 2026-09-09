@@ -31,6 +31,26 @@ if [ "$IS_SERVICE" = "no" ]; then
     exec "$@"
 fi
 
+# An empty APP_DOMAIN means "no hostname yet" — serve plain HTTP on :80. Caddy's
+# own `{$VAR:default}` cannot express that, because it treats an empty string as
+# a value and only falls back when the variable is missing entirely. Compose
+# always passes something, so the fallback never fired and Caddy bound no
+# address at all.
+if [ -z "${APP_DOMAIN:-}" ]; then
+    APP_DOMAIN=":80"
+    export APP_DOMAIN
+fi
+
+# Caddy's `email` directive takes exactly one argument and an empty one is a
+# parse error, not a no-op — so it is added only when there is an address to
+# add. Appended to any override the operator already set rather than replacing
+# it.
+if [ -n "${TLS_EMAIL:-}" ]; then
+    CADDY_GLOBAL_OPTIONS="${CADDY_GLOBAL_OPTIONS:-}
+	email ${TLS_EMAIL}"
+    export CADDY_GLOBAL_OPTIONS
+fi
+
 if [ -z "${APP_KEY:-}" ]; then
     echo "FATAL: APP_KEY is not set. Generate one with:" >&2
     echo "  docker run --rm devlab php artisan key:generate --show" >&2

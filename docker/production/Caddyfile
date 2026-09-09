@@ -4,17 +4,28 @@
 	# different set of correctness questions (state leaking between requests),
 	# so it is deliberately not enabled here.
 	frankenphp
-	# Automatic HTTPS needs an address to answer certificate challenges from.
-	email {$TLS_EMAIL:admin@localhost}
-	# Deployments behind Cloudflare or a load balancer should NOT let Caddy
-	# fetch its own certificate; set CADDY_GLOBAL_OPTIONS=auto_https off there.
+	# `email` is NOT written here. Caddy's `{$VAR:default}` fallback applies only
+	# when a variable is UNSET, and compose passes TLS_EMAIL through as an empty
+	# string — which left a bare `email` with no argument and crash-looped the
+	# container on first boot, before anyone had a certificate to configure.
+	# The entrypoint folds it into CADDY_GLOBAL_OPTIONS only when it has a value.
+	#
+	# That variable is also the override for deployments behind Cloudflare or a
+	# load balancer, which should not let Caddy fetch its own certificate:
+	# CADDY_GLOBAL_OPTIONS='auto_https off'.
 	{$CADDY_GLOBAL_OPTIONS}
 }
 
 # APP_DOMAIN decides everything. A real hostname gets a real Let's Encrypt
-# certificate automatically; `:80` — the default — serves plain HTTP, which is
-# what you want behind another proxy and on a first boot before DNS resolves.
-{$APP_DOMAIN::80} {
+# certificate automatically; `:80` serves plain HTTP, which is what you want
+# behind another proxy and on a first boot before DNS resolves.
+#
+# No `{$APP_DOMAIN::80}` default here, for the same reason `email` is absent
+# above: Caddy falls back only when a variable is UNSET, and compose passes an
+# empty string. That expanded to an empty site address and Caddy bound nothing —
+# the container ran, the port was published, and every request was refused. The
+# entrypoint substitutes `:80` when it is empty.
+{$APP_DOMAIN} {
 	root * /var/www/html/public
 
 	encode zstd gzip
