@@ -1,0 +1,155 @@
+# DevLab — single-host production.
+#
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Everything DevLab needs on one machine, which is what makes it deployable on a
+# free always-free VM. The alternative shape — managed Postgres and managed
+# Redis behind a PaaS — is the shape that costs money first, because those two
+# are always the earliest upsell.
+#
+# Five services and no more: web, worker, scheduler, database, cache. The
+# execution engine is absent on purpose; see docs/security/sandbox-threat-model.md.
+#
+# Configuration comes from a `.env` beside this file. Start from `.env.example`
+# and change what docs/deployment/README.md lists.
+
+services:
+    app:
+        # Pulled, not built. The image compiles its PHP extensions from source,
+        # which a 1-vCPU always-free instance would take a very long time to do
+        # and would probably be killed for memory doing. CI builds it and
+        # pushes it here; the server only ever pulls.
+        #
+        # `docker compose build` still works if you want to build locally — the
+        # build section below is the fallback, not the normal path.
+        image: '${DEVLAB_IMAGE:-ghcr.io/marnelmogado05-tech/devlab:latest}'
+        build:
+            context: .
+            dockerfile: docker/production/Dockerfile
+        container_name: devlab-app
+        restart: unless-stopped
+        env_file: .env
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+            # Set APP_DOMAIN to your hostname and Caddy fetches a Let's Encrypt
+            # certificate on first request. Left unset it serves plain HTTP on
+            # :80, which is correct behind another proxy and before DNS resolves.
+            APP_DOMAIN: '${APP_DOMAIN:-}'
+            TLS_EMAIL: '${TLS_EMAIL:-}'
+        ports:
+            - '80:80'
+            - '443:443'
+            - '443:443/udp'
+        volumes:
+            # The certificate store. Losing it means re-issuing on every restart,
+            # which will hit Let's Encrypt's rate limit and leave the site
+            # without TLS for a week.
+            - caddy-data:/data
+            - caddy-config:/config
+            # Logs and anything the application writes. NOT the code — the code
+            # is the image.
+            - app-storage:/var/www/html/storage
+        depends_on:
+            postgres: { condition: service_healthy }
+            redis: { condition: service_healthy }
+        networks: [devlab]
+
+    # Without this, nothing queued ever runs. Notifications are queued, so a
+    # missing worker means challenge reports arrive nowhere.
+    worker:
+        image: '${DEVLAB_IMAGE:-ghcr.io/marnelmogado05-tech/devlab:latest}'
+        container_name: devlab-worker
+        restart: unless-stopped
+        command: php artisan queue:work redis --tries=3 --max-time=3600 --backoff=5
+        env_file: .env
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        volumes:
+            - app-storage:/var/www/html/storage
+        depends_on:
+            app: { condition: service_started }
+        networks: [devlab]
+
+    # `schedule:work` is the scheduler as a long-running process, which is what
+    # a container wants — no crontab to install. It drives devlab:expire-attempts
+    # and the hourly leaderboard repair; without it, abandoned attempts never
+    # close and rankings drift.
+    scheduler:
+        image: '${DEVLAB_IMAGE:-ghcr.io/marnelmogado05-tech/devlab:latest}'
+        container_name: devlab-scheduler
+        restart: unless-stopped
+        command: php artisan schedule:work
+        env_file: .env
+        environment:
+            DB_HOST: postgres
+            DB_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+        volumes:
+            - app-storage:/var/www/html/storage
+        depends_on:
+            app: { condition: service_started }
+        networks: [devlab]
+
+    postgres:
+        image: postgres:17-alpine
+        container_name: devlab-postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:-devlab}'
+            POSTGRES_USER: '${DB_USERNAME:-devlab}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:?DB_PASSWORD must be set}'
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-devlab}']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        # No published port. The database is reachable only from this network;
+        # exposing 5432 to the internet is the single most common way a hobby
+        # deployment is compromised.
+        networks: [devlab]
+
+    redis:
+        image: redis:8-alpine
+        container_name: devlab-redis
+        restart: unless-stopped
+        # Sessions and the queue live here, so it persists. Losing it logs
+        # everyone out and drops queued work; it never loses XP, attempts or
+        # achievements, which are PostgreSQL rows.
+        command: >
+            redis-server --appendonly yes
+            --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+        volumes:
+            - redis-data:/data
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        environment:
+            REDIS_PASSWORD: '${REDIS_PASSWORD}'
+        networks: [devlab]
+
+volumes:
+    postgres-data:
+    redis-data:
+    app-storage:
+    caddy-data:
+    caddy-config:
+
+networks:
+    devlab:
+        driver: bridge
